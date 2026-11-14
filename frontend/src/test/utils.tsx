@@ -32,4 +32,5 @@ export const systemInfoFixture = {
   database: { status: 'UP', product: 'PostgreSQL', version: '17.2' },
   migrations: { appliedCount: 1, currentVersion: '1' },
   ai: { enabled: false, provider: 'none' },
+  demo: { resetEnabled: false },
 }

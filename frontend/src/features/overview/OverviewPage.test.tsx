@@ -13,6 +13,10 @@ function mockBackend(handlers: { health: Handler; info: Handler }) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.pathname : input.url
     if (url === '/actuator/health') return handlers.health()
     if (url === '/api/system/info') return handlers.info()
+    // The factory summary has its own tests; here the backend simply holds no factory.
+    if (url.startsWith('/api/factories')) {
+      return Promise.resolve(jsonResponse({ items: [], page: 0, size: 200, totalItems: 0, totalPages: 0 }))
+    }
     return Promise.reject(new Error(`Unexpected request to ${url}`))
   })
   vi.stubGlobal('fetch', spy)

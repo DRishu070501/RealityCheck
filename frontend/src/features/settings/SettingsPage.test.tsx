@@ -1,0 +1,101 @@
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { SettingsPage } from '@/features/settings/SettingsPage'
+import { FACTORY_ID, fixtures, mockBackend, problem } from '@/test/backend'
+import { jsonResponse, renderWithProviders } from '@/test/utils'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+const info = (resetEnabled: boolean) => () => jsonResponse({ ...fixtures.systemInfo, demo: { resetEnabled } })
+const RESET = 'POST /api/demo/reset'
+
+describe('SettingsPage', () => {
+  it('shows how the deployment is configured', async () => {
+    mockBackend({ 'GET /api/system/info': info(true) })
+
+    renderWithProviders(<SettingsPage />)
+
+    expect(await screen.findByText('RealityCheck 0.1.0')).toBeInTheDocument()
+    expect(screen.getByText('PostgreSQL 17.12')).toBeInTheDocument()
+    expect(screen.getByText('4 applied, current version 4')).toBeInTheDocument()
+    expect(screen.getByText('Not configured')).toBeInTheDocument()
+  })
+
+  it('offers no reset when it is disabled by configuration', async () => {
+    mockBackend({ 'GET /api/system/info': info(false) })
+
+    renderWithProviders(<SettingsPage />)
+
+    expect(await screen.findByText(/disabled by configuration/)).toBeInTheDocument()
+    expect(screen.getByText('REALITYCHECK_DEMO_RESET_ENABLED=true')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reset demo data' })).not.toBeInTheDocument()
+  })
+
+  it('asks for confirmation, stating that all data is erased, before resetting', async () => {
+    const user = userEvent.setup()
+    const backend = mockBackend({
+      'GET /api/system/info': info(true),
+      [RESET]: () => jsonResponse({ factoryId: FACTORY_ID, resetAt: '2026-11-14T06:40:00.123456Z' }),
+    })
+    renderWithProviders(<SettingsPage />)
+
+    await user.click(await screen.findByRole('button', { name: 'Reset demo data' }))
+
+    const dialog = await screen.findByRole('dialog', { name: 'Erase all data and reset the demo?' })
+    expect(within(dialog).getByText('This cannot be undone.')).toBeInTheDocument()
+    expect(within(dialog).getByText(/will be deleted, including your own\s+changes/)).toBeInTheDocument()
+    expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(0)
+
+    await user.click(within(dialog).getByRole('button', { name: 'Erase and reset' }))
+
+    expect(await screen.findByText(/Demo data was reset at/)).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(1)
+    // Cached data is discarded: system info is read again.
+    await waitFor(() => {
+      expect(backend.sent('GET', '/api/system/info').length).toBeGreaterThan(1)
+    })
+  })
+
+  it('resets nothing when the confirmation is cancelled', async () => {
+    const user = userEvent.setup()
+    const backend = mockBackend({ 'GET /api/system/info': info(true) })
+    renderWithProviders(<SettingsPage />)
+
+    await user.click(await screen.findByRole('button', { name: 'Reset demo data' }))
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+    expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(0)
+  })
+
+  it('keeps the confirmation open and reports a failed reset', async () => {
+    const user = userEvent.setup()
+    mockBackend({
+      'GET /api/system/info': info(true),
+      [RESET]: () => problem(500, 'Internal server error', 'Something went wrong on the server. The error has been logged.'),
+    })
+    renderWithProviders(<SettingsPage />)
+
+    await user.click(await screen.findByRole('button', { name: 'Reset demo data' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Erase and reset' }))
+
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent('Something went wrong on the server.')
+    expect(screen.queryByText(/Demo data was reset at/)).not.toBeInTheDocument()
+  })
+
+  it('reports an unreachable backend', async () => {
+    mockBackend({ 'GET /api/system/info': () => Promise.reject(new TypeError('Failed to fetch')) })
+
+    renderWithProviders(<SettingsPage />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Backend unreachable')
+  })
+})

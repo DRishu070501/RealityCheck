@@ -47,10 +47,16 @@ describe('Sidebar', () => {
 })
 
 describe('navigation config', () => {
-  it('gives every screen except Overview a planned milestone', () => {
-    const unplanned = NAV_ITEMS.filter((item) => !item.planned).map((item) => item.label)
+  it('marks exactly the screens that are not built yet as planned', () => {
+    const planned = NAV_ITEMS.filter((item) => item.planned).map((item) => item.label)
 
-    expect(unplanned).toEqual(['Overview'])
+    expect(planned).toEqual([
+      'Production Orders',
+      'Operational Timeline',
+      'Scenario Lab',
+      'Simulation Results',
+      'AI Analyst',
+    ])
   })
 })
 

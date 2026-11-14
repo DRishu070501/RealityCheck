@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FactorySummary } from '@/features/overview/FactorySummary'
 import { api } from '@/lib/api'
 import { formatDateTime } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
@@ -32,9 +33,9 @@ function RowSkeleton({ label }: { label: string }) {
 }
 
 /**
- * Milestone 1 overview: live status of the backend, database, migrations and AI layer.
- * Factory metrics replace this once Milestone 2 provides real factory data; nothing here is
- * sample data.
+ * Overview: what is configured for the factory, and the live status of the backend, database,
+ * migrations and AI layer. Operational and simulated metrics join it as later milestones provide
+ * them; nothing here is sample data.
  */
 export function OverviewPage() {
   const health = useQuery({
@@ -57,7 +58,7 @@ export function OverviewPage() {
     <>
       <PageHeader
         title="Overview"
-        description="Live status of the RealityCheck platform. Factory metrics appear here once the factory model is available."
+        description="The configured factory and the live status of the RealityCheck platform."
         actions={
           <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
             <RotateCw aria-hidden="true" className={refreshing ? 'animate-spin' : undefined} />
@@ -67,6 +68,8 @@ export function OverviewPage() {
       />
 
       <div className="flex flex-col gap-6">
+        <FactorySummary />
+
         <Card aria-labelledby="system-status-title">
           <CardHeader>
             <div>
@@ -164,7 +167,6 @@ export function OverviewPage() {
           </CardHeader>
           <CardContent>
             <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground marker:text-subtle-foreground">
-              <li>Milestone 2 adds the demonstration factory, its eight-stage workflow and resource pools.</li>
               <li>Milestone 3 adds production orders and the operational event timeline.</li>
               <li>Milestones 4 and 5 add the deterministic simulation engine and scenario branching.</li>
               <li>

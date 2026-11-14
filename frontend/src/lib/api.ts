@@ -1,5 +1,21 @@
 import { z } from 'zod'
 
+import {
+  availabilityWindowSchema,
+  capacityTimelineSchema,
+  demoResetSchema,
+  factorySchema,
+  factorySummarySchema,
+  pageOf,
+  resourceSchema,
+  stageSchema,
+  workflowSchema,
+  workflowSummarySchema,
+  type CreateAvailabilityInput,
+  type ResourceKind,
+  type UpdateResourceInput,
+} from '@/lib/schemas'
+
 /**
  * The single place the application talks to the backend. Every response is parsed with a Zod
  * schema, and every failure surfaces as an {@link ApiError} with a stable `kind`.
@@ -14,6 +30,7 @@ const problemSchema = z.object({
   status: z.number().optional(),
   detail: z.string().optional(),
   instance: z.string().optional(),
+  code: z.string().optional(),
   errors: z.array(fieldErrorSchema).optional(),
 })
 
@@ -32,6 +49,8 @@ export class ApiError extends Error {
   readonly status: number | undefined
   readonly title: string
   readonly detail: string | undefined
+  /** Machine-readable reason from the backend, for example `STALE_VERSION`. */
+  readonly code: string | undefined
   readonly fieldErrors: readonly FieldError[]
 
   constructor(init: {
@@ -39,6 +58,7 @@ export class ApiError extends Error {
     title: string
     status?: number
     detail?: string
+    code?: string
     fieldErrors?: readonly FieldError[]
     cause?: unknown
   }) {
@@ -48,6 +68,7 @@ export class ApiError extends Error {
     this.title = init.title
     this.status = init.status
     this.detail = init.detail
+    this.code = init.code
     this.fieldErrors = init.fieldErrors ?? []
   }
 }
@@ -92,6 +113,7 @@ function toHttpError(response: Response, body: unknown): ApiError {
     status: response.status,
     title: problem.data.title ?? fallbackTitle,
     detail: problem.data.detail,
+    code: problem.data.code,
     fieldErrors: problem.data.errors,
   })
 }
@@ -171,6 +193,8 @@ export const systemInfoSchema = z.object({
     enabled: z.boolean(),
     provider: z.string(),
   }),
+  /** Whether this deployment allows the demonstration data to be reset from the UI. */
+  demo: z.object({ resetEnabled: z.boolean() }),
 })
 export type SystemInfo = z.infer<typeof systemInfoSchema>
 
@@ -178,7 +202,55 @@ export type SystemInfo = z.infer<typeof systemInfoSchema>
 export const healthSchema = z.object({ status: z.string() })
 export type Health = z.infer<typeof healthSchema>
 
+/** Largest page the backend serves; configuration lists are far smaller, so one page is all of it. */
+const ALL = 200
+
+function query(params: Record<string, string | number | undefined>): string {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, String(value))
+  }
+  const text = search.toString()
+  return text === '' ? '' : `?${text}`
+}
+
+const factoryPageSchema = pageOf(factorySummarySchema)
+const workflowPageSchema = pageOf(workflowSummarySchema)
+const stagePageSchema = pageOf(stageSchema)
+const resourcePageSchema = pageOf(resourceSchema)
+
 export const api = {
+  factories: {
+    list: (signal?: AbortSignal) => request(`/api/factories${query({ size: ALL })}`, factoryPageSchema, { signal }),
+    get: (id: string, signal?: AbortSignal) => request(`/api/factories/${id}`, factorySchema, { signal }),
+  },
+  workflows: {
+    list: (factoryId: string, signal?: AbortSignal) =>
+      request(`/api/workflows${query({ factoryId, size: ALL })}`, workflowPageSchema, { signal }),
+    get: (id: string, signal?: AbortSignal) => request(`/api/workflows/${id}`, workflowSchema, { signal }),
+    stages: (id: string, signal?: AbortSignal) =>
+      request(`/api/workflows/${id}/stages`, stagePageSchema, { signal }),
+  },
+  resources: {
+    list: (factoryId: string, kind?: ResourceKind, signal?: AbortSignal) =>
+      request(`/api/resources${query({ factoryId, kind, size: ALL })}`, resourcePageSchema, { signal }),
+    get: (id: string, signal?: AbortSignal) => request(`/api/resources/${id}`, resourceSchema, { signal }),
+    update: (id: string, body: UpdateResourceInput) =>
+      request(`/api/resources/${id}`, resourceSchema, { method: 'PUT', body }),
+    /** Without a range the backend reports the span covered by the pool's windows. */
+    availability: (id: string, range?: { from: string; to: string }, signal?: AbortSignal) =>
+      request(
+        `/api/resources/${id}/availability${query({ from: range?.from, to: range?.to })}`,
+        capacityTimelineSchema,
+        { signal },
+      ),
+    addAvailability: (id: string, body: CreateAvailabilityInput) =>
+      request(`/api/resources/${id}/availability`, availabilityWindowSchema, { method: 'POST', body }),
+  },
+  demo: {
+    /** Erases all data and re-creates the demonstration factory. Answers 404 when disabled. */
+    reset: () => request('/api/demo/reset', demoResetSchema, { method: 'POST' }),
+  },
   system: {
     info: (signal?: AbortSignal) => request('/api/system/info', systemInfoSchema, { signal }),
     /**

@@ -27,34 +27,9 @@ export interface NavItem {
 /** Primary navigation, in the order the product specification defines. */
 export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/', label: 'Overview', icon: LayoutDashboard },
-  {
-    path: '/factory',
-    label: 'Factory',
-    icon: Factory,
-    planned: {
-      milestone: 'Milestone 2',
-      summary: 'Factory profile, time zone, currency and the working calendar of shifts and breaks.',
-    },
-  },
-  {
-    path: '/workflow',
-    label: 'Workflow',
-    icon: Workflow,
-    planned: {
-      milestone: 'Milestone 2',
-      summary:
-        'The eight production stages from Rough Intake to Dispatch, with processing rates, setup times, yields and resource requirements.',
-    },
-  },
-  {
-    path: '/resources',
-    label: 'Resources',
-    icon: Boxes,
-    planned: {
-      milestone: 'Milestone 2',
-      summary: 'Machine and employee pools with capacity, hourly cost, availability and downtime.',
-    },
-  },
+  { path: '/factory', label: 'Factory', icon: Factory },
+  { path: '/workflow', label: 'Workflow', icon: Workflow },
+  { path: '/resources', label: 'Resources', icon: Boxes },
   {
     path: '/orders',
     label: 'Production Orders',
@@ -104,13 +79,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
         'Explanations and recommendations grounded in a selected simulation run, each with the metrics that support it.',
     },
   },
-  {
-    path: '/settings',
-    label: 'Settings',
-    icon: Settings,
-    planned: {
-      milestone: 'Milestone 6',
-      summary: 'Application preferences and the demo-data reset.',
-    },
-  },
+  { path: '/settings', label: 'Settings', icon: Settings },
 ]

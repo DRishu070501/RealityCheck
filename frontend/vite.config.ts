@@ -11,7 +11,9 @@ const BACKEND_PATHS = ['/api', '/actuator', '/v3/api-docs', '/swagger-ui']
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   // loadEnv merges .env files with VITE_-prefixed variables from the process environment.
-  const backendUrl = env.VITE_BACKEND_URL ?? 'http://localhost:8080'
+  // 127.0.0.1 rather than localhost: Node may resolve localhost to ::1, where a backend published
+  // by Docker on IPv4 loopback does not listen.
+  const backendUrl = env.VITE_BACKEND_URL ?? 'http://127.0.0.1:8080'
 
   return {
     plugins: [react(), tailwindcss()],
