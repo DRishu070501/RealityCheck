@@ -1,6 +1,7 @@
 package com.realitycheck.demo;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -26,15 +27,17 @@ public class DemoSeeder {
     /**
      * Runs every section in order. One transaction: if any section fails, nothing is kept.
      *
+     * @param seededAt the demonstration's "now": history is generated up to this instant, relative to it
      * @return the id of the demonstration factory
      */
     @Transactional
-    public UUID seed() {
-        DemoSeedContext context = new DemoSeedContext();
+    public UUID seed(Instant seededAt) {
+        DemoSeedContext context = new DemoSeedContext(seededAt);
         for (DemoSeedSection section : sections) {
             section.seed(context);
         }
-        log.info("Seeded demonstration factory factoryId={} sections={}", context.factoryId(), sections.size());
+        log.info("Seeded demonstration factory factoryId={} sections={} historyFrom={} historyTo={}",
+                context.factoryId(), sections.size(), context.anchor(), seededAt);
         return context.factoryId();
     }
 
@@ -44,7 +47,7 @@ public class DemoSeeder {
      * row-level guard, and this is the only sanctioned way around it.
      */
     @Transactional
-    public UUID reset() {
+    public UUID reset(Instant seededAt) {
         entityManager.flush();
         entityManager.clear();
         Object tables = entityManager.createNativeQuery("""
@@ -58,6 +61,6 @@ public class DemoSeeder {
                     .executeUpdate();
         }
         log.warn("All application data erased for a demonstration reset");
-        return seed();
+        return seed(seededAt);
     }
 }

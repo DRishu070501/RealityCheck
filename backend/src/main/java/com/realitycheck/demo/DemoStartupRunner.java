@@ -2,6 +2,7 @@ package com.realitycheck.demo;
 
 import com.realitycheck.common.config.RealityCheckProperties;
 import com.realitycheck.factory.service.FactoryService;
+import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -17,11 +18,14 @@ class DemoStartupRunner implements ApplicationRunner {
     private final RealityCheckProperties properties;
     private final FactoryService factoryService;
     private final DemoSeeder seeder;
+    private final Clock clock;
 
-    DemoStartupRunner(RealityCheckProperties properties, FactoryService factoryService, DemoSeeder seeder) {
+    DemoStartupRunner(RealityCheckProperties properties, FactoryService factoryService, DemoSeeder seeder,
+            Clock clock) {
         this.properties = properties;
         this.factoryService = factoryService;
         this.seeder = seeder;
+        this.clock = clock;
     }
 
     @Override
@@ -33,6 +37,6 @@ class DemoStartupRunner implements ApplicationRunner {
             log.info("Demonstration seed skipped: a factory already exists");
             return;
         }
-        seeder.seed();
+        seeder.seed(clock.instant());
     }
 }

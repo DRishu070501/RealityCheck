@@ -46,7 +46,7 @@ public abstract class IntegrationTest {
                   and table_type = 'BASE TABLE'
                   and table_name <> 'flyway_schema_history'""", String.class);
         if (tables != null) {
-            jdbc.execute("truncate table " + tables + " cascade");
+            jdbc.execute("truncate table " + tables + " restart identity cascade");
         }
     }
 

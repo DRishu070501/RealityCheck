@@ -10,10 +10,15 @@ import com.realitycheck.common.config.RealityCheckProperties.Ai;
 import com.realitycheck.common.config.RealityCheckProperties.Cors;
 import com.realitycheck.common.config.RealityCheckProperties.Demo;
 import com.realitycheck.factory.service.FactoryService;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class DemoStartupRunnerTest {
+
+    private static final Instant NOW = Instant.parse("2026-01-21T06:00:00Z");
 
     private final FactoryService factoryService = mock(FactoryService.class);
     private final DemoSeeder seeder = mock(DemoSeeder.class);
@@ -24,7 +29,7 @@ class DemoStartupRunnerTest {
 
         runner(true).run(null);
 
-        verify(seeder).seed();
+        verify(seeder).seed(NOW);
     }
 
     @Test
@@ -33,7 +38,7 @@ class DemoStartupRunnerTest {
 
         runner(true).run(null);
 
-        verify(seeder, never()).seed();
+        verify(seeder, never()).seed(NOW);
     }
 
     @Test
@@ -42,12 +47,12 @@ class DemoStartupRunnerTest {
 
         runner(false).run(null);
 
-        verify(seeder, never()).seed();
+        verify(seeder, never()).seed(NOW);
     }
 
     private DemoStartupRunner runner(boolean seedOnStartup) {
         RealityCheckProperties properties = new RealityCheckProperties(
                 new Cors(List.of()), new Ai("none", null), new Demo(seedOnStartup, false));
-        return new DemoStartupRunner(properties, factoryService, seeder);
+        return new DemoStartupRunner(properties, factoryService, seeder, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 }

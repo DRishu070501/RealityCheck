@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.realitycheck.IntegrationTest;
 import com.realitycheck.common.error.ApiException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,15 +19,19 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = "realitycheck.demo.reset-enabled=true")
 class DemoIT extends IntegrationTest {
 
+    /** Wednesday of the third week, 11:30 in Surat; the history therefore starts Monday 5 January, 09:00. */
+    private static final Instant SEEDED_AT = Instant.parse("2026-01-21T06:00:00Z");
+
     private static final List<String> TABLES = List.of("factory", "working_shift", "calendar_break", "resource",
-            "resource_availability", "workflow", "workflow_stage", "stage_requirement");
+            "resource_availability", "workflow", "workflow_stage", "stage_requirement", "production_order",
+            "production_batch", "operational_event");
 
     @Autowired
     private DemoSeeder seeder;
 
     @Test
     void seedsOneFullyConfiguredFactory() {
-        String factoryId = seeder.seed().toString();
+        String factoryId = seeder.seed(SEEDED_AT).toString();
 
         JsonNode factory = get("/api/factories/" + factoryId).getBody();
         assertThat(factory.path("name").asText()).isEqualTo("Surat Diamond Works");
@@ -43,7 +48,7 @@ class DemoIT extends IntegrationTest {
 
     @Test
     void seedsTheEightStagesInOrderEachWithPoolsThatCanRunIt() {
-        seeder.seed();
+        seeder.seed(SEEDED_AT);
 
         JsonNode workflows = get("/api/workflows").getBody().path("items");
         assertThat(workflows).hasSize(1);
@@ -67,7 +72,7 @@ class DemoIT extends IntegrationTest {
 
     @Test
     void seedsMachineAndEmployeePoolsAndOneDowntimeWindow() {
-        seeder.seed();
+        seeder.seed(SEEDED_AT);
 
         JsonNode machines = get("/api/resources?kind=MACHINE").getBody();
         JsonNode employees = get("/api/resources?kind=EMPLOYEE").getBody();
@@ -87,11 +92,69 @@ class DemoIT extends IntegrationTest {
     }
 
     @Test
+    void seedsOrdersInEveryStateWithAHistoryThatEndsAtTheSeedingInstant() {
+        String factoryId = seeder.seed(SEEDED_AT).toString();
+
+        assertThat(get("/api/orders?size=1").getBody().path("totalItems").asLong()).isGreaterThanOrEqualTo(30);
+        for (String status : List.of("IN_PROGRESS", "COMPLETED", "DISPATCHED")) {
+            assertThat(get("/api/orders?size=1&status=" + status).getBody().path("totalItems").asLong())
+                    .as(status).isPositive();
+        }
+        assertThat(get("/api/events?type=CORRECTION").getBody().path("totalItems").asLong()).isEqualTo(1);
+        assertThat(get("/api/events?type=RESOURCE_UNAVAILABLE").getBody().path("totalItems").asLong()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select max(occurred_at) <= ?::timestamptz from operational_event",
+                Boolean.class, SEEDED_AT.toString())).isTrue();
+
+        JsonNode summary = get("/api/timeline/summary").getBody();
+        assertThat(summary.path("firstEventAt").asText()).isEqualTo("2026-01-05T03:30:00Z");
+        assertThat(summary.path("buckets").size()).isGreaterThanOrEqualTo(14);
+        assertThat(get("/api/factories/" + factoryId).getBody().path("counts").path("orders").asLong())
+                .isGreaterThanOrEqualTo(30);
+    }
+
+    @Test
+    void theStoredPositionOfEveryBatchMatchesAReplayOfItsHistory() {
+        String factoryId = seeder.seed(SEEDED_AT).toString();
+
+        JsonNode state = get("/api/factories/" + factoryId + "/state?at=" + SEEDED_AT).getBody();
+
+        assertThat(state.path("batches").size())
+                .isEqualTo(jdbc.queryForObject("select count(*) from production_batch", Integer.class));
+        for (JsonNode batch : state.path("batches")) {
+            Map<String, Object> stored = jdbc.queryForMap(
+                    "select status, current_stage_id::text as stage, current_stones::text as stones "
+                            + "from production_batch where id = ?::uuid", batch.path("batchId").asText());
+            assertThat(batch.path("status").asText()).isEqualTo(stored.get("status"));
+            assertThat(batch.path("stageId").isNull() ? null : batch.path("stageId").asText())
+                    .isEqualTo(stored.get("stage"));
+            assertThat(batch.path("inputStones").asText()).isEqualTo(stored.get("stones"));
+        }
+        JsonNode polishing = state.path("stages").get(5);
+        assertThat(polishing.path("code").asText()).isEqualTo("POLISHING");
+        assertThat(polishing.path("inProgress").asInt()).isEqualTo(6);
+        assertThat(polishing.path("queued").asInt()).as("work waits at polishing").isPositive();
+    }
+
+    @Test
+    void theSeededHistoryNeverUsesMoreUnitsThanAPoolHas() {
+        String factoryId = seeder.seed(SEEDED_AT).toString();
+
+        for (Instant at = Instant.parse("2026-01-05T04:00:00Z"); at.isBefore(SEEDED_AT);
+                at = at.plus(5, java.time.temporal.ChronoUnit.HOURS)) {
+            for (JsonNode pool : get("/api/factories/" + factoryId + "/state?at=" + at).getBody().path("resources")) {
+                assertThat(pool.path("unitsInUse").asInt())
+                        .as(pool.path("name").asText() + " at " + at)
+                        .isLessThanOrEqualTo(pool.path("baseCapacity").asInt());
+            }
+        }
+    }
+
+    @Test
     void resettingReproducesExactlyTheSameRows() {
-        seeder.seed();
+        seeder.seed(SEEDED_AT);
         Map<String, String> first = fingerprints();
 
-        seeder.reset();
+        seeder.reset(SEEDED_AT);
 
         assertThat(fingerprints()).isEqualTo(first);
         assertThat(first.values()).doesNotContainNull();
@@ -99,17 +162,17 @@ class DemoIT extends IntegrationTest {
 
     @Test
     void seedingOverExistingDemoDataFailsAndChangesNothing() {
-        seeder.seed();
+        seeder.seed(SEEDED_AT);
         Map<String, String> before = fingerprints();
 
-        assertThatThrownBy(() -> seeder.seed()).isInstanceOf(ApiException.class);
+        assertThatThrownBy(() -> seeder.seed(SEEDED_AT)).isInstanceOf(ApiException.class);
 
         assertThat(fingerprints()).isEqualTo(before);
     }
 
     @Test
     void theResetEndpointDiscardsChangesAndRestoresTheDemoFactory() {
-        seeder.seed();
+        seeder.seed(SEEDED_AT);
         String wheels = idOf(get("/api/resources?kind=MACHINE").getBody()
                 .path("items"), "Polishing wheels");
         put("/api/resources/" + wheels, """

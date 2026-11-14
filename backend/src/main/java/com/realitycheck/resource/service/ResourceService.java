@@ -39,14 +39,17 @@ public class ResourceService {
     private final ResourceAvailabilityRepository availabilities;
     private final FactoryResolver factoryResolver;
     private final RequirementUsage requirementUsage;
+    private final ResourceEventSink eventSink;
     private final Clock clock;
 
     public ResourceService(ResourceRepository resources, ResourceAvailabilityRepository availabilities,
-            FactoryResolver factoryResolver, RequirementUsage requirementUsage, Clock clock) {
+            FactoryResolver factoryResolver, RequirementUsage requirementUsage, ResourceEventSink eventSink,
+            Clock clock) {
         this.resources = resources;
         this.availabilities = availabilities;
         this.factoryResolver = factoryResolver;
         this.requirementUsage = requirementUsage;
+        this.eventSink = eventSink;
         this.clock = clock;
     }
 
@@ -112,7 +115,7 @@ public class ResourceService {
     @Transactional
     public AvailabilityResponse addAvailability(UUID resourceId, CreateAvailabilityRequest request, UUID id,
             Instant now) {
-        find(resourceId);
+        Resource resource = find(resourceId);
         if (!request.endsAt().isAfter(request.startsAt())) {
             throw new ValidationException("endsAt", "must be after startsAt");
         }
@@ -121,7 +124,12 @@ public class ResourceService {
         }
         ResourceAvailability window = new ResourceAvailability(id, now, resourceId, request.startsAt(),
                 request.endsAt(), request.capacityDelta(), request.reason().strip());
-        return toResponse(availabilities.saveAndFlush(window));
+        AvailabilityResponse response = toResponse(availabilities.saveAndFlush(window));
+        if (request.capacityDelta() < 0) {
+            eventSink.unitsUnavailable(resource.getFactoryId(), resourceId, id, request.startsAt(),
+                    request.endsAt(), -request.capacityDelta(), request.reason().strip(), now);
+        }
+        return response;
     }
 
     /**

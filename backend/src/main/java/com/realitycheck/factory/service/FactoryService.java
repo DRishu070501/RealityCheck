@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +36,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class FactoryService {
 
     private final FactoryRepository factories;
-    private final List<FactoryCountProvider> countProviders;
+    private final ObjectProvider<FactoryCountProvider> countProviders;
     private final Clock clock;
 
-    public FactoryService(FactoryRepository factories, List<FactoryCountProvider> countProviders, Clock clock) {
+    /**
+     * The count providers are looked up when used, not at construction: modules that provide
+     * counts may themselves depend on this service.
+     */
+    public FactoryService(FactoryRepository factories, ObjectProvider<FactoryCountProvider> countProviders,
+            Clock clock) {
         this.factories = factories;
         this.countProviders = countProviders;
         this.clock = clock;
@@ -114,9 +120,8 @@ public class FactoryService {
                                 .toList()))
                 .toList();
         Map<String, Long> counts = new TreeMap<>();
-        for (FactoryCountProvider provider : countProviders) {
-            counts.put(provider.key(), provider.count(factory.getId()));
-        }
+        countProviders.orderedStream()
+                .forEach(provider -> counts.put(provider.key(), provider.count(factory.getId())));
         return new FactoryResponse(factory.getId(), factory.getName(), factory.getDescription(),
                 factory.getTimeZone(), factory.getCurrencyCode(), factory.isDemo(),
                 new CalendarResponse(shifts, toCalendar(factory).weeklyWorkingSeconds()), counts,

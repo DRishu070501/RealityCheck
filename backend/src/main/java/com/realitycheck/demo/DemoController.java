@@ -35,6 +35,7 @@ public class DemoController {
     @PostMapping("/reset")
     @Operation(summary = "Erase all data and re-create the demonstration factory")
     public DemoResetResponse reset() {
-        return new DemoResetResponse(seeder.reset(), clock.instant());
+        Instant now = clock.instant();
+        return new DemoResetResponse(seeder.reset(now), now);
     }
 }
