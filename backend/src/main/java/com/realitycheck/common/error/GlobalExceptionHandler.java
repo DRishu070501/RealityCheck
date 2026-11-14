@@ -35,11 +35,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public static final String STALE_VERSION = "STALE_VERSION";
 
     @ExceptionHandler(ApiException.class)
-    ProblemDetail handleApiException(ApiException ex) {
+    ResponseEntity<ProblemDetail> handleApiException(ApiException ex) {
         if (ex instanceof ValidationException validation) {
-            return validationProblem(validation.errors());
+            return ResponseEntity.badRequest().body(validationProblem(validation.errors()));
         }
-        return problem(ex.status(), ex.title(), ex.getMessage());
+        ProblemDetail body = problem(ex.status(), ex.title(), ex.getMessage());
+        ex.properties().forEach(body::setProperty);
+        HttpHeaders headers = new HttpHeaders();
+        ex.headers().forEach(headers::add);
+        return ResponseEntity.status(ex.status()).headers(headers).body(body);
     }
 
     /**

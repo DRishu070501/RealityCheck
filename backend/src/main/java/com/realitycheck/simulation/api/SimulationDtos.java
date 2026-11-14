@@ -134,6 +134,7 @@ public final class SimulationDtos {
      *
      * @param limitingPoolId          the required pool with the highest utilization; null if none is required
      * @param limitingPoolUtilization that pool's utilization over the whole run
+     * @param utilizationSignal       the same as a signal in [0, 1]; zero when no pool is required
      * @param waitSignal              mean wait here relative to the largest across stages
      * @param queueSignal             mean queue length here relative to the largest across stages
      * @param saturation              of the time the stage had work, the share spent with work
@@ -145,6 +146,7 @@ public final class SimulationDtos {
             UUID limitingPoolId,
             String limitingPoolName,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal limitingPoolUtilization,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal utilizationSignal,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal waitSignal,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal queueSignal,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal saturation,
@@ -153,6 +155,7 @@ public final class SimulationDtos {
     }
 
     /**
+     * @param capacity      base units in the simulated configuration, before dated windows
      * @param utilization   busy over available, capped at 1; null when nothing was available
      * @param overcommitted jobs already running kept more units than a capacity reduction left
      * @param cost          this pool's share of the employee or machine cost
@@ -161,6 +164,7 @@ public final class SimulationDtos {
             UUID resourceId,
             String name,
             String kind,
+            int capacity,
             long busyUnitSeconds,
             long availableUnitSeconds,
             long idleUnitSeconds,

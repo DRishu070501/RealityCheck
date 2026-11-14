@@ -34,7 +34,10 @@ public class DemoSeeder {
     public UUID seed(Instant seededAt) {
         DemoSeedContext context = new DemoSeedContext(seededAt);
         for (DemoSeedSection section : sections) {
+            long started = System.nanoTime();
             section.seed(context);
+            log.info("Seeded section {} in {} ms", section.getClass().getSimpleName(),
+                    (System.nanoTime() - started) / 1_000_000);
         }
         log.info("Seeded demonstration factory factoryId={} sections={} historyFrom={} historyTo={}",
                 context.factoryId(), sections.size(), context.anchor(), seededAt);

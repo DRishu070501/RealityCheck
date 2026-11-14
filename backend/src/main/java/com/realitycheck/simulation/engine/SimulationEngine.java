@@ -31,6 +31,21 @@ public final class SimulationEngine {
      * @throws InvalidSimulationInputException if the input describes an impossible factory.
      *         Reaching a simulation limit is not an error: it is reported in the result.
      */
+    /**
+     * The input validation {@link #run} performs first, without running anything: lets callers
+     * report problems before a run is submitted.
+     *
+     * @return every problem found; empty when the input can be simulated
+     */
+    public java.util.List<InvalidSimulationInputException.Problem> problems(SimulationInput input) {
+        try {
+            InputValidator.validate(input);
+            return java.util.List.of();
+        } catch (InvalidSimulationInputException ex) {
+            return ex.problems();
+        }
+    }
+
     public SimulationResult run(SimulationInput input) {
         InputValidator.validate(input);
         SimulationContext context = new SimulationContext(input);

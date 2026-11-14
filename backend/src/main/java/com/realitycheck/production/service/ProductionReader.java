@@ -2,6 +2,7 @@ package com.realitycheck.production.service;
 
 import com.realitycheck.production.domain.ProductionBatch;
 import com.realitycheck.production.domain.ProductionOrder;
+import com.realitycheck.production.persistence.OperationalEventRepository;
 import com.realitycheck.production.persistence.ProductionBatchRepository;
 import com.realitycheck.production.persistence.ProductionOrderRepository;
 import java.math.BigDecimal;
@@ -30,10 +31,18 @@ public class ProductionReader {
 
     private final ProductionOrderRepository orders;
     private final ProductionBatchRepository batches;
+    private final OperationalEventRepository events;
 
-    public ProductionReader(ProductionOrderRepository orders, ProductionBatchRepository batches) {
+    public ProductionReader(ProductionOrderRepository orders, ProductionBatchRepository batches,
+            OperationalEventRepository events) {
         this.orders = orders;
         this.batches = batches;
+        this.events = events;
+    }
+
+    /** @return when the factory's first recorded event occurred; null when it has none */
+    public Instant firstEventAt(UUID factoryId) {
+        return events.findFirstOccurrence(factoryId);
     }
 
     /** @return the orders that exist among the ids, keyed by id */

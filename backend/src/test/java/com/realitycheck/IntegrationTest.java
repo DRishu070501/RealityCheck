@@ -38,7 +38,7 @@ public abstract class IntegrationTest {
     protected JdbcTemplate jdbc;
 
     @BeforeEach
-    void emptyAllTables() {
+    protected void emptyAllTables() {
         String tables = jdbc.queryForObject("""
                 select string_agg(format('%I', table_name), ', ')
                 from information_schema.tables

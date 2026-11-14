@@ -1,5 +1,6 @@
 package com.realitycheck.simulation.service;
 
+import com.realitycheck.scenario.snapshot.Snapshot;
 import com.realitycheck.simulation.api.SimulationDtos;
 import com.realitycheck.simulation.api.SimulationDtos.Bottleneck;
 import com.realitycheck.simulation.api.SimulationDtos.BottleneckEvidence;
@@ -32,11 +33,18 @@ public final class SimulationResultMapper {
     private SimulationResultMapper() {
     }
 
+    /** Names, currency and pool capacities come from the snapshot the result was computed from. */
+    public static SimulationResultResponse toResponse(UUID factoryId, Snapshot snapshot, SimulationResult result) {
+        return toResponse(factoryId, snapshot.currencyCode(), SnapshotInputAdapter.stageNames(snapshot),
+                SnapshotInputAdapter.poolCapacities(snapshot), result);
+    }
+
     /**
-     * @param stageNames display names of the stages, by id
+     * @param stageNames     display names of the stages, by id
+     * @param poolCapacities base capacity of each pool in the simulated configuration
      */
     public static SimulationResultResponse toResponse(UUID factoryId, String currencyCode,
-            Map<UUID, String> stageNames, SimulationResult result) {
+            Map<UUID, String> stageNames, Map<UUID, Integer> poolCapacities, SimulationResult result) {
         Map<UUID, String> poolNames = result.pools().stream()
                 .collect(Collectors.toMap(SimulationResult.PoolResult::poolId, SimulationResult.PoolResult::name));
 
@@ -52,7 +60,8 @@ public final class SimulationResultMapper {
                 .toList();
 
         List<PoolResult> pools = result.pools().stream()
-                .map(pool -> new PoolResult(pool.poolId(), pool.name(), pool.kind().name(), pool.busyUnitSeconds(),
+                .map(pool -> new PoolResult(pool.poolId(), pool.name(), pool.kind().name(),
+                        poolCapacities.getOrDefault(pool.poolId(), 0), pool.busyUnitSeconds(),
                         pool.availableUnitSeconds(), pool.idleUnitSeconds(), pool.utilization(),
                         pool.utilizationNullReason(), pool.overcommitted(), pool.cost()))
                 .toList();
@@ -85,7 +94,7 @@ public final class SimulationResultMapper {
     private static BottleneckEvidence toEvidence(BottleneckSignals signals, Map<UUID, String> poolNames) {
         return new BottleneckEvidence(signals.limitingPoolId(),
                 signals.limitingPoolId() == null ? null : poolNames.get(signals.limitingPoolId()),
-                signals.limitingPoolUtilization(), signals.waitSignal(), signals.queueSignal(),
+                signals.limitingPoolUtilization(), signals.utilizationSignal(), signals.waitSignal(), signals.queueSignal(),
                 signals.saturationSignal(), signals.blockedShare(), signals.score());
     }
 

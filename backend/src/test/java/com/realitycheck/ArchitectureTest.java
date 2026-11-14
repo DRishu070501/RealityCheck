@@ -52,6 +52,36 @@ class ArchitectureTest {
             .because("AI explains results; it must not be able to influence them");
 
     @ArchTest
+    static final ArchRule scenarioNeverDependsOnSimulation = noClasses()
+            .that().resideInAPackage("com.realitycheck.scenario..")
+            .should().dependOnClassesThat().resideInAnyPackage("com.realitycheck.simulation..",
+                    "com.realitycheck.ai..")
+            .because("simulation depends on scenario (through ports declared in scenario), never the reverse");
+
+    @ArchTest
+    static final ArchRule operationalModulesKnowNothingOfScenarios = noClasses()
+            .that().resideInAnyPackage(
+                    "com.realitycheck.factory..",
+                    "com.realitycheck.workflow..",
+                    "com.realitycheck.resource..",
+                    "com.realitycheck.production..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "com.realitycheck.scenario..",
+                    "com.realitycheck.simulation..",
+                    "com.realitycheck.ai..")
+            .because("scenarios read live configuration and history; live data never depends on what-ifs");
+
+    @ArchTest
+    static final ArchRule simulationReadsOnlyThroughScenarioSnapshots = noClasses()
+            .that().resideInAPackage("com.realitycheck.simulation..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "com.realitycheck.factory..",
+                    "com.realitycheck.workflow..",
+                    "com.realitycheck.resource..",
+                    "com.realitycheck.production..")
+            .because("a run reads only its stored snapshot, assembled by the scenario module");
+
+    @ArchTest
     static final ArchRule commonDependsOnNoFeature = noClasses()
             .that().resideInAPackage("com.realitycheck.common..")
             .should().dependOnClassesThat().resideInAnyPackage(
