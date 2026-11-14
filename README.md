@@ -20,7 +20,7 @@ Two principles hold throughout:
 | 1. Foundation | Backend, frontend shell, PostgreSQL, Flyway, OpenAPI, health checks, Docker Compose, Kiro steering and specs | **Done** |
 | 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | **Done** |
 | 3. Production operations | Orders, batches, append-only events, timeline | **Done** |
-| 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | Not started |
+| 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | **Done** (API only, no screen yet) |
 | 5. Scenario branching | State reconstruction, scenarios, changes, comparison | Not started |
 | 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Orders, Timeline, Settings |
 | 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
@@ -30,8 +30,10 @@ What runs today: a seeded demonstration factory, Surat Diamond Works, with its w
 resource pools, an eight-stage workflow, and two to three weeks of production history ending now. You can
 browse orders and their batches, follow the operational timeline, inspect the factory as it stood at any
 past moment, see current queues and units in use, edit pools, record downtime and reset the demonstration
-data. Simulation, scenarios and AI are not built yet; their screens are placeholders that say which
-milestone delivers them.
+data. The deterministic simulation engine is built and can be run on the factory as recorded from any
+instant through `GET /api/factories/{id}/baseline-simulation` (see Swagger UI); it predicts completion, waiting,
+utilization, cost and delivery, and names the bottleneck with its evidence. Scenarios, their screens and AI are
+not built yet; those screens are placeholders that say which milestone delivers them.
 
 ## Run it with Docker
 

@@ -348,6 +348,69 @@ event the state is empty.
 `dailyOutput` (batches, stones and carats that finished the last stage per factory-local day, oldest first)
 and `recentEvents` (the ten newest timeline items).
 
+### Baseline simulation
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/factories/{id}/baseline-simulation?at=` | Run the simulation engine on the factory as recorded, from an instant (default now), changing nothing and storing nothing |
+
+The engine starts from the state reconstructed at `at`: batches in progress keep their units and only their
+remaining work is simulated, queued batches keep their place, and orders placed after `at` (if the history
+knows of them) arrive at the first stage when they were placed. It runs until every batch has finished or a
+limit is reached (180 simulated days, one million events). `at` may not be in the future (400). A factory
+whose configuration cannot be simulated, for example a stage needing more units than a pool ever has,
+answers 422 with every problem listed.
+
+Every number in the response comes from the deterministic engine and is labelled `source: "SIMULATED"`; it is
+an estimate under the rules in `.kiro/steering/simulation-rules.md`, not a forecast guarantee. The same factory
+data, `at` and `algorithmVersion` always give the same response.
+
+```json
+{ "factoryId": "...", "forkAt": "2026-11-14T08:45:24Z", "endsAt": "2026-11-23T05:51:13Z",
+  "algorithmVersion": "1.0.0", "terminationReason": "COMPLETED", "eventsProcessed": 412,
+  "summary": { "elapsedSeconds": 767149, "workingSeconds": 195300, "processingSeconds": 1038000,
+               "waitingWorkingSeconds": 210400, "waitingCalendarSeconds": 640200,
+               "inputStones": "2010.0000", "outputStones": "1938.9432", "outputStonesRounded": "1939",
+               "stoneYield": "0.964648", "throughputStonesPerHour": "35.8419",
+               "machineUtilization": "0.331118", "employeeUtilization": "0.387641",
+               "cost": { "employee": "...", "machine": "...", "fixed": "...", "total": "427097.81",
+                         "perOutputStone": "220.2744", "currencyCode": "INR" },
+               "ordersTotal": 18, "ordersCompleted": 18, "ordersDelayed": 8, "ordersWithDueDate": 18,
+               "onTimeDeliveryRate": "0.555556" },
+  "stages": [ { "code": "POLISHING", "name": "Polishing", "sequence": 6, "jobsCompleted": 21,
+                "meanWaitWorkingSeconds": "37440.0000", "maxQueueLength": 9, "...": "...",
+                "bottleneck": { "limitingPoolName": "Polishing wheels", "limitingPoolUtilization": "0.810000",
+                                "waitSignal": "1.000000", "queueSignal": "1.000000",
+                                "saturation": "0.709010", "blockedShare": "...", "score": "0.890970" } } ],
+  "pools": [ { "name": "Polishing wheels", "kind": "MACHINE", "busyUnitSeconds": 0, "availableUnitSeconds": 0,
+               "utilization": "...", "overcommitted": false, "cost": "..." } ],
+  "orders": [ { "orderNumber": "SDW-0031", "completesAt": "...", "dueAt": "...", "outcome": "LATE", "delayed": true } ],
+  "bottleneck": { "stageCode": "POLISHING", "stageName": "Polishing", "reasonCode": "CONSTRAINED_POOL_WITH_QUEUE",
+                  "explanation": "Polishing is the bottleneck: work waited behind full slots for 71% of the time the stage had work (mean wait 10.4 working hours, queue up to 9); its most used pool, Polishing wheels, was at 81% over the whole run.",
+                  "scoreThreshold": "0.50", "saturationThreshold": "0.50" },
+  "unfinished": [], "source": "SIMULATED" }
+```
+
+(Figures above are from one run of the demonstration factory and change with the seeding day.)
+
+| Field | Meaning |
+|---|---|
+| `elapsedSeconds` | Fork to last completion in calendar time, nights and closed days included |
+| `workingSeconds` | Factory working time in that window |
+| `processingSeconds`, `waitingWorkingSeconds` | Summed over jobs, in working time; so they can exceed `elapsedSeconds` |
+| `outputStones` | Expected stones finishing the last stage, unrounded (yield is applied exactly); `outputStonesRounded` is for display |
+| `machineUtilization`, `employeeUtilization` | Busy over available unit-time, capacity-weighted; `null` when nothing was available |
+| `cost.employee` | Scheduled employee capacity over the run's working time: idle people are paid |
+| `cost.machine` | Machine unit-hours actually run |
+| `cost.perOutputStone` | Compare this as well as `total`: runs of different length accrue cost over different periods |
+| `stages[].bottleneck.saturation` | Of the time the stage had work, the share spent with work waiting behind full slots |
+| `bottleneck.reasonCode` | `CONSTRAINED_POOL_WITH_QUEUE`, `NO_SUSTAINED_QUEUE`, `NO_CLEAR_BOTTLENECK` or `NO_WORK` |
+| `bottleneck.explanation` | One sentence assembled from the evidence by fixed rules, **not** by AI |
+| `terminationReason` | `COMPLETED`, or `HORIZON_REACHED` / `EVENT_LIMIT_REACHED` with the remaining batches in `unfinished` |
+
+This endpoint is the engine's read-only entry point until scenarios exist. Stored, asynchronous runs with
+changes applied arrive in Milestone 5 (`POST /api/scenarios/{id}/simulate`).
+
 ### Demo
 
 | Endpoint | Purpose |
@@ -375,6 +438,6 @@ Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows whe
 | Group | Endpoints | Milestone |
 |---|---|---|
 | Scenarios | `GET/POST /api/scenarios`, `GET/PATCH /api/scenarios/{id}`, `POST /api/scenarios/{id}/changes`, `PUT/DELETE /api/scenarios/{id}/changes/{changeId}` | 5 |
-| Simulation | `POST /api/scenarios/{id}/simulate`, `GET /api/scenarios/{id}/simulations`, `GET /api/simulations/{runId}`, `.../results`, `.../stages` | 4, 5 |
+| Simulation runs | `POST /api/scenarios/{id}/simulate`, `GET /api/scenarios/{id}/simulations`, `GET /api/simulations/{runId}`, `.../results`, `.../stages` | 5 |
 | Comparison | `POST /api/simulations/compare`, `GET /api/scenarios/{id}/comparisons` | 5 |
 | AI | `POST /api/ai/insights`, `POST /api/ai/ask`, `GET /api/ai/insights/{runId}` | 7 |

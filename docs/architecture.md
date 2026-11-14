@@ -5,7 +5,7 @@ in `.kiro/steering/` (`architecture.md` for module boundaries and API convention
 the engine contract). This page is the narrative: the shape of the system, the decisions that are not
 obvious, and what was traded away.
 
-Status: Milestones 1 to 3 are built. Sections describing later milestones are the agreed design, not a description
+Status: Milestones 1 to 4 are built. Sections describing later milestones are the agreed design, not a description
 of existing code; each says so.
 
 ## System shape
@@ -40,7 +40,7 @@ Everything a user sees is one of:
 The architecture exists to keep these apart. Dependencies point one way: `ai` reads `simulation` results;
 `simulation` cannot import `ai`; the engine cannot import anything.
 
-## What exists today (Milestones 1 to 3)
+## What exists today (Milestones 1 to 4)
 
 - `common.config`: typed settings (`RealityCheckProperties`), CORS allow-list, OpenAPI metadata, the
   application `Clock`.
@@ -74,6 +74,12 @@ history with it applied still replays.
 **History cannot be rewritten.** `operational_event` has a trigger that rejects `UPDATE` and `DELETE`, the
 entity has no setters and no updatable column, and corrections are new rows. Order status and batch
 position are stored projections for fast reads; an integration test checks they equal a replay.
+
+**The engine** (`simulation.engine`, 18 classes) is built as designed below, as a pure function from
+`SimulationInput` to `SimulationResult`. `SimulationInputAssembler` in `simulation.service` is the only code
+that turns application data into engine input; it reuses the Milestone 3 state reconstruction for work in
+progress, so the fork state the engine starts from is the same one the timeline inspector shows. A read-only
+baseline endpoint runs it; stored runs come with scenarios.
 
 **Events are written in one place.** `EventAppendService` locks the batch row, validates, appends the event
 with those that follow from it (the next queue entry, order completion), and updates the projections in one
@@ -123,11 +129,22 @@ decimals, and a totally ordered event queue. The complete contract is in
 - **Stones stay fractional inside a run.** Yield is applied exactly at each stage and quantities are rounded
   only for display, so nothing is lost to truncation across eight stages.
 
+### How the bottleneck is decided
+
+A score from four signals (pool utilization, relative wait, relative queue length, saturation) picks the
+candidate; **saturation** decides whether to name it: of the time the stage had work, the share spent with work
+waiting behind full slots must be at least half. The first design gated on whole-run pool utilization of 85%,
+which named nothing on the demonstration factory even when polishing was obviously the constraint: every run
+has a start-up and a tail in which stages idle for lack of input. Relative signals alone cannot gate either,
+because some stage always has the longest wait, however short. When nothing qualifies the result says so and
+why, and still reports every stage's evidence.
+
 ### A property that is deliberately not asserted
 
 "Adding capacity never makes completion later" sounds self-evident and is false for non-preemptive
 priority scheduling across stages that share resources: extra capacity can change the order in which jobs
-start and lengthen the overall schedule. The tests assert the property where it provably holds (a single
+start and lengthen the overall schedule. Over 300 generated factories the property suite reports how often:
+about one case in 300 got longer with one more unit, two thirds were unchanged, a quarter got shorter. The tests assert the property where it provably holds (a single
 stage with a fixed job order) and report it as a statistic elsewhere. If a scenario shows a worse outcome
 after adding capacity, that is the dispatch rule's real consequence and the product shows it.
 

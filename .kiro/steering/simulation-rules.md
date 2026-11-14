@@ -158,10 +158,18 @@ Each stage receives a score from 0 to 1, a weighted sum of normalised signals:
 | Utilization of the stage's most constrained pool | 0.35 |
 | Mean working wait at the stage, relative to the largest across stages | 0.30 |
 | Time-weighted mean queue length, relative to the largest | 0.20 |
-| Share of working time with a non-empty queue and zero free slots | 0.15 |
+| Saturation: of the working time the stage had work (queued or running), the share with a non-empty queue and zero free slots | 0.15 |
 
-The stage with the highest score is the primary bottleneck if its score is at least 0.5 and its constrained
-pool's utilization is at least 0.85. Otherwise the run reports no clear bottleneck. Weights and thresholds are
+The stage with the highest score is the primary bottleneck if its score is at least 0.5 **and its saturation
+is at least 0.5**. Otherwise the run reports `NO_SUSTAINED_QUEUE` (the top stage's queue was brief relative to
+its activity) or `NO_CLEAR_BOTTLENECK` (score below threshold); `NO_WORK` when nothing ran.
+
+Saturation, not whole-run pool utilization, is the gate. Wait and queue are relative to the worst stage, so
+some stage always scores 1 on both even when its wait was trivial; saturation is absolute and separates a
+sustained queue from a brief one. Whole-run utilization cannot do that job: every run has a start-up and a
+tail in which stages idle for lack of input, so a stage that was the binding constraint throughout typically
+shows 0.6 to 0.8 utilization over the whole run. (The first design gated on utilization at least 0.85; it named
+no bottleneck on the demonstration factory even when polishing was plainly the constraint.) Weights and thresholds are
 configuration. The result always includes every stage's raw signal values, the limiting pool, and a
 machine-readable reason, so the UI and the AI layer can show why. A long-running stage with spare capacity and
 no queue is not a bottleneck.
