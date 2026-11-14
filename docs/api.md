@@ -366,32 +366,94 @@ an estimate under the rules in `.kiro/steering/simulation-rules.md`, not a forec
 data, `at` and `algorithmVersion` always give the same response.
 
 ```json
-{ "factoryId": "...", "forkAt": "2026-11-14T08:45:24Z", "endsAt": "2026-11-23T05:51:13Z",
-  "algorithmVersion": "1.0.0", "terminationReason": "COMPLETED", "eventsProcessed": 412,
-  "summary": { "elapsedSeconds": 767149, "workingSeconds": 195300, "processingSeconds": 1038000,
-               "waitingWorkingSeconds": 210400, "waitingCalendarSeconds": 640200,
-               "inputStones": "2010.0000", "outputStones": "1938.9432", "outputStonesRounded": "1939",
-               "stoneYield": "0.964648", "throughputStonesPerHour": "35.8419",
-               "machineUtilization": "0.331118", "employeeUtilization": "0.387641",
-               "cost": { "employee": "...", "machine": "...", "fixed": "...", "total": "427097.81",
-                         "perOutputStone": "220.2744", "currencyCode": "INR" },
-               "ordersTotal": 18, "ordersCompleted": 18, "ordersDelayed": 8, "ordersWithDueDate": 18,
-               "onTimeDeliveryRate": "0.555556" },
-  "stages": [ { "code": "POLISHING", "name": "Polishing", "sequence": 6, "jobsCompleted": 21,
-                "meanWaitWorkingSeconds": "37440.0000", "maxQueueLength": 9, "...": "...",
-                "bottleneck": { "limitingPoolName": "Polishing wheels", "limitingPoolUtilization": "0.810000",
-                                "waitSignal": "1.000000", "queueSignal": "1.000000",
-                                "saturation": "0.709010", "blockedShare": "...", "score": "0.890970" } } ],
-  "pools": [ { "name": "Polishing wheels", "kind": "MACHINE", "busyUnitSeconds": 0, "availableUnitSeconds": 0,
-               "utilization": "...", "overcommitted": false, "cost": "..." } ],
-  "orders": [ { "orderNumber": "SDW-0031", "completesAt": "...", "dueAt": "...", "outcome": "LATE", "delayed": true } ],
-  "bottleneck": { "stageCode": "POLISHING", "stageName": "Polishing", "reasonCode": "CONSTRAINED_POOL_WITH_QUEUE",
-                  "explanation": "Polishing is the bottleneck: work waited behind full slots for 71% of the time the stage had work (mean wait 10.4 working hours, queue up to 9); its most used pool, Polishing wheels, was at 81% over the whole run.",
-                  "scoreThreshold": "0.50", "saturationThreshold": "0.50" },
-  "unfinished": [], "source": "SIMULATED" }
+{
+  "factoryId": "...",
+  "forkAt": "2026-11-14T08:46:34Z",
+  "endsAt": "2026-11-23T05:51:13Z",
+  "algorithmVersion": "1.0.0",
+  "terminationReason": "COMPLETED",
+  "eventsProcessed": 188,
+  "summary": {
+    "elapsedSeconds": 767079,
+    "workingSeconds": 194679,
+    "processingSeconds": 1389008,
+    "waitingWorkingSeconds": 747811,
+    "waitingCalendarSeconds": 2893411,
+    "inputStones": "2022.0000",
+    "outputStones": "1938.9352",
+    "outputStonesRounded": "1939",
+    "stoneYield": "0.958919",
+    "throughputStonesPerHour": "35.8547",
+    "machineUtilization": "0.331014",
+    "employeeUtilization": "0.387536",
+    "cost": {
+      "employee": "363400.79",
+      "machine": "55639.85",
+      "fixed": "7880.00",
+      "total": "426920.64",
+      "perOutputStone": "220.1830",
+      "currencyCode": "INR"
+    },
+    "ordersTotal": 18,
+    "ordersCompleted": 18,
+    "ordersDelayed": 8,
+    "ordersWithDueDate": 18,
+    "onTimeDeliveryRate": "0.555556"
+  },
+  "stages": [
+    {
+      "code": "POLISHING",
+      "name": "Polishing",
+      "sequence": 6,
+      "jobsCompleted": 20,
+      "meanWaitWorkingSeconds": "37390.5500",
+      "maxQueueLength": 9,
+      "...": "...",
+      "bottleneck": {
+        "limitingPoolName": "Polishing wheels",
+        "limitingPoolUtilization": "0.813127",
+        "waitSignal": "1.000000",
+        "queueSignal": "1.000000",
+        "saturation": "0.708900",
+        "blockedShare": "0.673298",
+        "score": "0.890929"
+      }
+    }
+  ],
+  "pools": [
+    {
+      "name": "Polishing wheels",
+      "kind": "MACHINE",
+      "busyUnitSeconds": 949793,
+      "availableUnitSeconds": 1168074,
+      "utilization": "0.813127",
+      "overcommitted": false,
+      "cost": "36936.39"
+    }
+  ],
+  "orders": [
+    {
+      "orderNumber": "SDW-0045",
+      "completesAt": "2026-11-23T05:51:13Z",
+      "dueAt": "2026-11-21T07:30:00Z",
+      "outcome": "LATE",
+      "delayed": true
+    }
+  ],
+  "bottleneck": {
+    "stageCode": "POLISHING",
+    "stageName": "Polishing",
+    "reasonCode": "CONSTRAINED_POOL_WITH_QUEUE",
+    "explanation": "Polishing is the bottleneck: work waited behind full slots for 71% of the time the stage had work (mean wait 10.4 working hours, queue up to 9); its most used pool, Polishing wheels, was at 81% over the whole run.",
+    "scoreThreshold": "0.50",
+    "saturationThreshold": "0.50"
+  },
+  "unfinished": [],
+  "source": "SIMULATED"
+}
 ```
 
-(Figures above are from one run of the demonstration factory and change with the seeding day.)
+(A real response from the demonstration factory, trimmed to one stage, pool and order. The figures change with the day the demo was seeded.)
 
 | Field | Meaning |
 |---|---|
