@@ -1,0 +1,11 @@
+{
+  "name": "Simulation engine review",
+  "description": "After engine code is saved, review the change and its tests against simulation-rules.md and check whether ALGORITHM_VERSION must be bumped.",
+  "enabled": true,
+  "trigger": "fileSave",
+  "matcher": "backend/src/main/java/com/realitycheck/simulation/engine/**/*.java",
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A file in the simulation engine was saved. The engine is the source of every number the product shows, so review this change carefully against .kiro/steering/simulation-rules.md and .kiro/specs/07-simulation-engine/design.md.\n\n1. Purity: the saved file must not import Spring, Jakarta Persistence, Jackson or any com.realitycheck package outside simulation.engine, and must not use double, float, Random, System.currentTimeMillis, Instant.now, threads, I/O, or iteration over HashMap/HashSet where order can affect output.\n2. Rules: identify which numbered rule(s) of simulation-rules.md the change touches (event ordering, units, allocation, processing time, calendar, yield, work in progress at the fork, termination, metrics, bottleneck). State whether the code still matches the rule text exactly, including rounding modes and scales.\n3. Tests: for each touched rule, name the existing test that checks it (tests are named after the rule they check). If the behaviour changed and no test covers the new behaviour, write the test now. If a property in SimulationEngineProperties is affected, re-read its generator constraints. Never loosen property 10's restriction or turn the multi-stage monotonicity report into an assertion.\n4. Run from backend/: ./mvnw -q test -Dtest='com/realitycheck/simulation/engine/**' -Dsurefire.failIfNoSpecifiedTests=false\n5. Version: if the change can alter the output for any valid input (not a pure refactor), SimulationEngine.ALGORITHM_VERSION must be bumped in the same change and the commit message must say so. Say explicitly which case this is and why. If simulation-rules.md itself needs to change, do not edit it silently: describe the required change and ask.\n\nReport: rules touched, tests covering them, test result, and the ALGORITHM_VERSION decision."
+  }
+}

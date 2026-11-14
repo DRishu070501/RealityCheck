@@ -1,0 +1,11 @@
+{
+  "name": "Backend module tests",
+  "description": "After a Java source or test file is saved, run only the unit tests of the module that was touched.",
+  "enabled": true,
+  "trigger": "fileSave",
+  "matcher": "backend/src/{main,test}/java/com/realitycheck/**/*.java",
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A Java file under backend/ was saved. Run only the unit tests for the module it belongs to, not the full suite.\n\n1. Take the first package segment after com/realitycheck/ in the saved file's path (common, factory, workflow, resource, production, scenario, simulation, ai, demo). Call it <module>.\n2. From the backend/ directory run: ./mvnw -q test -Dtest='com/realitycheck/<module>/**/*Test,com/realitycheck/<module>/**/*Properties' -Dsurefire.failIfNoSpecifiedTests=false\n   (on Windows use mvnw.cmd). If the file is under simulation/engine/, narrow the pattern to com/realitycheck/simulation/engine/**.\n3. Do not run ./mvnw verify and do not run *IT classes: they need Docker and are run deliberately, not on save.\n4. If the tests pass, reply with one line: the module and the number of tests run. If they fail, show the failing test names and assertion messages, identify the cause in the code that was just changed, and propose the fix. Do not weaken or delete a test to make it pass.\n5. If the saved file is a new class containing business logic and no test in the module refers to it, say so and name the test class that should be added (see .kiro/steering/tech.md, Testing expectations)."
+  }
+}

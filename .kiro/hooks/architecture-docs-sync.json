@@ -1,0 +1,11 @@
+{
+  "name": "Architecture docs sync",
+  "description": "After a Flyway migration, the build file, the Compose file or the architecture tests are saved, bring the architecture documentation up to date.",
+  "enabled": true,
+  "trigger": "fileSave",
+  "matcher": "{backend/src/main/resources/db/migration/*.sql,backend/pom.xml,docker-compose.yml,backend/src/test/java/com/realitycheck/**/*ArchitectureTest.java}",
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A file that defines the system's structure was saved (a Flyway migration, pom.xml, docker-compose.yml, or an ArchUnit test). Check whether documentation now disagrees with the code and fix only what is actually out of date.\n\n- Migration: compare the tables, columns, constraints and indexes it creates or alters with the 'Data model' section of docs/architecture.md and with the data model in the owning spec's design.md under .kiro/specs/. Update both to match the migration if the change was intended; if the migration contradicts the spec without an obvious reason, report it instead. Confirm the file is a new V<n>__<snake_case>.sql and that no previously applied migration was edited (check git status / git diff for modified migration files); an edited applied migration is an error to report, not to document.\n- pom.xml: if a dependency was added, check it against 'Deliberately not used' in .kiro/steering/tech.md and confirm there is a one-line justification ready for the commit message. Do not copy version numbers into the docs.\n- docker-compose.yml: keep the Deployment section of docs/architecture.md, docs/setup.md and .env.example consistent with service names, ports and environment variables.\n- ArchUnit test: keep the 'Rules enforced by ArchUnit' list and the module dependency table in docs/architecture.md consistent with the rules in code.\n\nThe steering files in .kiro/steering/ are the agreed contract. If one of them is now wrong, do not edit it on your own: state the exact sentence that needs to change and why, and ask for confirmation.\n\nReply with the list of documentation edits made, or one line saying the docs already match."
+  }
+}

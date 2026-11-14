@@ -1,0 +1,11 @@
+{
+  "name": "API contract check",
+  "description": "After a controller or API DTO is saved, check the change against the API conventions and keep docs/api.md consistent.",
+  "enabled": true,
+  "trigger": "fileSave",
+  "matcher": "backend/src/main/java/com/realitycheck/*/api/**/*.java",
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A controller or request/response record under an api package was saved. Review only the saved file and the endpoints it defines.\n\nCheck against .kiro/steering/architecture.md (API conventions) and the design.md of the owning spec in .kiro/specs/:\n- Path, HTTP method, status codes (201 with Location on create, 202 on simulation submit, 404, 409, 422) match the spec.\n- The controller is thin: no repository use, no business logic, no JPA entity in any signature. Types are *Request / *Response records.\n- Every request body is annotated @Valid and its fields carry Bean Validation constraints matching the spec's limits.\n- List endpoints return the standard envelope (items, page, size, totalItems, totalPages), accept factoryId, and cap size at 200.\n- Decimal quantities and money are serialised as strings; timestamps are ISO-8601 UTC; durations are integer seconds with the unit in the field name; result objects carry source ACTUAL or SIMULATED.\n- Errors go through the central problem+json advice; nothing in the controller builds an error body or exposes exception details.\n- OpenAPI annotations (summary and response codes) are present.\n\nThen compare with docs/api.md: if an endpoint, field or status code in the saved file differs from what docs/api.md says, update docs/api.md in the same change. If the saved file adds an endpoint that is not in the owning spec's design.md, stop and report it instead of documenting it: the spec must be updated first.\n\nReport only discrepancies found and edits made. If everything is consistent, say so in one line. Do not start the application to fetch /v3/api-docs unless asked."
+  }
+}

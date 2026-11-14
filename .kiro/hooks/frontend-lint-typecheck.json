@@ -1,0 +1,11 @@
+{
+  "name": "Frontend lint and typecheck",
+  "description": "After a TypeScript source file in the frontend is saved, lint that file and typecheck the project.",
+  "enabled": true,
+  "trigger": "fileSave",
+  "matcher": "frontend/src/**/*.{ts,tsx}",
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A file under frontend/src was saved. From the frontend/ directory:\n\n1. Lint only the saved file: npx eslint <path relative to frontend/>\n2. Typecheck: npx tsc --noEmit -p tsconfig.app.json (use the project's typecheck script from package.json if one exists). TypeScript cannot check a single file in isolation with project settings, so this checks the project; it is incremental and fast.\n3. If a test file sits next to the saved file (same name with .test.ts or .test.tsx, or in the feature's __tests__ folder), run just that test: npx vitest run <test path>. Do not run the whole test suite or the Playwright suite.\n\nFix lint and type errors in the saved file. Do not add eslint-disable comments, @ts-ignore, or 'any' to silence an error (see .kiro/steering/tech.md, Frontend coding standards). Also flag, without auto-fixing: a component calling fetch directly, a hard-coded hex colour, a number rendered in the UI that does not come from an API response and has no 'Demo data' label, or a numeric panel without a SourceTag.\n\nReply with one line if everything is clean."
+  }
+}
