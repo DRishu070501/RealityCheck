@@ -111,7 +111,8 @@ class SystemInfoServiceTest {
             when(buildProperties.getIfAvailable()).thenReturn(new BuildProperties(entries));
         }
         RealityCheckProperties properties =
-                new RealityCheckProperties(new Cors(List.of("http://localhost:5173")), ai);
+                new RealityCheckProperties(new Cors(List.of("http://localhost:5173")), ai,
+                        new RealityCheckProperties.Demo(false, false));
         return new SystemInfoService(dataSource, flyway, Clock.fixed(NOW, ZoneOffset.UTC), properties, buildProperties);
     }
 }

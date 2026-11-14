@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    public record FieldViolation(String field, String message) {
-    }
-
     @ExceptionHandler(ApiException.class)
     ProblemDetail handleApiException(ApiException ex) {
+        if (ex instanceof ValidationException validation) {
+            return validationProblem(validation.errors());
+        }
         return problem(ex.status(), ex.title(), ex.getMessage());
+    }
+
+    /**
+     * Safety net for a uniqueness or foreign-key race that slipped past a service-level check.
+     * The driver message names tables and constraints, so it is logged and not returned.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        return problem(HttpStatus.CONFLICT, "Conflict", "The change conflicts with existing data.");
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

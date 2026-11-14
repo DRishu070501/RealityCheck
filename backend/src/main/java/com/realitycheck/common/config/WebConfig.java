@@ -1,6 +1,7 @@
 package com.realitycheck.common.config;
 
 import java.time.Clock;
+import java.time.Duration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,9 +32,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 
-    /** The one source of "now" for application services. The simulation engine never uses it. */
+    /**
+     * The one source of "now" for application services. The simulation engine never uses it.
+     * Ticks in microseconds, the precision PostgreSQL stores, so a value read back equals the
+     * value written.
+     */
     @Bean
     public Clock clock() {
-        return Clock.systemUTC();
+        return Clock.tick(Clock.systemUTC(), Duration.ofNanos(1_000));
     }
 }

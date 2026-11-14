@@ -50,7 +50,8 @@ public class SystemInfoService {
         Database database = readDatabase();
         Migrations migrations = Database.UP.equals(database.status()) ? readMigrations() : new Migrations(0, null);
         Ai ai = new Ai(properties.ai().enabled(), properties.ai().provider());
-        return new SystemInfoResponse(APPLICATION_NAME, version, clock.instant(), database, migrations, ai);
+        return new SystemInfoResponse(APPLICATION_NAME, version, clock.instant(), database, migrations, ai,
+                new SystemInfoResponse.Demo(properties.demo().resetEnabled()));
     }
 
     private Database readDatabase() {

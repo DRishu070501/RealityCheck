@@ -18,6 +18,7 @@ spring:
           time_zone: UTC
           batch_size: 100
         order_inserts: true
+        default_batch_fetch_size: 50
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -63,6 +64,9 @@ realitycheck:
   ai:
     provider: ${AI_PROVIDER:none}
     api-key: ${AI_API_KEY:}
+  demo:
+    seed-on-startup: ${REALITYCHECK_DEMO_SEED:false}
+    reset-enabled: ${REALITYCHECK_DEMO_RESET_ENABLED:false}
 
 ---
 # Used by the Docker deployment. No credential has a fallback here: a missing one stops startup.

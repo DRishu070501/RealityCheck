@@ -5,39 +5,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Milestone 1 acceptance: the application boots against a real PostgreSQL, migrations run,
  * health and system info answer, and the API documentation is served.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
-class ApplicationIT {
-
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine");
-
-    @Autowired
-    private TestRestTemplate rest;
-
-    @Autowired
-    private JdbcTemplate jdbc;
+class ApplicationIT extends IntegrationTest {
 
     @Test
     void healthIsUpAndHidesComponentDetails() {
@@ -134,6 +113,17 @@ class ApplicationIT {
         assertThat(response.getBody().path("status").asInt()).isEqualTo(404);
         assertThat(response.getBody().path("detail").asText()).isEqualTo("No endpoint matches this path.");
         assertThat(response.getBody().has("trace")).isFalse();
+    }
+
+    @Test
+    void demoResetIsOffUnlessConfigured() {
+        assertThat(post("/api/demo/reset", "{}").getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(get("/api/system/info").getBody().path("demo").path("resetEnabled").asBoolean()).isFalse();
+    }
+
+    @Test
+    void nothingIsSeededUnlessConfigured() {
+        assertThat(get("/api/factories").getBody().path("totalItems").asLong()).isZero();
     }
 
     @Test

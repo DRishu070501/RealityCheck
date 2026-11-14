@@ -8,7 +8,12 @@ public record SystemInfoResponse(
         Instant serverTime,
         Database database,
         Migrations migrations,
-        Ai ai) {
+        Ai ai,
+        Demo demo) {
+
+    /** Whether this deployment allows the demonstration data to be reset from the UI. */
+    public record Demo(boolean resetEnabled) {
+    }
 
     /** {@code product} and {@code version} are null when the database cannot be reached. */
     public record Database(String status, String product, String version) {
