@@ -1,0 +1,197 @@
+import { z } from 'zod'
+
+/**
+ * The single place the application talks to the backend. Every response is parsed with a Zod
+ * schema, and every failure surfaces as an {@link ApiError} with a stable `kind`.
+ */
+
+const fieldErrorSchema = z.object({ field: z.string(), message: z.string() })
+
+/** RFC 9457 problem details, as produced by the backend's exception handler. */
+const problemSchema = z.object({
+  type: z.string().optional(),
+  title: z.string().optional(),
+  status: z.number().optional(),
+  detail: z.string().optional(),
+  instance: z.string().optional(),
+  errors: z.array(fieldErrorSchema).optional(),
+})
+
+export type FieldError = z.infer<typeof fieldErrorSchema>
+
+export type ApiErrorKind =
+  /** The request never produced an HTTP response (backend down, DNS, offline). */
+  | 'network'
+  /** The backend answered with a non-2xx status. */
+  | 'http'
+  /** The backend answered 2xx but the body did not match the expected schema. */
+  | 'schema'
+
+export class ApiError extends Error {
+  readonly kind: ApiErrorKind
+  readonly status: number | undefined
+  readonly title: string
+  readonly detail: string | undefined
+  readonly fieldErrors: readonly FieldError[]
+
+  constructor(init: {
+    kind: ApiErrorKind
+    title: string
+    status?: number
+    detail?: string
+    fieldErrors?: readonly FieldError[]
+    cause?: unknown
+  }) {
+    super(init.detail ?? init.title, { cause: init.cause })
+    this.name = 'ApiError'
+    this.kind = init.kind
+    this.title = init.title
+    this.status = init.status
+    this.detail = init.detail
+    this.fieldErrors = init.fieldErrors ?? []
+  }
+}
+
+export interface RequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  body?: unknown
+  headers?: Record<string, string>
+  signal?: AbortSignal
+}
+
+async function readJson(response: Response): Promise<unknown> {
+  const text = await response.text()
+  if (text.trim() === '') return undefined
+  try {
+    return JSON.parse(text) as unknown
+  } catch {
+    return undefined
+  }
+}
+
+const GATEWAY_STATUSES: ReadonlySet<number> = new Set([502, 503, 504])
+
+function toHttpError(response: Response, body: unknown): ApiError {
+  const problem = problemSchema.safeParse(body)
+  const fallbackTitle = response.statusText || `Request failed with status ${response.status}`
+  if (!problem.success) {
+    // A gateway error without a problem body comes from the proxy in front of the backend
+    // (Vite in development, nginx in the container): the backend itself is not answering.
+    if (GATEWAY_STATUSES.has(response.status)) {
+      return new ApiError({
+        kind: 'http',
+        status: response.status,
+        title: 'Backend unavailable',
+        detail: 'The RealityCheck backend is not responding. Check that it is running.',
+      })
+    }
+    return new ApiError({ kind: 'http', status: response.status, title: fallbackTitle })
+  }
+  return new ApiError({
+    kind: 'http',
+    status: response.status,
+    title: problem.data.title ?? fallbackTitle,
+    detail: problem.data.detail,
+    fieldErrors: problem.data.errors,
+  })
+}
+
+/**
+ * Sends a request and parses the JSON response with `schema`.
+ *
+ * @throws ApiError for network failures, non-2xx responses and schema mismatches.
+ *         An aborted request rethrows the original `AbortError` so TanStack Query can ignore it.
+ */
+export async function request<T>(
+  path: string,
+  schema: z.ZodType<T>,
+  options: RequestOptions = {},
+): Promise<T> {
+  const { method = 'GET', body, headers, signal } = options
+
+  let response: Response
+  try {
+    response = await fetch(path, {
+      method,
+      signal,
+      headers: {
+        Accept: 'application/json, application/problem+json',
+        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  } catch (cause) {
+    if (cause instanceof DOMException && cause.name === 'AbortError') throw cause
+    throw new ApiError({
+      kind: 'network',
+      title: 'Backend unreachable',
+      detail: 'The RealityCheck backend did not respond. Check that it is running.',
+      cause,
+    })
+  }
+
+  const payload = await readJson(response)
+
+  if (!response.ok) {
+    throw toHttpError(response, payload)
+  }
+
+  const parsed = schema.safeParse(payload)
+  if (!parsed.success) {
+    throw new ApiError({
+      kind: 'schema',
+      status: response.status,
+      title: 'Unexpected response from the backend',
+      detail: `The response for ${path} did not match the expected format.`,
+      cause: parsed.error,
+    })
+  }
+  return parsed.data
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * System endpoints (Milestone 1)
+ * ------------------------------------------------------------------------------------------- */
+
+export const systemInfoSchema = z.object({
+  application: z.string(),
+  version: z.string(),
+  serverTime: z.iso.datetime({ offset: true }),
+  database: z.object({
+    status: z.string(),
+    product: z.string().nullish(),
+    version: z.string().nullish(),
+  }),
+  migrations: z.object({
+    appliedCount: z.number().int().nonnegative(),
+    currentVersion: z.string().nullish(),
+  }),
+  ai: z.object({
+    enabled: z.boolean(),
+    provider: z.string(),
+  }),
+})
+export type SystemInfo = z.infer<typeof systemInfoSchema>
+
+/** Spring Boot Actuator health. Extra fields (components, groups) are ignored. */
+export const healthSchema = z.object({ status: z.string() })
+export type Health = z.infer<typeof healthSchema>
+
+export const api = {
+  system: {
+    info: (signal?: AbortSignal) => request('/api/system/info', systemInfoSchema, { signal }),
+    /**
+     * Actuator answers 503 with a normal health body when a component is down, so that status
+     * is read as data here rather than thrown.
+     */
+    health: async (signal?: AbortSignal): Promise<Health> => {
+      try {
+        return await request('/actuator/health', healthSchema, { signal })
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 503) return { status: 'DOWN' }
+        throw error
+      }
+    },
+  },
+} as const

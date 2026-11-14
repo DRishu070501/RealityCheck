@@ -1,0 +1,123 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens. Components use the semantic names below (bg-surface, text-muted-foreground,
+ * text-status-ok ...) and never hard-code hex values.
+ *
+ * The product is dark-first. Text/background pairs are chosen for WCAG AA:
+ * foreground and muted-foreground exceed 4.5:1 on background, surface and surface-raised,
+ * and every status colour exceeds 4.5:1 on its own tinted surface.
+ */
+:root {
+  --background: #0a0f1a;
+  --surface: #0f1626;
+  --surface-raised: #141d30;
+  --surface-hover: #1a2540;
+  --border: #212c44;
+  --border-strong: #2f3d5c;
+
+  --foreground: #e6ebf5;
+  --muted-foreground: #9aa7bf;
+  --subtle-foreground: #8391ab;
+
+  --primary: #5b9dff;
+  --primary-foreground: #06101f;
+  --accent: #8f81f7;
+  --accent-foreground: #0b0a1f;
+  --ring: #7fb2ff;
+
+  --status-ok: #41c98b;
+  --status-ok-surface: #0f2a22;
+  --status-warn: #e6b450;
+  --status-warn-surface: #2c2411;
+  --status-error: #f47174;
+  --status-error-surface: #2f1519;
+  --status-info: #6fb1ff;
+  --status-info-surface: #10233f;
+
+  /* Data-source tags: Actual / Simulated / AI interpretation (see product.md). */
+  --source-actual: #41c98b;
+  --source-simulated: #5b9dff;
+  --source-ai: #a79bfa;
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-status-ok: var(--status-ok);
+  --color-status-ok-surface: var(--status-ok-surface);
+  --color-status-warn: var(--status-warn);
+  --color-status-warn-surface: var(--status-warn-surface);
+  --color-status-error: var(--status-error);
+  --color-status-error-surface: var(--status-error-surface);
+  --color-status-info: var(--status-info);
+  --color-status-info-surface: var(--status-info-surface);
+  --color-source-actual: var(--source-actual);
+  --color-source-simulated: var(--source-simulated);
+  --color-source-ai: var(--source-ai);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    color-scheme: dark;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Use on every metric so digits align in columns and do not jitter on refresh. */
+@utility metric {
+  font-variant-numeric: tabular-nums lining-nums;
+}
