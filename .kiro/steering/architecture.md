@@ -66,7 +66,13 @@ summary JSONB), `simulation_stage_result`, `simulation_resource_result`, `simula
   rosters are a non-goal.
 - **Stones and carats are separate quantities** with separate yields. Rates are expressed in stones.
 - **Operational events are append-only.** The table rejects `UPDATE` and `DELETE` with a database trigger.
-  Corrections are new events of type `CORRECTION` that reference the corrected event.
+  Corrections are new events of type `CORRECTION` that reference the corrected event; they replace the
+  output quantities or duration of a completion, or void a start or completion, and cannot move an event in
+  time. Only `STAGE_COMPLETED` carries quantities (the stage's output).
+- **`BatchHistory` is the single definition of a batch's history.** Its pure `effective` and `replay`
+  functions are used to validate a new event, to maintain stored projections, and to reconstruct state at an
+  instant. Never add a second implementation of the batch state machine.
+- **`EventAppendService` is the only writer of events.** It locks the batch row for the duration.
 - **Configuration is captured, not reconstructed.** Work-in-progress at a fork timestamp is rebuilt by
   replaying events. Resource and stage configuration is taken as it is when the snapshot is captured, with
   `resource_availability` windows applied by date. Editing a resource later never changes an existing run
@@ -120,7 +126,8 @@ record before persistence.
 
 Endpoints beyond the original list, added because the flows need them: `PATCH /api/scenarios/{id}`,
 `PUT` and `DELETE /api/scenarios/{id}/changes/{changeId}`, `GET /api/scenarios/{id}/simulations`,
-`GET /api/factories/{id}/state?at=`, `GET /api/resources/{id}`, `POST /api/resources/{id}/availability`,
+`GET /api/factories/{id}/state?at=`, `GET /api/factories/{id}/overview`, `GET /api/timeline/summary`,
+`GET /api/resources/{id}`, `POST /api/resources/{id}/availability`,
 `GET /api/system/info`, `POST /api/demo/reset` (only when
 `realitycheck.demo.reset-enabled=true`).
 

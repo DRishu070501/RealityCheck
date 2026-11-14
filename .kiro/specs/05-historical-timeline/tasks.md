@@ -8,35 +8,46 @@ screen (task 8, detailed in spec 10). Depends on spec 04.
   - Test: `CanonicalHasherTest`.
   - _Requirements: 3.6_
 
-- [ ] 2. Implement `FactoryStateReconstructor`
+- [x] 2. Implement `FactoryStateReconstructor`
   - Records `FactoryState`, `BatchState`, `OrderState`, `StageCounts`; algorithm from design.md reusing `EffectiveEvents` and `BatchProjector`.
   - Test: `FactoryStateReconstructorTest`; jqwik `ReconstructionProperties`.
   - _Requirements: 3.1, 3.2, 3.4, 3.5, 3.6, 3.8, 4.1, 4.2_
 
-- [ ] 3. Expose the state endpoint
+- [x] 3. Expose the state endpoint
   - `GET /api/factories/{id}/state?at=`, default `at` = now.
   - Test: `FactoryStateIT` against seeded history, including the no-writes assertion.
   - _Requirements: 3.1, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 4. Implement the timeline query
+- [x] 4. Implement the timeline query
   - `TimelineService` with filters, enrichment via joins, effective values, `includeVoided`, `order`.
   - Test: `TimelineApiIT` filter matrix and pagination.
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 5. Implement the timeline summary
+- [x] 5. Implement the timeline summary
   - `GET /api/timeline/summary` with `HOUR` and `DAY` buckets in the factory zone.
   - Test: `TimelineApiIT` bucket boundaries at local midnight; empty factory.
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 6. Implement the overview endpoint
+- [x] 6. Implement the overview endpoint
   - `FactoryOverviewService` and `GET /api/factories/{id}/overview`.
   - Test: `FactoryStateIT` compares each figure with a direct SQL count.
   - _Requirements: 5.1, 5.2_
 
-- [ ] 7. Document the endpoints
+- [x] 7. Document the endpoints
   - OpenAPI annotations; Timeline and State sections in `docs/api.md`, including what "effective" means.
   - _Requirements: 1.3, 3.8_
 
 - [ ] 8. Build the timeline screen (M6)
   - Implemented under spec 10, task "Operational Timeline". The fork flow shows the reconstructed state and then calls `POST /api/scenarios`.
   - _Requirements: 6.1, 6.2, 6.3_
+
+## Implementation notes (Milestone 3)
+
+- Task 1 (`CanonicalHasher`) and `baseStateHash` are deferred to Milestone 5, where scenario comparison
+  consumes them. The state response has no hash yet.
+- Reconstruction is `FactoryStateService.stateAt`, reusing `BatchHistory.replay`. The state response reports
+  resources with `baseCapacity`, `capacity` at the instant and `unitsInUse`, instead of a separate
+  `unavailable` list.
+- The timeline response uses `corrected`, `voided` and `original` rather than a nullable `original` alone.
+- The jqwik `ReconstructionProperties` were not written as such; prefix validity and forward-only movement
+  are covered by `BatchHistoryProperties`, and reconstruction by `ProductionApiIT` and `DemoIT`.

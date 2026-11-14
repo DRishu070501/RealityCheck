@@ -19,17 +19,18 @@ Two principles hold throughout:
 |---|---|---|
 | 1. Foundation | Backend, frontend shell, PostgreSQL, Flyway, OpenAPI, health checks, Docker Compose, Kiro steering and specs | **Done** |
 | 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | **Done** |
-| 3. Production operations | Orders, batches, append-only events, timeline | Not started |
+| 3. Production operations | Orders, batches, append-only events, timeline | **Done** |
 | 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | Not started |
 | 5. Scenario branching | State reconstruction, scenarios, changes, comparison | Not started |
-| 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Settings |
+| 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Orders, Timeline, Settings |
 | 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
 | 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
 
 What runs today: a seeded demonstration factory, Surat Diamond Works, with its working calendar, fourteen
-resource pools and an eight-stage workflow. You can browse the factory, explore the workflow and its
-resource requirements, edit pools, record downtime and reset the demonstration data. Orders, the event
-timeline, simulation, scenarios and AI are not built yet; their screens are placeholders that say which
+resource pools, an eight-stage workflow, and two to three weeks of production history ending now. You can
+browse orders and their batches, follow the operational timeline, inspect the factory as it stood at any
+past moment, see current queues and units in use, edit pools, record downtime and reset the demonstration
+data. Simulation, scenarios and AI are not built yet; their screens are placeholders that say which
 milestone delivers them.
 
 ## Run it with Docker

@@ -110,7 +110,7 @@ list endpoints below may be omitted while exactly one factory exists; with none 
 - A shift must end after it starts and stay within one day. Shifts on the same day must not overlap. Breaks
   must lie inside their shift and must not overlap.
 - `weeklyWorkingSeconds` is shift time minus breaks.
-- `counts` gains a key as each module is built (`orders` arrives in Milestone 3).
+- `counts` has one key per kind of thing: `orders`, `resources`, `workflows`.
 - `demo` is true only for the seeded demonstration factory and cannot be set through the API.
 
 ### Resources
@@ -151,7 +151,8 @@ the pool.
 
 **Availability.** A window is the half-open period `[startsAt, endsAt)` with a non-zero `capacityDelta`;
 negative means units unavailable. Windows are never edited or deleted: counter a mistake with the opposite
-delta over the same period.
+delta over the same period. A window that removes units also appends a `RESOURCE_UNAVAILABLE` event to the
+operational history, in the same transaction.
 
 ```json
 {
@@ -210,8 +211,142 @@ Decimals are strings so that no precision is lost in JavaScript; requests accept
 codes are upper-case letters, digits and underscores, unique in the workflow. Each requirement must name an
 active pool of the same factory, once per stage.
 
-Queue length, utilization and average duration per stage are not part of this resource. They come from
-recorded history (Milestone 3) and from simulation runs (Milestone 4).
+Queue length per stage comes from `GET /api/factories/{id}/state`. Utilization and average duration come
+from simulation runs (Milestone 4).
+
+### Orders
+
+An order is the customer commitment; its **batches** are the parcels that move through the workflow. Stone
+count and carat weight are separate quantities and are never combined.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/orders?factoryId=&status=&delayed=` | List, earliest due first; orders without a due date last |
+| `GET /api/orders/{id}` | `{ order, batches, events }`: the order, its batches, its full event history |
+| `POST /api/orders` | Place an order; each batch is queued at the first stage |
+
+```json
+{ "factoryId": "...", "orderNumber": "SDW-0048", "customerRef": "Demo buyer A", "priority": 3,
+  "placedAt": "2026-11-14T04:00:00Z", "dueAt": "2026-11-22T04:00:00Z",
+  "batches": [ { "stoneCount": 90, "roughCarats": "117.0000" } ] }
+```
+
+`priority` is 1 to 5; 5 is the most urgent. `placedAt` defaults to now and may not be in the future; `dueAt`
+is optional and must be after `placedAt`. The factory must have an active workflow (422 otherwise).
+
+```json
+{ "id": "...", "factoryId": "...", "orderNumber": "SDW-0048", "customerRef": "Demo buyer A",
+  "priority": 3, "status": "IN_PROGRESS", "placedAt": "...", "dueAt": "...", "completedAt": null,
+  "delayed": false, "batchCount": 1, "batchesCompleted": 0,
+  "totalStones": 90, "totalRoughCarats": "117.0000", "source": "ACTUAL" }
+```
+
+| Field | Meaning |
+|---|---|
+| `status` | `PENDING` until a batch starts; `IN_PROGRESS` until every batch has finished the last stage; then `COMPLETED`; `DISPATCHED` once handed over |
+| `delayed` | Finished after `dueAt`, or unfinished and past `dueAt` now |
+| `totalStones`, `totalRoughCarats` | What the order started with, summed over batches |
+
+A batch reports `stoneCount` and `roughCarats` (what it started with), `currentStones` and `currentCarats`
+(the output of its last completed stage), its current stage, and `QUEUED`, `IN_PROGRESS` or `COMPLETED`.
+
+### Events
+
+The operational history is **append-only**. A database trigger rejects any `UPDATE` or `DELETE` on
+`operational_event`; a mistake is fixed by appending a `CORRECTION`.
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/events` | Record a stage start, a stage completion, a dispatch, or a correction |
+| `GET /api/events` | The raw log, corrections included, oldest first |
+
+Every event has `occurredAt` (when it happened) and `recordedAt` (when it was written). `occurredAt`
+defaults to now and may not be in the future.
+
+| `eventType` | Send | Effect |
+|---|---|---|
+| `STAGE_STARTED` | `batchId` | The batch moves from queued to in progress at its current stage |
+| `STAGE_COMPLETED` | `batchId`, `stoneQuantity`, `caratQuantity`, optional `durationSeconds` | Records what left the stage. The system then records `STAGE_QUEUED` at the next stage, or finishes the batch; when the last batch finishes it records `ORDER_COMPLETED`. |
+| `ORDER_DISPATCHED` | `orderId` | A completed order is handed over |
+| `CORRECTION` | `correctsEventId`, and either `voids: true` or replacement `stoneQuantity` / `caratQuantity` / `durationSeconds` | See below |
+
+`ORDER_CREATED`, `STAGE_QUEUED`, `ORDER_COMPLETED` and `RESOURCE_UNAVAILABLE` are recorded by the system and
+answer 400 if posted. `stageId` is optional; when sent it must be the batch's current stage.
+
+**Batch state machine.** Anything else answers 422 with the reason.
+
+| Batch is | Accepts | Becomes |
+|---|---|---|
+| queued at stage *s* | `STAGE_STARTED` | in progress at *s* |
+| in progress at *s* | `STAGE_COMPLETED` | queued at *s*+1, or completed if *s* is the last stage |
+| completed | nothing | |
+
+An event may not occur before the batch's previous event, and a stage may not put out more stones or
+carats than entered it. Concurrent events for one batch are serialised by a row lock: of two simultaneous
+starts, exactly one succeeds.
+
+**Corrections.** A correction either replaces the output or duration of a `STAGE_COMPLETED`, or voids a
+`STAGE_STARTED` or `STAGE_COMPLETED`. The original row is never changed. After a correction the batch's
+whole history must still be possible, otherwise it is refused: an output cannot be corrected below what a
+later stage already produced, a step that later work depends on cannot be voided, and a finished batch
+cannot be reopened. Voiding a completion also voids the queue event that followed from it. Corrections
+cannot change when an event occurred.
+
+In responses, `stoneQuantity`, `caratQuantity` and `durationSeconds` are the **effective** values (the
+latest correction's, if any). `corrected: true` comes with `original`, the values first recorded.
+`voided: true` marks an event a correction cancelled.
+
+### Timeline
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/timeline` | What happened, as now known: corrections applied, voided events left out, newest first |
+| `GET /api/timeline/summary?bucket=DAY` | Event counts per day or `HOUR` of factory-local time |
+
+Both `/api/events` and `/api/timeline` accept `factoryId`, `orderId`, `batchId`, `stageId`, `type`, `from`,
+`to` (inclusive instants), `order` (`asc` or `desc`), `page` and `size`. The timeline also takes
+`includeVoided=true`. The timeline never lists `CORRECTION` rows; it shows their effect on the events they
+target. Each item carries `orderNumber`, `batchNumber`, `stageCode`, `stageName` and `resourceName` where
+they apply, and `source: "ACTUAL"`.
+
+Summary buckets start at local midnight (or the local hour) in the factory's time zone and are returned as
+UTC instants; buckets with no events are absent.
+
+### Factory state and overview
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/factories/{id}/state?at=` | The factory as it stood at an instant (default now), rebuilt from the event history |
+| `GET /api/factories/{id}/overview` | Order counts, stage queues, units in use, 14 days of output and recent events, as of now |
+
+`state` replays every batch's events up to `at`. It is read-only and writes nothing. Corrections apply
+whenever they were recorded, so the answer is what is **now known** about that moment. Before the first
+event the state is empty.
+
+```json
+{ "factoryId": "...", "at": "2026-11-10T08:00:00Z", "source": "ACTUAL",
+  "orders": { "PENDING": 0, "IN_PROGRESS": 16, "COMPLETED": 6, "DISPATCHED": 14 },
+  "stages": [ { "stageId": "...", "code": "POLISHING", "name": "Polishing", "sequence": 6,
+                "queued": 4, "inProgress": 6, "completed": 31 } ],
+  "batches": [ { "batchId": "...", "orderId": "...", "orderNumber": "SDW-0031", "batchNumber": 1, "priority": 3,
+                 "status": "QUEUED", "stageId": "...", "stageCode": "POLISHING", "stageSequence": 6,
+                 "inputStones": "88.0000", "inputCarats": "63.1120",
+                 "waitingSince": "2026-11-10T05:12:40Z", "startedAt": null, "completedAt": null } ],
+  "resources": [ { "resourceId": "...", "name": "Polishing wheels", "kind": "MACHINE",
+                   "baseCapacity": 6, "capacity": 6, "unitsInUse": 6 } ] }
+```
+
+| Field | Meaning |
+|---|---|
+| `stages[].queued`, `inProgress`, `completed` | Batches waiting at, being worked at, and already through the stage |
+| `batches[].inputStones`, `inputCarats` | What the batch holds on entering its current stage; its final output once completed |
+| `resources[].capacity` | Units available at `at`, after availability windows; `baseCapacity` is the configured number |
+| `resources[].unitsInUse` | Units held by batches in progress at `at` |
+
+`overview` adds `orders` (`total`, `active`, `pending`, `inProgress`, `completed`, `dispatched`, `delayed`),
+`machines` and `employees` (`inUse`, `capacity`: a snapshot of this instant, not utilization over time),
+`dailyOutput` (batches, stones and carats that finished the last stage per factory-local day, oldest first)
+and `recentEvents` (the ten newest timeline items).
 
 ### Demo
 
@@ -239,8 +374,6 @@ Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows whe
 
 | Group | Endpoints | Milestone |
 |---|---|---|
-| Factory state | `GET /api/factories/{id}/state?at=` | 5 |
-| Production | `GET/POST /api/orders`, `GET /api/orders/{id}`, `GET/POST /api/events`, `GET /api/timeline` | 3 |
 | Scenarios | `GET/POST /api/scenarios`, `GET/PATCH /api/scenarios/{id}`, `POST /api/scenarios/{id}/changes`, `PUT/DELETE /api/scenarios/{id}/changes/{changeId}` | 5 |
 | Simulation | `POST /api/scenarios/{id}/simulate`, `GET /api/scenarios/{id}/simulations`, `GET /api/simulations/{runId}`, `.../results`, `.../stages` | 4, 5 |
 | Comparison | `POST /api/simulations/compare`, `GET /api/scenarios/{id}/comparisons` | 5 |

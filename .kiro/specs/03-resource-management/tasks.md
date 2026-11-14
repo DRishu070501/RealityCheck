@@ -34,7 +34,7 @@ event store and state reconstruction. Depends on spec 01.
   - Test: `ResourceApiIT` for window creation, range query, timeline in response.
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 7. Wire events and live usage (M3)
+- [x] 7. Wire events and live usage (M3)
   - `production` implements `ResourceEventSink` (appends `RESOURCE_UNAVAILABLE`) and `ResourceUsageProvider`; `ResourceResponse` gains `unitsInUse`.
   - Test: `ResourceApiIT` asserts one event per negative window in the same transaction (roll back both on failure), and `unitsInUse` for a seeded in-progress batch.
   - _Requirements: 3.5, 4.1, 4.2_
@@ -58,3 +58,8 @@ event store and state reconstruction. Depends on spec 01.
   Milestone 3, together with their implementations, instead of as no-op placeholders now.
 - The ArchUnit rule on `*Reader` return types was not added; `ResourceReader` returns records only.
 - Optimistic locking is tested with a stale version, not with two concurrent requests.
+
+## Implementation notes (Milestone 3)
+
+- Task 7: a negative availability window appends one `RESOURCE_UNAVAILABLE` event in the same transaction.
+  Units in use are exposed through the factory state and overview endpoints, not on `ResourceResponse`.

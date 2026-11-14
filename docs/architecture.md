@@ -5,7 +5,7 @@ in `.kiro/steering/` (`architecture.md` for module boundaries and API convention
 the engine contract). This page is the narrative: the shape of the system, the decisions that are not
 obvious, and what was traded away.
 
-Status: Milestones 1 and 2 are built. Sections describing later milestones are the agreed design, not a description
+Status: Milestones 1 to 3 are built. Sections describing later milestones are the agreed design, not a description
 of existing code; each says so.
 
 ## System shape
@@ -40,7 +40,7 @@ Everything a user sees is one of:
 The architecture exists to keep these apart. Dependencies point one way: `ai` reads `simulation` results;
 `simulation` cannot import `ai`; the engine cannot import anything.
 
-## What exists today (Milestones 1 and 2)
+## What exists today (Milestones 1 to 3)
 
 - `common.config`: typed settings (`RealityCheckProperties`), CORS allow-list, OpenAPI metadata, the
   application `Clock`.
@@ -60,6 +60,24 @@ The architecture exists to keep these apart. Dependencies point one way: `ai` re
 - `workflow`: workflows with ordered stages and per-slot requirements; one active workflow per factory,
   enforced by a partial unique index as well as the service.
 - `demo`: the deterministic Surat Diamond Works seed and its guarded reset.
+- `production`: orders, batches and the operational event log, with the timeline, point-in-time state and
+  dashboard overview read from it.
+
+**One function defines a batch's history.** `BatchHistory` is pure: `effective` applies corrections and
+`replay` walks the result through the state machine, returning where the batch stands or the reason the
+history is impossible. That one function is used three ways: to accept or refuse a new event (replay the
+history with the event added), to maintain the stored position of a batch, and to reconstruct the factory
+at a past instant (replay the events up to then). Validation, projection and reconstruction therefore
+cannot drift apart, and corrections need no special cases: a correction is accepted exactly when the
+history with it applied still replays.
+
+**History cannot be rewritten.** `operational_event` has a trigger that rejects `UPDATE` and `DELETE`, the
+entity has no setters and no updatable column, and corrections are new rows. Order status and batch
+position are stored projections for fast reads; an integration test checks they equal a replay.
+
+**Events are written in one place.** `EventAppendService` locks the batch row, validates, appends the event
+with those that follow from it (the next queue entry, order completion), and updates the projections in one
+transaction. Two simultaneous starts of one batch yield exactly one success.
 
 Two inversions keep the module dependencies pointing one way. `factory` shows counts of things owned by
 other modules through `FactoryCountProvider`, which those modules implement. `resource` learns which stages
@@ -138,6 +156,9 @@ application is complete without AI.
 | Processing time divided by parallel slots | One slot per job | Avoids conflating elapsed time with resource-hours; batch splitting is a later extension. |
 | Reconstruct full factory state from history | Replay events for work in progress; snapshot configuration per run | Reproducibility without temporal versioning of every table. |
 | Seed data | Application seeder with a guarded reset endpoint, not a Flyway migration | Migrations are permanent; demo data must be resettable. |
+| Fixed seed dates | History is laid out relative to the seeding instant | A demonstration factory whose last activity was months ago has no meaningful "now": every open order would be late. It is still deterministic for a given instant. |
+| Events carry input quantities on queue and start | Only `STAGE_COMPLETED` carries quantities (its output) | One place for each number, so a correction changes one value and everything downstream follows from the replay. |
+| Corrections may change any field | Corrections replace quantities or duration, or void a step; they cannot move an event in time | Keeps event order a property of the stored rows, so ordering and paging stay in SQL. |
 
 Added because the flows need them: a factory time zone and currency, calendar tables, a batch reference on
 events, a `CORRECTION` event type, per-resource result rows, an input hash and idempotency key on runs, and
