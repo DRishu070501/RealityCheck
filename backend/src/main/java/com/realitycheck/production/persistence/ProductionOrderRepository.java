@@ -24,6 +24,10 @@ public interface ProductionOrderRepository
     List<ProductionOrder> findByFactoryIdAndPlacedAtLessThanEqualOrderByPlacedAtAscIdAsc(UUID factoryId,
             Instant at);
 
+    /** Orders placed in {@code (after, until]}, in placement order. */
+    List<ProductionOrder> findByFactoryIdAndPlacedAtGreaterThanAndPlacedAtLessThanEqualOrderByPlacedAtAscIdAsc(
+            UUID factoryId, Instant after, Instant until);
+
     /** Serialises concurrent changes to one order's status. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from ProductionOrder o where o.id = :id")
