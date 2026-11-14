@@ -36,7 +36,8 @@ Every error is an RFC 9457 problem document with content type `application/probl
 }
 ```
 
-`errors` is present only for validation failures and is sorted by field. Responses never contain stack
+`errors` is present only for validation failures and is sorted by field. A 409 caused by an out-of-date
+`version` carries `"code": "STALE_VERSION"`, so a client can offer to reload without reading the message. Responses never contain stack
 traces, exception class names or database messages.
 
 | Status | Meaning |

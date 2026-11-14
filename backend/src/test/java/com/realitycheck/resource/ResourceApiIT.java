@@ -113,7 +113,7 @@ class ResourceApiIT extends IntegrationTest {
         ResponseEntity<JsonNode> stale = put("/api/resources/" + id, body.formatted(9));
 
         assertThat(stale.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(stale.getBody().path("detail").asText()).contains("Reload");
+        assertThat(stale.getBody().path("code").asText()).isEqualTo("STALE_VERSION");
         assertThat(get("/api/resources/" + id).getBody().path("capacity").asInt()).isEqualTo(7);
     }
 

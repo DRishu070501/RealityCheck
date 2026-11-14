@@ -60,6 +60,7 @@ class GlobalExceptionHandlerTest {
         mvc.perform(get("/test/stale"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.code").value("STALE_VERSION"))
                 .andExpect(content().string(not(containsString("secret_table"))));
     }
 

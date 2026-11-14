@@ -31,6 +31,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /** Value of the {@code code} property on a 409 caused by an out-of-date {@code version}. */
+    public static final String STALE_VERSION = "STALE_VERSION";
+
     @ExceptionHandler(ApiException.class)
     ProblemDetail handleApiException(ApiException ex) {
         if (ex instanceof ValidationException validation) {
@@ -65,8 +68,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     ProblemDetail handleOptimisticLock(OptimisticLockingFailureException ex) {
-        return problem(HttpStatus.CONFLICT, "Conflict",
+        ProblemDetail body = problem(HttpStatus.CONFLICT, "Conflict",
                 "The record was changed by someone else. Reload it and try again.");
+        // Lets a client offer "reload" without matching on the wording of the message.
+        body.setProperty("code", STALE_VERSION);
+        return body;
     }
 
     @ExceptionHandler(Exception.class)
