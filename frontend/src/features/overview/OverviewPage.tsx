@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FactorySummary } from '@/features/overview/FactorySummary'
+import { OperationsSummary } from '@/features/overview/OperationsSummary'
 import { api } from '@/lib/api'
 import { formatDateTime } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
@@ -33,9 +34,9 @@ function RowSkeleton({ label }: { label: string }) {
 }
 
 /**
- * Overview: what is configured for the factory, and the live status of the backend, database,
- * migrations and AI layer. Operational and simulated metrics join it as later milestones provide
- * them; nothing here is sample data.
+ * Overview: what is configured for the factory, what its recorded history says about the
+ * present, and the live status of the backend, database, migrations and AI layer. Simulated
+ * metrics join it when the engine exists; nothing here is sample data.
  */
 export function OverviewPage() {
   const health = useQuery({
@@ -58,7 +59,7 @@ export function OverviewPage() {
     <>
       <PageHeader
         title="Overview"
-        description="The configured factory and the live status of the RealityCheck platform."
+        description="The factory as configured, what its recorded history says about the present, and the status of the platform."
         actions={
           <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
             <RotateCw aria-hidden="true" className={refreshing ? 'animate-spin' : undefined} />
@@ -69,6 +70,7 @@ export function OverviewPage() {
 
       <div className="flex flex-col gap-6">
         <FactorySummary />
+        <OperationsSummary />
 
         <Card aria-labelledby="system-status-title">
           <CardHeader>
@@ -155,7 +157,7 @@ export function OverviewPage() {
         <Card aria-labelledby="next-title">
           <CardHeader>
             <div>
-              <CardTitle id="next-title">What comes next</CardTitle>
+              <CardTitle id="next-title">Not shown yet</CardTitle>
               <CardDescription>Roadmap notes, not data.</CardDescription>
             </div>
             <Button asChild variant="link" size="sm" className="px-0">
@@ -166,14 +168,11 @@ export function OverviewPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground marker:text-subtle-foreground">
-              <li>Milestone 3 adds production orders and the operational event timeline.</li>
-              <li>Milestones 4 and 5 add the deterministic simulation engine and scenario branching.</li>
-              <li>
-                Order counts, throughput, utilization and bottleneck indicators will be shown on this page only when
-                they can be read from recorded or simulated data.
-              </li>
-            </ul>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Throughput and utilization over time, and which stage is the bottleneck, are results of a simulation run.
+              The simulation engine and scenario branching arrive in Milestones 4 and 5; until then those figures are
+              left out rather than estimated.
+            </p>
           </CardContent>
         </Card>
       </div>

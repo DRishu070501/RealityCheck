@@ -17,7 +17,7 @@ import { EditResourceDialog } from '@/features/resources/EditResourceDialog'
 import { api } from '@/lib/api'
 import { formatInteger, formatMoney, humanizeCode } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Factory, Resource, ResourceKind } from '@/lib/schemas'
+import type { Factory, Resource, ResourceKind, ResourceState } from '@/lib/schemas'
 import { cn } from '@/lib/utils'
 
 type KindFilter = 'ALL' | ResourceKind
@@ -41,27 +41,34 @@ function PoolTable({
   title,
   pools,
   currencyCode,
+  usage,
   onOpen,
 }: {
   title: string
   pools: readonly Resource[]
   currencyCode: string
+  /** Units in use and available right now, by pool id; null while unknown. */
+  usage: ReadonlyMap<string, ResourceState> | null
   onOpen: (action: Action, resource: Resource) => void
 }) {
   return (
-    <Table aria-label={title} className="min-w-[56rem] table-fixed">
+    <Table aria-label={title} className="min-w-[64rem] table-fixed">
       <colgroup>
-        <col className="w-[23%]" />
-        <col className="w-[10%]" />
-        <col className="w-[16%]" />
+        <col className="w-[20%]" />
         <col className="w-[9%]" />
-        <col className="w-[23%]" />
+        <col className="w-[13%]" />
+        <col className="w-[14%]" />
+        <col className="w-[8%]" />
         <col className="w-[19%]" />
+        <col className="w-[17%]" />
       </colgroup>
       <thead>
         <tr>
           <TableHead>Pool</TableHead>
           <TableHead className="text-right">Capacity</TableHead>
+          <TableHead className="text-right">
+            In use now <span className="font-normal text-source-actual">(actual)</span>
+          </TableHead>
           <TableHead className="text-right">Hourly cost per unit</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Required by</TableHead>
@@ -71,13 +78,27 @@ function PoolTable({
         </tr>
       </thead>
       <tbody>
-        {pools.map((pool) => (
+        {pools.map((pool) => {
+          const now = usage?.get(pool.id)
+          return (
           <TableRow key={pool.id}>
             <TableCell>
               <span className="block font-medium text-foreground">{pool.name}</span>
               <span className="block text-xs text-subtle-foreground">{humanizeCode(pool.category)}</span>
             </TableCell>
             <TableCell className="metric text-right whitespace-nowrap">{formatInteger(pool.capacity)} units</TableCell>
+            <TableCell className="metric text-right whitespace-nowrap">
+              {now ? (
+                <>
+                  {formatInteger(now.unitsInUse)} of {formatInteger(now.capacity)}
+                  {now.capacity !== pool.capacity ? (
+                    <span className="block text-xs text-subtle-foreground">available now</span>
+                  ) : null}
+                </>
+              ) : (
+                <span className="text-subtle-foreground">—</span>
+              )}
+            </TableCell>
             <TableCell className="metric text-right whitespace-nowrap">
               {formatMoney(pool.hourlyCost, currencyCode)}
             </TableCell>
@@ -129,7 +150,8 @@ function PoolTable({
               </div>
             </TableCell>
           </TableRow>
-        ))}
+          )
+        })}
       </tbody>
     </Table>
   )
@@ -144,6 +166,13 @@ function ResourceManager({ factory }: { factory: Factory }) {
     queryKey: queryKeys.resources.list(factory.id, kind),
     queryFn: ({ signal }) => api.resources.list(factory.id, kind, signal),
   })
+
+  // Units in use right now. The page works without it, so its failure only hides the column values.
+  const state = useQuery({
+    queryKey: queryKeys.factories.state(factory.id, 'now'),
+    queryFn: ({ signal }) => api.factories.state(factory.id, undefined, signal),
+  })
+  const usage = state.data ? new Map(state.data.resources.map((pool) => [pool.resourceId, pool])) : null
 
   const openAction = ACTIONS.find((action) => searchParams.has(action))
   const openId = openAction ? searchParams.get(openAction) : null
@@ -181,6 +210,7 @@ function ResourceManager({ factory }: { factory: Factory }) {
         <div className="flex flex-wrap items-center gap-2">
           {factory.demo ? <DemoTag /> : null}
           <SourceTag />
+          {usage ? <SourceTag source="Actual" /> : null}
         </div>
       </div>
 
@@ -217,15 +247,22 @@ function ResourceManager({ factory }: { factory: Factory }) {
                   {formatInteger(pools.length)} {pools.length === 1 ? 'pool' : 'pools'}, {formatInteger(units)} units
                 </p>
               </CardHeader>
-              <PoolTable title={group.title} pools={pools} currencyCode={factory.currencyCode} onOpen={open} />
+              <PoolTable
+                title={group.title}
+                pools={pools}
+                currencyCode={factory.currencyCode}
+                usage={usage}
+                onOpen={open}
+              />
             </Card>
           )
         })
       )}
 
       <p className="text-xs text-subtle-foreground">
-        Capacity and cost are configuration. Units in use and utilization arrive with production tracking and
-        simulation, and are not shown until they can be read from recorded or simulated data.
+        Capacity and cost are configuration. “In use now” is recorded history: units held by batches being worked on
+        at this instant, out of the units available now. Utilization over time comes from simulation runs and is not
+        shown until it can be read from simulated data.
       </p>
 
       {openAction === 'edit' && openResource ? (

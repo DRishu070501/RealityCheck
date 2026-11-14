@@ -4,14 +4,22 @@ import {
   availabilityWindowSchema,
   capacityTimelineSchema,
   demoResetSchema,
+  eventSchema,
+  factoryOverviewSchema,
   factorySchema,
+  factoryStateSchema,
   factorySummarySchema,
+  orderDetailSchema,
+  orderSchema,
   pageOf,
   resourceSchema,
   stageSchema,
+  timelineSummarySchema,
   workflowSchema,
   workflowSummarySchema,
   type CreateAvailabilityInput,
+  type EventType,
+  type OrderStatus,
   type ResourceKind,
   type UpdateResourceInput,
 } from '@/lib/schemas'
@@ -205,7 +213,7 @@ export type Health = z.infer<typeof healthSchema>
 /** Largest page the backend serves; configuration lists are far smaller, so one page is all of it. */
 const ALL = 200
 
-function query(params: Record<string, string | number | undefined>): string {
+function query(params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined) search.set(key, String(value))
@@ -218,11 +226,56 @@ const factoryPageSchema = pageOf(factorySummarySchema)
 const workflowPageSchema = pageOf(workflowSummarySchema)
 const stagePageSchema = pageOf(stageSchema)
 const resourcePageSchema = pageOf(resourceSchema)
+const orderPageSchema = pageOf(orderSchema)
+const eventPageSchema = pageOf(eventSchema)
+
+/** Filters of `GET /api/orders`. The backend sorts earliest due first. */
+export interface OrderListParams {
+  status?: OrderStatus
+  /** When set, only orders that are (true) or are not (false) late. */
+  delayed?: boolean
+  page: number
+  size: number
+}
+
+/** Filters of `GET /api/timeline`. `from` and `to` are inclusive ISO-8601 instants. */
+export interface TimelineParams {
+  orderId?: string
+  batchId?: string
+  stageId?: string
+  type?: EventType
+  from?: string
+  to?: string
+  includeVoided?: boolean
+  order: 'asc' | 'desc'
+  page: number
+  size: number
+}
 
 export const api = {
   factories: {
     list: (signal?: AbortSignal) => request(`/api/factories${query({ size: ALL })}`, factoryPageSchema, { signal }),
     get: (id: string, signal?: AbortSignal) => request(`/api/factories/${id}`, factorySchema, { signal }),
+    /** The factory rebuilt from its event history at `at`; now when omitted. */
+    state: (id: string, at?: string, signal?: AbortSignal) =>
+      request(`/api/factories/${id}/state${query({ at })}`, factoryStateSchema, { signal }),
+    overview: (id: string, signal?: AbortSignal) =>
+      request(`/api/factories/${id}/overview`, factoryOverviewSchema, { signal }),
+  },
+  orders: {
+    list: (factoryId: string, params: OrderListParams, signal?: AbortSignal) =>
+      request(`/api/orders${query({ factoryId, ...params })}`, orderPageSchema, { signal }),
+    get: (id: string, signal?: AbortSignal) => request(`/api/orders/${id}`, orderDetailSchema, { signal }),
+    /** Records that a completed order left the factory, now. */
+    dispatch: (orderId: string) =>
+      request('/api/events', eventSchema, { method: 'POST', body: { eventType: 'ORDER_DISPATCHED', orderId } }),
+  },
+  timeline: {
+    /** What happened, as now known: corrections folded in, voided events left out unless asked for. */
+    list: (factoryId: string, params: TimelineParams, signal?: AbortSignal) =>
+      request(`/api/timeline${query({ factoryId, ...params })}`, eventPageSchema, { signal }),
+    summary: (factoryId: string, bucket: 'DAY' | 'HOUR', signal?: AbortSignal) =>
+      request(`/api/timeline/summary${query({ factoryId, bucket })}`, timelineSummarySchema, { signal }),
   },
   workflows: {
     list: (factoryId: string, signal?: AbortSignal) =>

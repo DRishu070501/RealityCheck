@@ -31,7 +31,7 @@ describe('schemas accept what the backend actually sends', () => {
     const factory = factorySchema.parse(fixtures.factory)
     expect(factory.calendar.shifts).toHaveLength(6)
     expect(factory.calendar.weeklyWorkingSeconds).toBe(172_800)
-    expect(factory.counts).toEqual({ resources: 14, workflows: 1 })
+    expect(factory.counts).toEqual({ orders: 47, resources: 14, workflows: 1 })
   })
 
   it('parses workflows and keeps stage decimals as strings', () => {

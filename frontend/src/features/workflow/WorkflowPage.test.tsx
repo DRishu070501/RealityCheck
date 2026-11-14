@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { WorkflowPage } from '@/features/workflow/WorkflowPage'
-import { demoRoutes, emptyPage, fixtures, mockBackend, WORKFLOW_ID } from '@/test/backend'
+import { demoRoutes, emptyPage, FACTORY_ID, fixtures, mockBackend, problem, WORKFLOW_ID } from '@/test/backend'
 import { jsonResponse, renderWithProviders } from '@/test/utils'
 
 afterEach(() => {
@@ -104,9 +104,45 @@ describe('WorkflowPage', () => {
 
     renderWithProviders(<WorkflowPage />)
 
-    expect(await screen.findByText(/Everything on this page is configuration/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/Utilization, average duration and bottleneck evidence come from simulation runs/),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/bottleneck$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/utilization:/i)).not.toBeInTheDocument()
+  })
+
+  it('shows how many batches are queued and in progress at each stage right now, as actual', async () => {
+    mockBackend(demoRoutes())
+
+    renderWithProviders(<WorkflowPage />)
+
+    await screen.findByRole('heading', { name: 'Rough to polished' })
+    const polishing = await within(pipeline()).findByRole('button', { name: /Polishing/ })
+    await within(polishing).findByText('6 queued · 6 in progress')
+    expect(within(pipeline()).getByRole('button', { name: /Rough Intake/ })).toHaveTextContent(
+      '0 queued · 0 in progress',
+    )
+    expect(screen.getAllByText('Actual').length).toBeGreaterThan(0)
+
+    await userEvent.click(polishing)
+
+    const now = screen.getByLabelText('At this stage right now')
+    expect(now).toHaveTextContent('6 batches queued, 6 in progress, 42 through this stage.')
+    expect(within(now).getByText('Actual')).toBeInTheDocument()
+  })
+
+  it('still shows the configuration when the live counts cannot be read', async () => {
+    mockBackend({
+      ...demoRoutes(),
+      [`GET /api/factories/${FACTORY_ID}/state`]: () => problem(500, 'Internal server error', 'Something went wrong.'),
+    })
+
+    renderWithProviders(<WorkflowPage />)
+
+    expect(await screen.findByRole('heading', { name: '1. Rough Intake' })).toBeInTheDocument()
+    expect(within(pipeline()).getAllByRole('button')).toHaveLength(8)
+    expect(screen.queryByText(/queued ·/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('says so when the factory has no workflow', async () => {

@@ -10,6 +10,19 @@ export const queryKeys = {
     all: ['factories'] as const,
     list: ['factories', 'list'] as const,
     detail: (id: string) => ['factories', 'detail', id] as const,
+    /** `at` is an ISO instant, or 'now' for the present. */
+    state: (id: string, at: string) => ['factories', 'state', id, at] as const,
+    overview: (id: string) => ['factories', 'overview', id] as const,
+  },
+  orders: {
+    all: ['orders'] as const,
+    list: (factoryId: string, params: object) => ['orders', 'list', factoryId, params] as const,
+    detail: (id: string) => ['orders', 'detail', id] as const,
+  },
+  timeline: {
+    all: ['timeline'] as const,
+    list: (factoryId: string, params: object) => ['timeline', 'list', factoryId, params] as const,
+    summary: (factoryId: string, bucket: string) => ['timeline', 'summary', factoryId, bucket] as const,
   },
   workflows: {
     all: ['workflows'] as const,

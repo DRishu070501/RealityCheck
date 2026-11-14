@@ -1,15 +1,32 @@
-import { FlaskRound, SlidersHorizontal } from 'lucide-react'
+import { ClipboardCheck, FlaskRound, SlidersHorizontal } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 
+export type DataSource = 'Configuration' | 'Actual'
+
+const SOURCES = {
+  Configuration: {
+    icon: SlidersHorizontal,
+    className: '',
+    title: "These values are the factory's configured settings, not measurements or simulation results.",
+  },
+  Actual: {
+    icon: ClipboardCheck,
+    className: 'border-source-actual/30 text-source-actual',
+    title: 'These values come from recorded operational history: orders and events as they were entered. They are not simulated.',
+  },
+} as const satisfies Record<DataSource, unknown>
+
 /**
- * Says where the figures in a view come from. Milestone 2 shows only configuration; "Actual"
- * (recorded history) and "Simulated" (engine output) join it in later milestones.
+ * Says where the figures in a view come from: "Configuration" (what was set up) or "Actual"
+ * (recorded history). "Simulated" (engine output) and "AI interpretation" join them in later
+ * milestones.
  */
-export function SourceTag({ source = 'Configuration' }: { source?: 'Configuration' }) {
+export function SourceTag({ source = 'Configuration' }: { source?: DataSource }) {
+  const { icon: Icon, className, title } = SOURCES[source]
   return (
-    <Badge variant="neutral" title="These values are the factory's configured settings, not measurements or simulation results.">
-      <SlidersHorizontal aria-hidden="true" />
+    <Badge variant="neutral" className={className} title={title}>
+      <Icon aria-hidden="true" />
       {source}
     </Badge>
   )

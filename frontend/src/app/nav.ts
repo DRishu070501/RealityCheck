@@ -30,25 +30,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/factory', label: 'Factory', icon: Factory },
   { path: '/workflow', label: 'Workflow', icon: Workflow },
   { path: '/resources', label: 'Resources', icon: Boxes },
-  {
-    path: '/orders',
-    label: 'Production Orders',
-    icon: Activity,
-    planned: {
-      milestone: 'Milestone 3',
-      summary: 'Production orders and their batches, with stone counts, carat weights, due dates and current stage.',
-    },
-  },
-  {
-    path: '/timeline',
-    label: 'Operational Timeline',
-    icon: History,
-    planned: {
-      milestone: 'Milestone 3',
-      summary:
-        'The append-only history of operational events, filterable by stage and order, and the starting point for branching a scenario.',
-    },
-  },
+  { path: '/orders', label: 'Production Orders', icon: Activity },
+  { path: '/timeline', label: 'Operational Timeline', icon: History },
   {
     path: '/scenarios',
     label: 'Scenario Lab',

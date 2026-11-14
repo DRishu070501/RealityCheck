@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ResourcesPage } from '@/features/resources/ResourcesPage'
-import { demoRoutes, emptyPage, mockBackend, poolNamed, problem, type Routes } from '@/test/backend'
+import { demoRoutes, emptyPage, FACTORY_ID, mockBackend, poolNamed, problem, type Routes } from '@/test/backend'
 import { jsonResponse, renderWithProviders } from '@/test/utils'
 
 const wheels = poolNamed('Polishing wheels')
@@ -64,9 +64,9 @@ describe('ResourcesPage list', () => {
       .map((cell) => cell.textContent)
     expect(cells[0]).toBe('Polishing wheelsPolishing wheel')
     expect(cells[1]).toBe('6 units')
-    expect(cells[2]).toMatch(/^₹\s?140\.00$/)
-    expect(cells[3]).toBe('Active')
-    expect(cells[4]).toBe('Polishing (1 per slot)')
+    expect(cells[3]).toMatch(/^₹\s?140\.00$/)
+    expect(cells[4]).toBe('Active')
+    expect(cells[5]).toBe('Polishing (1 per slot)')
   })
 
   it('asks the backend for one kind when a filter is chosen', async () => {
@@ -93,11 +93,30 @@ describe('ResourcesPage list', () => {
     expect(await screen.findByText('No resource pools are configured')).toBeInTheDocument()
   })
 
-  it('shows no utilization or in-use figure', async () => {
+  it('shows the units of each pool in use right now, as actual, and no utilization', async () => {
     await renderPage()
 
-    expect(screen.queryByText(/in use:/i)).not.toBeInTheDocument()
+    const machines = screen.getByRole('table', { name: 'Machines' })
+    expect(within(machines).getByRole('columnheader', { name: /In use now/ })).toBeInTheDocument()
+    const scanners = within(machines).getByText('Planning scanners').closest('tr')
+    if (!scanners) throw new Error('No row for Planning scanners')
+    expect(await within(scanners).findByText('1 of 3')).toBeInTheDocument()
+    const polishers = within(screen.getByRole('table', { name: 'Employees' })).getByText('Polishers').closest('tr')
+    expect(polishers).toHaveTextContent('12 of 12')
+    expect(screen.getByText('Actual')).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: /utilization/i })).not.toBeInTheDocument()
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument()
+  })
+
+  it('still lists the pools when the units in use cannot be read', async () => {
+    await renderPage({
+      ...demoRoutes(),
+      [`GET /api/factories/${FACTORY_ID}/state`]: () => problem(500, 'Internal server error', 'Something went wrong.'),
+    })
+
+    expect(poolNames(screen.getByRole('table', { name: 'Machines' }))).toHaveLength(6)
+    expect(screen.queryByText('Actual')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
 

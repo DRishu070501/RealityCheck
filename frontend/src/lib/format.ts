@@ -133,3 +133,94 @@ export function zonedLocalToInstant(local: string, timeZone: string): string | n
   const instant = wallAsUtc - zoneOffsetMs(firstGuess, timeZone)
   return new Date(instant).toISOString().replace('.000Z', 'Z')
 }
+
+/* ---- Dates and quantities for recorded history ----------------------------------------------- */
+
+type ZonedParts = Record<'year' | 'month' | 'day' | 'hour' | 'minute', string>
+
+/** The numeric date-time parts of an instant as seen on a wall clock in `timeZone`. */
+function zonedParts(iso: string, timeZone: string): ZonedParts | null {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).formatToParts(date)
+  const read = (type: Intl.DateTimeFormatPartTypes): string => parts.find((part) => part.type === type)?.value ?? ''
+  return { year: read('year'), month: read('month'), day: read('day'), hour: read('hour'), minute: read('minute') }
+}
+
+/** The local calendar day an instant falls on in `timeZone`, as "YYYY-MM-DD". */
+export function localDayKey(iso: string, timeZone: string): string {
+  const parts = zonedParts(iso, timeZone)
+  return parts ? `${parts.year}-${parts.month}-${parts.day}` : iso
+}
+
+/** An instant as a `datetime-local` value ("2026-01-07T09:00") on a wall clock in `timeZone`. */
+export function instantToZonedLocal(iso: string, timeZone: string): string {
+  const parts = zonedParts(iso, timeZone)
+  return parts ? `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}` : ''
+}
+
+/** The first and last second of a local calendar day ("YYYY-MM-DD") in `timeZone`, as UTC instants. */
+export function localDayRange(day: string, timeZone: string): { from: string; to: string } | null {
+  const from = zonedLocalToInstant(`${day}T00:00:00`, timeZone)
+  const to = zonedLocalToInstant(`${day}T23:59:59`, timeZone)
+  return from !== null && to !== null ? { from, to } : null
+}
+
+/** "14:05" on a wall clock in `timeZone`. */
+export function formatTimeInZone(iso: string, timeZone: string): string {
+  const parts = zonedParts(iso, timeZone)
+  return parts ? `${parts.hour}:${parts.minute}` : iso
+}
+
+/** "14 Nov 2026, 14:05" on a wall clock in `timeZone`: compact, for table cells. */
+export function formatShortDateTimeInZone(iso: string, timeZone: string): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return iso
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(date)
+}
+
+/** "14 Nov 2026": the calendar date of an instant on a wall clock in `timeZone`. */
+export function formatDateInZone(iso: string, timeZone: string): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return iso
+  return new Intl.DateTimeFormat('en-GB', { timeZone, day: 'numeric', month: 'short', year: 'numeric' }).format(date)
+}
+
+/** A local calendar day ("YYYY-MM-DD") as "Sat, 14 Nov 2026", or "14 Nov" when `short`. */
+export function formatDay(day: string, short = false): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day)
+  if (!match) return day
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])))
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    short
+      ? { timeZone: 'UTC', day: 'numeric', month: 'short' }
+      : { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' },
+  ).format(date)
+}
+
+/** "97 stones" from a decimal string. Recorded stones are whole, so a fraction shows only if present. */
+export function formatStones(value: string): string {
+  return `${formatDecimal(value, 4)} ${Number(value) === 1 ? 'stone' : 'stones'}`
+}
+
+/** "66.1 ct" from a decimal string. */
+export function formatCarats(value: string): string {
+  return `${formatDecimal(value, 2)} ct`
+}

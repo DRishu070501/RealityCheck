@@ -3,22 +3,54 @@ import { vi } from 'vitest'
 import availability from '@/test/fixtures/availability.json'
 import factories from '@/test/fixtures/factories.json'
 import factory from '@/test/fixtures/factory.json'
+import orderDetail from '@/test/fixtures/orderDetail.json'
+import orders from '@/test/fixtures/orders.json'
+import overview from '@/test/fixtures/overview.json'
 import resources from '@/test/fixtures/resources.json'
+import state from '@/test/fixtures/state.json'
 import systemInfo from '@/test/fixtures/systemInfo.json'
+import timeline from '@/test/fixtures/timeline.json'
+import timelineSummary from '@/test/fixtures/timelineSummary.json'
 import workflow from '@/test/fixtures/workflow.json'
 import workflows from '@/test/fixtures/workflows.json'
 import { jsonResponse } from '@/test/utils'
 
-/** Responses captured from the running backend with the demonstration seed loaded. */
-export const fixtures = { availability, factories, factory, resources, systemInfo, workflow, workflows }
+/**
+ * Responses captured from the running backend with the demonstration seed loaded. The production
+ * fixtures (orders, events, state, overview) were taken on 14 November 2026, so their history
+ * runs from 26 October to that day; `timeline` holds only the newest 14 of its 1,376 events.
+ */
+export const fixtures = {
+  availability,
+  factories,
+  factory,
+  orderDetail,
+  orders,
+  overview,
+  resources,
+  state,
+  systemInfo,
+  timeline,
+  timelineSummary,
+  workflow,
+  workflows,
+}
 
 export const FACTORY_ID = factory.id
 export const WORKFLOW_ID = workflow.id
+/** SDW-0002: dispatched, one batch, with one corrected stage completion. */
+export const ORDER_ID = orderDetail.order.id
 
 export function poolNamed(name: string) {
   const pool = resources.items.find((item) => item.name === name)
   if (!pool) throw new Error(`No fixture pool named ${name}`)
   return pool
+}
+
+export function stageNamed(name: string) {
+  const stage = workflow.stages.find((item) => item.name === name)
+  if (!stage) throw new Error(`No fixture stage named ${name}`)
+  return stage
 }
 
 export interface MockRequest {
@@ -55,6 +87,8 @@ export function demoRoutes(): Routes {
     'GET /actuator/health': () => jsonResponse({ status: 'UP' }),
     'GET /api/factories': () => jsonResponse(factories),
     [`GET /api/factories/${FACTORY_ID}`]: () => jsonResponse(factory),
+    [`GET /api/factories/${FACTORY_ID}/state`]: () => jsonResponse(state),
+    [`GET /api/factories/${FACTORY_ID}/overview`]: () => jsonResponse(overview),
     'GET /api/workflows': () => jsonResponse(workflows),
     [`GET /api/workflows/${WORKFLOW_ID}`]: () => jsonResponse(workflow),
     'GET /api/resources': ({ query }) => {
@@ -66,6 +100,25 @@ export function demoRoutes(): Routes {
       path.endsWith('/availability')
         ? jsonResponse(availability)
         : jsonResponse(resources.items.find((item) => path.endsWith(item.id)) ?? null),
+    // The first page of orders as captured; the filters are applied to that page.
+    'GET /api/orders': ({ query }) => {
+      const status = query.get('status')
+      const delayed = query.get('delayed')
+      const items = orders.items.filter(
+        (item) => (status === null || item.status === status) && (delayed === null || String(item.delayed) === delayed),
+      )
+      const filtered = status !== null || delayed !== null
+      return jsonResponse({
+        ...orders,
+        items,
+        page: Number(query.get('page') ?? '0'),
+        totalItems: filtered ? items.length : orders.totalItems,
+        totalPages: filtered ? 1 : orders.totalPages,
+      })
+    },
+    [`GET /api/orders/${ORDER_ID}`]: () => jsonResponse(orderDetail),
+    'GET /api/timeline': () => jsonResponse(timeline),
+    'GET /api/timeline/summary': () => jsonResponse(timelineSummary),
   }
 }
 
@@ -99,5 +152,12 @@ export function mockBackend(routes: Routes) {
     requests,
     /** Requests made with the given method to the given path. */
     sent: (method: string, path: string) => requests.filter((r) => r.method === method && r.path === path),
+    /** The most recent request with the given method to the given path. */
+    last: (method: string, path: string): MockRequest => {
+      const matching = requests.filter((r) => r.method === method && r.path === path)
+      const request = matching[matching.length - 1]
+      if (!request) throw new Error(`No ${method} ${path} request was made`)
+      return request
+    },
   }
 }

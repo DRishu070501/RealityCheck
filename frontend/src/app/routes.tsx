@@ -1,14 +1,24 @@
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
 
 import { AppShell } from '@/app/AppShell'
 import { NAV_ITEMS } from '@/app/nav'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { ComingSoon } from '@/components/ComingSoon'
-import { FactoryPage } from '@/features/factory/FactoryPage'
-import { OverviewPage } from '@/features/overview/OverviewPage'
-import { ResourcesPage } from '@/features/resources/ResourcesPage'
-import { SettingsPage } from '@/features/settings/SettingsPage'
-import { WorkflowPage } from '@/features/workflow/WorkflowPage'
+import { RouteFallback } from '@/components/RouteFallback'
+
+/**
+ * Each screen is its own chunk, fetched when first visited, so that the shell loads quickly and
+ * the charting library is downloaded only by the screens that draw charts.
+ */
+function screen<T extends Record<string, ComponentType>>(load: () => Promise<T>, name: keyof T): ReactNode {
+  const Screen = lazy(async () => ({ default: (await load())[name] as ComponentType }))
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Screen />
+    </Suspense>
+  )
+}
 
 /**
  * Every navigation entry that still carries a `planned` note gets a placeholder route. When a
@@ -31,11 +41,14 @@ export const routes: RouteObject[] = [
   {
     element: <AppShell />,
     children: [
-      { index: true, element: <OverviewPage /> },
-      { path: '/factory', element: <FactoryPage /> },
-      { path: '/workflow', element: <WorkflowPage /> },
-      { path: '/resources', element: <ResourcesPage /> },
-      { path: '/settings', element: <SettingsPage /> },
+      { index: true, element: screen(() => import('@/features/overview/OverviewPage'), 'OverviewPage') },
+      { path: '/factory', element: screen(() => import('@/features/factory/FactoryPage'), 'FactoryPage') },
+      { path: '/workflow', element: screen(() => import('@/features/workflow/WorkflowPage'), 'WorkflowPage') },
+      { path: '/resources', element: screen(() => import('@/features/resources/ResourcesPage'), 'ResourcesPage') },
+      { path: '/orders', element: screen(() => import('@/features/orders/OrdersPage'), 'OrdersPage') },
+      { path: '/orders/:id', element: screen(() => import('@/features/orders/OrderDetailPage'), 'OrderDetailPage') },
+      { path: '/timeline', element: screen(() => import('@/features/timeline/TimelinePage'), 'TimelinePage') },
+      { path: '/settings', element: screen(() => import('@/features/settings/SettingsPage'), 'SettingsPage') },
       ...placeholderRoutes,
       { path: '*', element: <NotFoundPage /> },
     ],

@@ -1,0 +1,216 @@
+{
+ "bucket": "DAY",
+ "timeZone": "Asia/Kolkata",
+ "firstEventAt": "2026-10-26T03:30:00Z",
+ "lastEventAt": "2026-11-14T07:08:54Z",
+ "buckets": [
+  {
+   "start": "2026-10-25T18:30:00Z",
+   "total": 32,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 11,
+    "STAGE_STARTED": 11,
+    "STAGE_COMPLETED": 7
+   }
+  },
+  {
+   "start": "2026-10-26T18:30:00Z",
+   "total": 50,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 17,
+    "STAGE_STARTED": 17,
+    "STAGE_COMPLETED": 13
+   }
+  },
+  {
+   "start": "2026-10-27T18:30:00Z",
+   "total": 52,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 18,
+    "STAGE_STARTED": 16,
+    "STAGE_COMPLETED": 14,
+    "RESOURCE_UNAVAILABLE": 1
+   }
+  },
+  {
+   "start": "2026-10-28T18:30:00Z",
+   "total": 67,
+   "byType": {
+    "ORDER_CREATED": 2,
+    "STAGE_QUEUED": 22,
+    "STAGE_STARTED": 23,
+    "STAGE_COMPLETED": 20
+   }
+  },
+  {
+   "start": "2026-10-29T18:30:00Z",
+   "total": 83,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 25,
+    "STAGE_COMPLETED": 25,
+    "ORDER_COMPLETED": 2,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-10-30T18:30:00Z",
+   "total": 78,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 25,
+    "STAGE_STARTED": 26,
+    "STAGE_COMPLETED": 22,
+    "ORDER_COMPLETED": 1,
+    "ORDER_DISPATCHED": 1
+   }
+  },
+  {
+   "start": "2026-11-01T18:30:00Z",
+   "total": 86,
+   "byType": {
+    "ORDER_CREATED": 2,
+    "STAGE_QUEUED": 27,
+    "STAGE_STARTED": 26,
+    "STAGE_COMPLETED": 28,
+    "ORDER_COMPLETED": 2,
+    "ORDER_DISPATCHED": 1
+   }
+  },
+  {
+   "start": "2026-11-02T18:30:00Z",
+   "total": 86,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 28,
+    "STAGE_STARTED": 28,
+    "STAGE_COMPLETED": 25,
+    "ORDER_COMPLETED": 1,
+    "ORDER_DISPATCHED": 1
+   }
+  },
+  {
+   "start": "2026-11-03T18:30:00Z",
+   "total": 92,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 29,
+    "STAGE_STARTED": 26,
+    "STAGE_COMPLETED": 29,
+    "ORDER_COMPLETED": 3,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-11-04T18:30:00Z",
+   "total": 92,
+   "byType": {
+    "ORDER_CREATED": 2,
+    "STAGE_QUEUED": 28,
+    "STAGE_STARTED": 30,
+    "STAGE_COMPLETED": 28,
+    "ORDER_COMPLETED": 3,
+    "ORDER_DISPATCHED": 1
+   }
+  },
+  {
+   "start": "2026-11-05T18:30:00Z",
+   "total": 86,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 25,
+    "STAGE_COMPLETED": 26,
+    "ORDER_COMPLETED": 3,
+    "ORDER_DISPATCHED": 3
+   }
+  },
+  {
+   "start": "2026-11-06T18:30:00Z",
+   "total": 79,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 21,
+    "STAGE_COMPLETED": 25,
+    "ORDER_COMPLETED": 2,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-11-08T18:30:00Z",
+   "total": 106,
+   "byType": {
+    "ORDER_CREATED": 2,
+    "STAGE_QUEUED": 31,
+    "STAGE_STARTED": 36,
+    "STAGE_COMPLETED": 33,
+    "ORDER_COMPLETED": 3,
+    "ORDER_DISPATCHED": 1
+   }
+  },
+  {
+   "start": "2026-11-09T18:30:00Z",
+   "total": 81,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 25,
+    "STAGE_COMPLETED": 24,
+    "ORDER_COMPLETED": 1,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-11-10T18:30:00Z",
+   "total": 97,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 30,
+    "STAGE_STARTED": 29,
+    "STAGE_COMPLETED": 30,
+    "ORDER_COMPLETED": 3,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-11-11T18:30:00Z",
+   "total": 84,
+   "byType": {
+    "ORDER_CREATED": 2,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 27,
+    "STAGE_COMPLETED": 25,
+    "ORDER_COMPLETED": 2,
+    "ORDER_DISPATCHED": 2
+   }
+  },
+  {
+   "start": "2026-11-12T18:30:00Z",
+   "total": 77,
+   "byType": {
+    "ORDER_CREATED": 3,
+    "STAGE_QUEUED": 26,
+    "STAGE_STARTED": 23,
+    "STAGE_COMPLETED": 24,
+    "ORDER_COMPLETED": 1
+   }
+  },
+  {
+   "start": "2026-11-13T18:30:00Z",
+   "total": 48,
+   "byType": {
+    "ORDER_CREATED": 1,
+    "STAGE_QUEUED": 14,
+    "STAGE_STARTED": 16,
+    "STAGE_COMPLETED": 15,
+    "ORDER_COMPLETED": 2
+   }
+  }
+ ],
+ "source": "ACTUAL"
+}

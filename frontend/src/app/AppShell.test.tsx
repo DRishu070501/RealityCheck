@@ -51,8 +51,6 @@ describe('navigation config', () => {
     const planned = NAV_ITEMS.filter((item) => item.planned).map((item) => item.label)
 
     expect(planned).toEqual([
-      'Production Orders',
-      'Operational Timeline',
       'Scenario Lab',
       'Simulation Results',
       'AI Analyst',

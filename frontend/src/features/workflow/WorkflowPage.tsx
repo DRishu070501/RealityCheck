@@ -13,7 +13,7 @@ import { Table, TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { api } from '@/lib/api'
 import { formatDecimal, formatDuration, formatInteger, formatMoney, formatYield } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Factory, Stage } from '@/lib/schemas'
+import type { Factory, Stage, StageState } from '@/lib/schemas'
 import { cn } from '@/lib/utils'
 
 function slotsLabel(maxSlots: number | null): string {
@@ -25,12 +25,20 @@ function rateLabel(stage: Stage): string {
   return `${formatDecimal(stage.stonesPerHour, 4)} stones/hour per slot`
 }
 
+/** "4 queued · 6 in progress", from recorded history. */
+function liveLabel(live: StageState): string {
+  return `${formatInteger(live.queued)} queued · ${formatInteger(live.inProgress)} in progress`
+}
+
 function Pipeline({
   stages,
+  live,
   selectedId,
   onSelect,
 }: {
   stages: readonly Stage[]
+  /** What is at each stage right now, by stage id; empty while unknown. */
+  live: ReadonlyMap<string, StageState>
   selectedId: string
   onSelect: (id: string) => void
 }) {
@@ -41,6 +49,7 @@ function Pipeline({
     >
       {stages.map((stage, index) => {
         const selected = stage.id === selectedId
+        const now = live.get(stage.id)
         return (
           <li key={stage.id} className="flex min-w-0 items-center">
             <button
@@ -64,6 +73,9 @@ function Pipeline({
               <span className="metric text-xs text-muted-foreground">
                 {stage.maxSlots === null ? 'Unlimited slots' : `${formatInteger(stage.maxSlots)} slots`}
               </span>
+              {now ? (
+                <span className="metric border-t border-border pt-1.5 text-xs text-source-actual">{liveLabel(now)}</span>
+              ) : null}
             </button>
             <ChevronRight
               aria-hidden="true"
@@ -86,7 +98,7 @@ function Parameter({ label, hint, children }: { label: string; hint: string; chi
   )
 }
 
-function StageDetail({ stage, factory }: { stage: Stage; factory: Factory }) {
+function StageDetail({ stage, factory, live }: { stage: Stage; factory: Factory; live: StageState | undefined }) {
   return (
     <Card aria-labelledby="stage-title">
       <CardHeader>
@@ -121,6 +133,24 @@ function StageDetail({ stage, factory }: { stage: Stage; factory: Factory }) {
           {formatMoney(stage.fixedCostPerJob, factory.currencyCode)} per job
         </Parameter>
       </dl>
+
+      {live ? (
+        <div
+          aria-label="At this stage right now"
+          className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3"
+        >
+          <p className="text-sm text-foreground">
+            Right now:{' '}
+            <span className="metric font-medium">
+              {formatInteger(live.queued)} {live.queued === 1 ? 'batch' : 'batches'} queued
+            </span>
+            ,{' '}
+            <span className="metric font-medium">{formatInteger(live.inProgress)} in progress</span>,{' '}
+            <span className="metric text-muted-foreground">{formatInteger(live.completed)} through this stage</span>.
+          </p>
+          <SourceTag source="Actual" />
+        </div>
+      ) : null}
 
       {stage.requirements.length === 0 ? (
         <CardContent className="text-sm text-muted-foreground">
@@ -166,6 +196,11 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
     queryFn: ({ signal }) => api.workflows.get(workflowId ?? '', signal),
     enabled: workflowId !== undefined,
   })
+  // What is at each stage now. The page works without it, so its failure only hides the counts.
+  const state = useQuery({
+    queryKey: queryKeys.factories.state(factory.id, 'now'),
+    queryFn: ({ signal }) => api.factories.state(factory.id, undefined, signal),
+  })
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   if (list.isError) {
@@ -195,6 +230,7 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
   }
 
   const { stages } = workflow.data
+  const live = new Map((state.data?.stages ?? []).map((stage) => [stage.stageId, stage]))
   const selected = stages.find((stage) => stage.id === selectedId) ?? stages[0]
   if (!selected) return null
 
@@ -202,10 +238,11 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
     <div className="flex flex-col gap-6">
       <Card aria-labelledby="pipeline-title">
         <CardHeader>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1 basis-72">
             <CardTitle id="pipeline-title">{workflow.data.name}</CardTitle>
             <CardDescription>
               {formatInteger(stages.length)} stages, each feeding the next. Select a stage for its details.
+              {state.data ? ' Queue and in-progress counts are batches at each stage right now, from recorded history.' : ''}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -214,19 +251,20 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
             </Badge>
             {factory.demo ? <DemoTag /> : null}
             <SourceTag />
+            {state.data ? <SourceTag source="Actual" /> : null}
           </div>
         </CardHeader>
-        <Pipeline stages={stages} selectedId={selected.id} onSelect={setSelectedId} />
+        <Pipeline stages={stages} live={live} selectedId={selected.id} onSelect={setSelectedId} />
       </Card>
 
-      <StageDetail stage={selected} factory={factory} />
+      <StageDetail stage={selected} factory={factory} live={live.get(selected.id)} />
 
       <p className="flex items-start gap-2 text-xs text-subtle-foreground">
         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
         <span>
-          Everything on this page is configuration. Live queue lengths and stage status arrive with production
-          tracking, and utilization, average duration and bottleneck evidence with simulation runs. None of those
-          figures are shown until they can be read from recorded or simulated data.
+          Rates, setup, yields, costs and resources are configuration; the queued and in-progress counts are
+          recorded history. Utilization, average duration and bottleneck evidence come from simulation runs and are
+          not shown until they can be read from simulated data.
         </span>
       </p>
     </div>
