@@ -79,42 +79,42 @@ check. Any later change to engine output bumps `ALGORITHM_VERSION`.
 
 ## Part B — Run execution (M5)
 
-- [ ] 15. Add the simulation schema
+- [x] 15. Add the simulation schema
   - Flyway migration for `simulation_run`, `simulation_stage_result`, `simulation_resource_result`, `simulation_event_result` with indexes; entities and repositories; enable `hibernate.jdbc.batch_size` and ordered inserts.
   - Test: `SimulationRepositoryIT` for the unique `(scenario_id, idempotency_key)` (nulls allowed many times) and cascade delete.
   - _Requirements: 12.1, 16.2_
 
-- [ ] 16. Implement `SnapshotInputAdapter`
+- [x] 16. Implement `SnapshotInputAdapter`
   - Mapping from spec 06 snapshot records to `SimulationInput`.
   - Test: `SnapshotInputAdapterTest`.
   - _Requirements: 13.5_
 
-- [ ] 17. Implement `SimulationResultWriter`
+- [x] 17. Implement `SimulationResultWriter`
   - Entities and summary JSON from `SimulationResult`, names copied from the snapshot, one transaction, batched event inserts.
   - Test: integration test writing a known result and reading every table back.
   - _Requirements: 13.2, 16.2_
 
-- [ ] 18. Implement submission
+- [x] 18. Implement submission
   - `SimulationExecutorConfig` (executor, semaphore, properties); `SimulationSubmissionService` per design B.3; `POST /api/scenarios/{id}/simulate`.
   - Test: `SimulationSubmissionServiceTest`; `SimulationRunIT` idempotency and reuse cases, 422 on invalid snapshot, 429 with permits set to zero.
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
-- [ ] 19. Implement execution and failure handling
+- [x] 19. Implement execution and failure handling
   - `SimulationRunExecutor` per design B.4 with the conditional claim and safe failure message.
   - Test: `SimulationRunIT` happy path, failure injection leaves zero result rows, exclusive claim, history and live configuration untouched.
   - _Requirements: 13.1, 13.2, 13.3, 13.5, 13.6_
 
-- [ ] 20. Implement stale-run recovery
+- [x] 20. Implement stale-run recovery
   - `StaleRunRecovery` runner.
   - Test: `SimulationRunIT` recovery case.
   - _Requirements: 13.4_
 
-- [ ] 21. Implement the read endpoints
+- [x] 21. Implement the read endpoints
   - `GET /api/simulations/{runId}`, `/results`, `/stages`, `/resources`, `/events`, and `GET /api/scenarios/{id}/simulations`; `SimulationResultsReader` for other modules; scenario list gains `latestRun` (spec 06 task 3).
   - Test: `SimulationApiIT` for shapes, 409 before completion, pagination and filters on events, ordering.
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [ ] 22. Verify reproducibility and performance
+- [x] 22. Verify reproducibility and performance
   - Test: re-run the engine on a stored snapshot and compare with the stored summary; stored results served unchanged when the code's version constant differs (set by a test property); `SimulationPerformanceTest`.
   - Update `docs/api.md` (Simulation section) and add `/resources`, `/events` to the endpoint list in architecture.md.
   - _Requirements: 15.1, 15.2, 16.1_
@@ -148,3 +148,26 @@ belongs to a scenario. Differences from design.md:
   (including daylight-saving gaps and overlaps and interval-set properties), `SimulationEngineProperties`
   (rules 13.1-13.10 and the multi-stage monotonicity report), `DemoFactoryScenarioTest` (the product's
   scenarios on a demo-shaped factory), `EnginePurityTest`, and `BaselineSimulationIT` against the seeded factory.
+
+## Implementation notes (Milestone 5, Part B)
+
+Tasks 15-22 are built. Differences from design.md:
+
+- **Result rows are written and read with JDBC** (`SimulationResultWriter` batches inserts of 500;
+  `SimulationQueryService` maps rows to records). Only `simulation_run` has a JPA entity, and it is read-only
+  after insert: status, timing and summary are changed by conditional `UPDATE`s. A trigger rejects any change
+  to a run's input columns, and the result tables reject `UPDATE`.
+- **Extra stored columns:** `limiting_resource_name` (copied from the snapshot, like stage names) and
+  `saturation_signal` in place of `blocked_signal` (see the Milestone 4 notes on the bottleneck gate).
+- **Results** include `resources` (per-pool rows with `capacity`, the base capacity in the simulated
+  configuration). `PoolResult` gained `capacity` and `BottleneckEvidence` gained `utilizationSignal`, in the
+  baseline endpoint as well.
+- **Baseline endpoint** now builds its input with the scenario module's `SnapshotAssembler` and
+  `SnapshotInputAdapter`, so ad hoc and stored runs use one path. `SimulationInputAssembler` was removed, and
+  `simulation` no longer depends on `factory`, `workflow`, `resource` or `production` (ArchUnit enforces it).
+- **Failure injection** is done without mocks: the writer is called for a run that is not `RUNNING`, so it
+  inserts every row and then fails, and the test asserts nothing was kept; a run with a corrupt snapshot
+  checks the safe failure message.
+- **429** is tested by draining the permit semaphore, not by a second application context.
+- **Performance (task 22):** there is no `SimulationPerformanceTest`; each run logs `engineMillis`. Measured
+  on the seeded factory: see the Milestone 5 report in docs/api.md.

@@ -473,6 +473,148 @@ data, `at` and `algorithmVersion` always give the same response.
 This endpoint is the engine's read-only entry point until scenarios exist. Stored, asynchronous runs with
 changes applied arrive in Milestone 5 (`POST /api/scenarios/{id}/simulate`).
 
+### Scenarios
+
+A scenario is a named "what if": a fork instant in recorded history plus an ordered list of changes.
+Scenarios never touch live configuration or history; changes are applied to a copy (the input snapshot)
+when a scenario is validated or simulated.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/scenarios?factoryId=` | List, oldest first, with `changeCount`, `baseline` and `latestRun` |
+| `POST /api/scenarios` | Create. `forkAt` must lie between the factory's first recorded event and now. With `parentScenarioId` the parent's fork and changes are copied once (changes marked `inherited: true`) |
+| `GET /api/scenarios/{id}` | The scenario and its changes in order, each with a plain-language `summary` |
+| `PATCH /api/scenarios/{id}` | `name`, `description`, `forkAt`, `includeFutureOrders` with the current `version`; a stale version is 409 `STALE_VERSION`; moving the fork or changing `includeFutureOrders` once a run exists is 409 |
+| `POST /api/scenarios/{id}/changes` | Append `{ "changeType", "payload" }`; 201 |
+| `PUT /api/scenarios/{id}/changes/{changeId}` | Replace the payload; the type cannot change |
+| `DELETE /api/scenarios/{id}/changes/{changeId}` | Remove; later changes are renumbered 1..n |
+| `POST /api/scenarios/{id}/validate` | `valid`, `errors`, `warnings`, a before/after `preview` and both hashes. Stores nothing |
+
+Every add, edit and delete re-applies the whole change list to the factory's configuration, so a change
+that would make a later one impossible is refused with 400 naming `changes[n].payload.<field>`. Payload
+errors name `payload.<field>`; a pool or stage that is not active in the scenario's factory is 400.
+
+One example payload per change type:
+
+```json
+{ "changeType": "RESOURCE_CAPACITY",    "payload": { "resourceId": "…", "mode": "DELTA", "value": 2 } }
+{ "changeType": "RESOURCE_UNAVAILABLE", "payload": { "resourceId": "…", "units": 5 } }
+{ "changeType": "RESOURCE_DOWNTIME",    "payload": { "resourceId": "…", "from": "2026-11-10T03:30:00Z", "to": "2026-11-10T12:30:00Z" } }
+{ "changeType": "DEMAND_VOLUME",        "payload": { "percent": 20 } }
+{ "changeType": "PROCESSING_RATE",      "payload": { "stageId": "…", "mode": "PERCENT", "value": "-12.5" } }
+{ "changeType": "WORKING_SCHEDULE",     "payload": { "mode": "ADD", "shifts": [ { "dayOfWeek": 1, "startTime": "18:00", "endTime": "22:00" } ] } }
+```
+
+Rules and rounding:
+
+- `RESOURCE_CAPACITY`: `ABSOLUTE` (whole units, 0 or more), `DELTA` (non-zero whole units, never below 0) or
+  `PERCENT` (-100 or more, **rounded down** to whole units so capacity is never overstated: 4 saws at -30%
+  become 2).
+- `RESOURCE_UNAVAILABLE`: takes `units` out from `from` (default: the fork) to `to` (default: the end of the
+  simulation horizon). `to` must be after the fork.
+- `RESOURCE_DOWNTIME`: every unit out for the period.
+- `DEMAND_VOLUME`: multiplies stones and carats of every batch not yet started on its first stage at the fork
+  (including later arrivals) by `(100 + percent) / 100`, exactly at scale 4, half-even; stones are not
+  rounded to whole numbers. Range: above -100, at most 500, not zero.
+- `PROCESSING_RATE`: `ABSOLUTE` (above 0) or `PERCENT` (above -100), scale 4, half-even.
+- `WORKING_SCHEDULE`: `ADD` shifts to the calendar or `REPLACE` it; shifts may not overlap. Added shifts
+  apply to the whole factory with every pool at its normal capacity.
+
+Warnings do not block a run: `NO_EFFECT` (for example a percentage that rounds to the same capacity, or
+demand when no batch is unstarted) and `EXCEEDS_CAPACITY` (more units made unavailable than the pool has).
+Errors come from the engine's own input validation, for example `REQUIREMENT_EXCEEDS_CAPACITY` when a change
+leaves a stage unable to run.
+
+`baseStateHash` identifies the starting state (work in progress reconstructed at the fork and the captured
+configuration) and is equal for scenarios with the same fork when nothing changed in between. `inputHash`
+identifies the exact run input: the snapshot with its changes and the algorithm version.
+
+### Simulation runs
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/scenarios/{id}/simulate?force=false` | Validate, store the input snapshot, answer **202** with `{ runId, scenarioId, status, reused, submittedAt }` and run in the background. Header `Idempotency-Key` (at most 100 characters): a repeated key returns the original run. A completed run with the same `inputHash` is returned with `reused: true` unless `force=true`. An invalid scenario is 422 with `errors`; no free worker slot is 429 with `Retry-After: 5` |
+| `GET /api/scenarios/{id}/simulations` | The scenario's runs, newest first |
+| `GET /api/simulations/{runId}` | Status (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`), timing, hashes, termination reason, failure message |
+| `GET /api/simulations/{runId}/results` | Summary, bottleneck, order outcomes, per-pool `resources` and unfinished batches; `source: "SIMULATED"`. 409 with `status` until the run is `COMPLETED` |
+| `GET /api/simulations/{runId}/stages` | Per-stage results with bottleneck evidence, in sequence order |
+| `GET /api/simulations/{runId}/resources` | Per-pool utilization, capacity and cost, machines first |
+| `GET /api/simulations/{runId}/events?stageId=&orderId=&page=&size=` | The simulated trace in order, paginated |
+
+A run reads only its stored snapshot and writes only `simulation_*` tables. It either completes with every
+result row or fails with none; a failure message never contains internals. A trigger makes a run's input
+columns immutable, and result rows cannot be updated, so stored results are served unchanged and labelled
+with the algorithm version that produced them. Runs left pending or running by a restart are marked
+`FAILED` ("Interrupted by restart") at start-up. Workers: `realitycheck.simulation.threads` (2) and
+`queue-capacity` (8).
+
+A real run of the seeded baseline scenario (`GET /api/simulations/{runId}`, 14 November 2026):
+
+```json
+{ "runId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3", "scenarioName": "Current factory operations",
+  "status": "COMPLETED", "forkAt": "2026-11-09T18:03:14Z", "algorithmVersion": "1.0.0",
+  "inputHash": "e01cf936448e523294485bc5094f7d12a4d2ea7db0fec795d92360f3bfbfcfef",
+  "baseStateHash": "db7d9beec1b7e4bc474d33bc57391f64d23231cfee6ad8050530707747abb490",
+  "terminationReason": "COMPLETED", "simulatedEndAt": "2026-11-24T04:47:22Z", "eventsProcessed": 534,
+  "failureMessage": null, "submittedAt": "2026-11-14T18:03:39.291264Z",
+  "startedAt": "2026-11-14T18:03:39.310034Z", "finishedAt": "2026-11-14T18:03:39.409285Z" }
+```
+
+The engine itself took 3 to 38 ms for each of the six demonstration scenarios in that session (logged as
+`engineMillis`); submission to completion took about 0.1 s.
+
+### Comparison
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/simulations/compare` | `{ "baselineRunId", "alternativeRunIds": [1..5], "allowDifferentBaseline": false }` |
+| `GET /api/scenarios/{id}/comparisons` | The scenario's latest completed run against the newest matching run of every baseline scenario (one with no changes) that started from the same state. `baselineMissing: true` and `suggestedBaselineScenarioId` when none has been run |
+
+Every value is read from stored results; the comparison only subtracts, with exact decimals. Runs must be
+`COMPLETED` (409 otherwise) and from one factory (400). If an alternative started from a different fork or
+`baseStateHash`, the answer is 422 `DIFFERENT_STARTING_STATE` unless `allowDifferentBaseline` is true, in
+which case `sameStartingState` is false and each such run gets a warning. Other warnings:
+`DIFFERENT_ALGORITHM_VERSION` and `INCOMPLETE_SIMULATION` (a run stopped on a limit). `includeActual` is not
+available yet (Milestone 8) and is refused with 400.
+
+For each alternative: 16 summary `metrics` (each with `baseline`, `alternative`, `absolute`, `percent`,
+`unit`, `betterWhen` and `direction`), the `bottleneck` change (`SAME`, `MOVED`, `RESOLVED`, `EMERGED`,
+`NONE`) with both stages' scores in both runs, and per-stage, per-pool and per-order differences. Applied
+changes come from each run's stored snapshot, so editing a scenario later does not rewrite a comparison.
+Utilization has no `betterWhen`: higher is not inherently better. Runs of different length accrue cost over
+different periods, so read total cost together with cost per output stone. "Improved" describes how a
+metric moved under the simulation's assumptions, not a recommendation.
+
+Excerpts from a real comparison (baseline against "Introduce an additional shift", same session):
+
+```json
+{ "source": "SIMULATED", "currencyCode": "INR", "sameStartingState": true, "forkAt": "2026-11-09T18:03:14Z",
+  "warnings": [],
+  "alternatives": [ {
+    "run": { "scenarioName": "Introduce an additional shift", "algorithmVersion": "1.0.0",
+             "terminationReason": "COMPLETED",
+             "appliedChanges": [ { "ordinal": 1, "changeType": "WORKING_SCHEDULE",
+                                   "summary": "Add shifts: Mon, Tue, Wed, Thu, Fri, Sat 18:00-22:00" } ] },
+    "metrics": [
+      { "key": "elapsedSeconds", "label": "Completion time", "unit": "seconds", "baseline": "1248248",
+        "alternative": "834247", "absolute": "-414001", "percent": "-33.17", "betterWhen": "LOWER",
+        "direction": "IMPROVED" },
+      { "key": "cost.total", "label": "Total cost", "unit": "currency", "baseline": "856352.00",
+        "alternative": "875469.83", "absolute": "19117.83", "percent": "2.23", "betterWhen": "LOWER",
+        "direction": "WORSENED" },
+      { "key": "machineUtilization", "label": "Machine utilization", "unit": "fraction", "baseline": "0.507217",
+        "alternative": "0.467027", "absolute": "-0.040190", "percent": "-7.92", "betterWhen": null,
+        "direction": null } ],
+    "bottleneck": { "change": "SAME",
+                    "baselineStage": { "code": "POLISHING", "baselineScore": "0.939906", "alternativeScore": "0.881322" } },
+    "orders": [ { "orderNumber": "SDW-0030", "dueAt": "2026-11-15T11:30:00Z",
+                  "baselineCompletionAt": "2026-11-23T07:24:46Z", "alternativeCompletionAt": "2026-11-14T14:35:36Z",
+                  "differenceSeconds": -751750, "baselineOutcome": "LATE", "alternativeOutcome": "ON_TIME" } ] } ],
+  "actual": null }
+```
+
+(Excerpt: other metrics, stages and resources omitted.)
+
 ### Demo
 
 | Endpoint | Purpose |
@@ -499,7 +641,5 @@ Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows whe
 
 | Group | Endpoints | Milestone |
 |---|---|---|
-| Scenarios | `GET/POST /api/scenarios`, `GET/PATCH /api/scenarios/{id}`, `POST /api/scenarios/{id}/changes`, `PUT/DELETE /api/scenarios/{id}/changes/{changeId}` | 5 |
-| Simulation runs | `POST /api/scenarios/{id}/simulate`, `GET /api/scenarios/{id}/simulations`, `GET /api/simulations/{runId}`, `.../results`, `.../stages` | 5 |
-| Comparison | `POST /api/simulations/compare`, `GET /api/scenarios/{id}/comparisons` | 5 |
+| Comparison | `includeActual` (recorded outcome next to simulated futures) | 8 |
 | AI | `POST /api/ai/insights`, `POST /api/ai/ask`, `GET /api/ai/insights/{runId}` | 7 |

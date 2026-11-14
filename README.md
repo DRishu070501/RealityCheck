@@ -21,7 +21,7 @@ Two principles hold throughout:
 | 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | **Done** |
 | 3. Production operations | Orders, batches, append-only events, timeline | **Done** |
 | 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | **Done** (API only, no screen yet) |
-| 5. Scenario branching | State reconstruction, scenarios, changes, comparison | Not started |
+| 5. Scenario branching | Scenarios, changes, stored background runs, comparison | **Done** (API only, no screen yet) |
 | 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Orders, Timeline, Settings |
 | 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
 | 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
@@ -32,8 +32,11 @@ browse orders and their batches, follow the operational timeline, inspect the fa
 past moment, see current queues and units in use, edit pools, record downtime and reset the demonstration
 data. The deterministic simulation engine is built and can be run on the factory as recorded from any
 instant through `GET /api/factories/{id}/baseline-simulation` (see Swagger UI); it predicts completion, waiting,
-utilization, cost and delivery, and names the bottleneck with its evidence. Scenarios, their screens and AI are
-not built yet; those screens are placeholders that say which milestone delivers them.
+utilization, cost and delivery, and names the bottleneck with its evidence. Scenarios are built in the API:
+six ready-made what-ifs are seeded, and any scenario can be validated, simulated in the background with
+stored, reproducible results, and compared with the baseline (Swagger UI, tags Scenarios, Simulation and
+Comparison). The Scenario Lab and Results screens (Milestone 6) and AI (Milestone 7) are not built yet; those
+screens are placeholders that say which milestone delivers them.
 
 ## Run it with Docker
 

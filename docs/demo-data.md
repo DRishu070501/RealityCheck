@@ -114,6 +114,24 @@ compared with something the engine did not itself produce.
 Orders arrive slightly faster than polishing can absorb, so a queue forms there and some orders run late.
 That is the designed constraint mentioned above showing up in the recorded history.
 
-## Not seeded yet
+## Scenarios
 
-The preconfigured scenarios arrive in Milestone 5.
+Six scenarios, all forked at the same instant: five working days (Monday to Saturday) before the seeding
+instant, at the same time of day, so recorded history exists after the fork. They are created through the
+scenario service, so their changes pass the same validation as user input. **No result is seeded**: every
+number shown for them is computed when they are run.
+
+| Scenario | Change |
+|---|---|
+| Current factory operations | None: the baseline |
+| Add two polishing machines | Polishing wheels +2 (6 to 8). No polishers are added, and each wheel needs two of the twelve |
+| Increase production demand by 20% | Stones and carats of every batch not yet started +20% |
+| Make five employees unavailable | 5 polishers unavailable from the fork onwards |
+| Reduce cutting capacity by 30% | Laser saws -30%, rounded down: 4 to 2 |
+| Introduce an additional shift | Monday to Saturday 18:00-22:00 added, every pool at normal capacity |
+
+What one live run showed (14 November 2026; simulated, under the engine's assumptions): adding two wheels
+changed nothing, because twelve polishers can still only staff six wheels; the evening shift brought delayed
+orders from 10 to 0 for 2.2% more total cost; five polishers away made completion 71% later; cutting at 2
+saws moved the bottleneck from polishing to cutting. These figures depend on the seeding instant and are an
+example, not fixed values.

@@ -40,7 +40,7 @@ Everything a user sees is one of:
 The architecture exists to keep these apart. Dependencies point one way: `ai` reads `simulation` results;
 `simulation` cannot import `ai`; the engine cannot import anything.
 
-## What exists today (Milestones 1 to 4)
+## What exists today (Milestones 1 to 5)
 
 - `common.config`: typed settings (`RealityCheckProperties`), CORS allow-list, OpenAPI metadata, the
   application `Clock`.
@@ -76,10 +76,23 @@ entity has no setters and no updatable column, and corrections are new rows. Ord
 position are stored projections for fast reads; an integration test checks they equal a replay.
 
 **The engine** (`simulation.engine`, 18 classes) is built as designed below, as a pure function from
-`SimulationInput` to `SimulationResult`. `SimulationInputAssembler` in `simulation.service` is the only code
-that turns application data into engine input; it reuses the Milestone 3 state reconstruction for work in
-progress, so the fork state the engine starts from is the same one the timeline inspector shows. A read-only
-baseline endpoint runs it; stored runs come with scenarios.
+`SimulationInput` to `SimulationResult`.
+
+**Scenarios and runs** (Milestone 5). `scenario.service.SnapshotAssembler` is the only code that turns
+application data into simulation input: it builds a `Snapshot` (plain records, every list sorted) from the
+calendar, active workflow, active pools with their windows and the Milestone 3 state reconstruction, so the
+fork state is the same one the timeline inspector shows. `scenario.change.ChangeApplier` applies a scenario's
+changes to a copy, purely. `scenario.snapshot.SnapshotJson` writes canonical JSON and hashes it
+(`baseStateHash` before changes, `inputHash` after, with the algorithm version). `simulation` stores the
+snapshot in the run row, runs the engine on a bounded executor through `SnapshotInputAdapter`, and writes all
+results in one transaction. The baseline endpoint uses the same assembler and adapter.
+
+The dependency runs `simulation -> scenario` only. Where `scenario` needs something from `simulation`, it
+declares a port and `simulation` implements it: `SimulationEngineContract` (algorithm version, defaults and
+the engine's own input validation, so validation rules exist once), `ScenarioRunLookup` (latest run per
+scenario) and `RunResultsPort` (stored results for comparison). ArchUnit enforces that `scenario` never
+imports `simulation`, that `simulation` never reads `factory`, `workflow`, `resource` or `production`, and
+that those operational modules know nothing of scenarios.
 
 **Events are written in one place.** `EventAppendService` locks the batch row, validates, appends the event
 with those that follow from it (the next queue entry, order completion), and updates the projections in one
@@ -189,3 +202,11 @@ the extra endpoints listed in `docs/api.md`.
   state checkpoints are the remedy if it shows up in measurements.
 - **Heuristic bottleneck detection.** Weights and thresholds are configuration and every signal is shown, so
   a questionable classification can be inspected rather than trusted.
+- **Shift times on a non-UTC JVM (found in Milestone 5, not fixed).** `hibernate.jdbc.time_zone: UTC` makes
+  Hibernate shift `LocalTime` values by the JVM's offset when binding them. On a JVM running in Asia/Kolkata a
+  shift starting before 05:30 is stored as the previous evening and fails the database's `end > start` check.
+  The Docker image runs in UTC and is unaffected; times round-trip consistently on any one JVM. The fix
+  (binding `java.time` values directly, or a `time` column converter) changes how existing rows are read, so
+  it is left for a deliberate change with a migration plan.
+- **Demo seeding takes 20 to 35 seconds**, almost all of it replaying each generated event through the real
+  append path. That keeps seeded history honest but makes seeded integration tests slow.
