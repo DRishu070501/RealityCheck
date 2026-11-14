@@ -110,4 +110,12 @@ describe('AppShell', () => {
 
     expect(screen.queryByRole('button', { name: 'Close navigation' })).not.toBeInTheDocument()
   })
+
+  it('keeps screen-reader-only content inside the scrolling area', () => {
+    renderShell()
+
+    // jsdom has no layout, so this guards the class that prevents a second, page-level scrollbar:
+    // absolutely positioned `sr-only` descendants must be contained (and clipped) by <main>.
+    expect(screen.getByRole('main')).toHaveClass('relative', 'overflow-y-auto')
+  })
 })
