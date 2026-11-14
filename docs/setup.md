@@ -32,6 +32,8 @@ All configuration is environment variables. `.env.example` lists every one with 
 | `FRONTEND_HOST_PORT` | `3000` | Host port for the web application |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Origins allowed to call the API from a browser |
 | `API_DOCS_ENABLED` | `true` | Serve Swagger UI and the OpenAPI document |
+| `REALITYCHECK_DEMO_SEED` | `true` in `.env.example`, `false` when unset | Seed the demonstration factory at start-up if the database has no factory |
+| `REALITYCHECK_DEMO_RESET_ENABLED` | `true` in `.env.example`, `false` when unset | Allow `POST /api/demo/reset`, which erases all data. See [demo-data.md](demo-data.md). |
 | `AI_PROVIDER`, `AI_API_KEY` | `none`, empty | Read now, used from Milestone 7. The key stays on the server. |
 
 When the backend runs outside Docker it reads `DB_URL`, `DB_USERNAME` and `DB_PASSWORD`, defaulting to
@@ -102,3 +104,9 @@ Docker Desktop and retry; `./mvnw test` works without it.
 `DB_HOST_PORT` was changed; set `DB_URL` to match.
 
 **Start again from an empty database.** `docker compose down -v`.
+
+**Restore the demonstration data.** Settings, then Reset demo data (needs
+`REALITYCHECK_DEMO_RESET_ENABLED=true`), or `curl -X POST http://localhost:8080/api/demo/reset`.
+
+**No factory appears when running the backend with `./mvnw spring-boot:run`.** The seed is off unless
+`REALITYCHECK_DEMO_SEED=true` is in the environment of that process.

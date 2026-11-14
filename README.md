@@ -18,17 +18,19 @@ Two principles hold throughout:
 | Milestone | Scope | State |
 |---|---|---|
 | 1. Foundation | Backend, frontend shell, PostgreSQL, Flyway, OpenAPI, health checks, Docker Compose, Kiro steering and specs | **Done** |
-| 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | Not started |
+| 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | **Done** |
 | 3. Production operations | Orders, batches, append-only events, timeline | Not started |
 | 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | Not started |
 | 5. Scenario branching | State reconstruction, scenarios, changes, comparison | Not started |
-| 6. Frontend | The ten application screens | Shell and navigation only |
+| 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Settings |
 | 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
 | 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
 
-What runs today: the backend starts, connects to PostgreSQL, applies migrations and serves health, system
-info and API documentation; the frontend shows the application shell and a live system-status view. The
-feature screens are placeholders that say which milestone delivers them. There is no factory data yet.
+What runs today: a seeded demonstration factory, Surat Diamond Works, with its working calendar, fourteen
+resource pools and an eight-stage workflow. You can browse the factory, explore the workflow and its
+resource requirements, edit pools, record downtime and reset the demonstration data. Orders, the event
+timeline, simulation, scenarios and AI are not built yet; their screens are placeholders that say which
+milestone delivers them.
 
 ## Run it with Docker
 
@@ -65,6 +67,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - [docs/architecture.md](docs/architecture.md): modules, data flow, key decisions and their trade-offs
 - [docs/setup.md](docs/setup.md): prerequisites, configuration, commands, troubleshooting
 - [docs/api.md](docs/api.md): API conventions and the endpoints implemented so far
+- [docs/demo-data.md](docs/demo-data.md): the synthetic demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules
 - [.kiro/specs/](.kiro/specs/): requirements, design and tasks for each feature
 

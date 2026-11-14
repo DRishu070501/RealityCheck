@@ -5,7 +5,7 @@ in `.kiro/steering/` (`architecture.md` for module boundaries and API convention
 the engine contract). This page is the narrative: the shape of the system, the decisions that are not
 obvious, and what was traded away.
 
-Status: Milestone 1 is built. Sections describing later milestones are the agreed design, not a description
+Status: Milestones 1 and 2 are built. Sections describing later milestones are the agreed design, not a description
 of existing code; each says so.
 
 ## System shape
@@ -40,7 +40,7 @@ Everything a user sees is one of:
 The architecture exists to keep these apart. Dependencies point one way: `ai` reads `simulation` results;
 `simulation` cannot import `ai`; the engine cannot import anything.
 
-## What exists today (Milestone 1)
+## What exists today (Milestones 1 and 2)
 
 - `common.config`: typed settings (`RealityCheckProperties`), CORS allow-list, OpenAPI metadata, the
   application `Clock`.
@@ -52,6 +52,22 @@ The architecture exists to keep these apart. Dependencies point one way: `ai` re
   `reject_modification()` (the append-only guard).
 - Frontend shell: sidebar navigation for the ten screens, a live system-status view, placeholders elsewhere.
 - Docker Compose with health-gated start-up order.
+- `factory`: factory with time zone, currency and weekly calendar (shifts and breaks). `FactoryResolver`
+  resolves the optional `factoryId` of factory-scoped requests.
+- `resource`: pools with optimistic locking, dated availability windows, and `CapacityTimeline`, the pure
+  function that turns base capacity plus windows into effective capacity. The simulation snapshot will use
+  the same function, so the screen and the engine cannot disagree about a window.
+- `workflow`: workflows with ordered stages and per-slot requirements; one active workflow per factory,
+  enforced by a partial unique index as well as the service.
+- `demo`: the deterministic Surat Diamond Works seed and its guarded reset.
+
+Two inversions keep the module dependencies pointing one way. `factory` shows counts of things owned by
+other modules through `FactoryCountProvider`, which those modules implement. `resource` learns which stages
+need a pool through `RequirementUsage`, which `workflow` implements. Cross-module references are by id, and
+modules exchange records (`ResourceView`, `FactoryCalendar`), never entities.
+
+Child rows get ids derived from their parent's id and natural key (a stage's code, a shift's day and start).
+With fixed root ids and a fixed anchor instant, the seed reproduces identical rows on every reset.
 
 ## Design for the milestones ahead
 

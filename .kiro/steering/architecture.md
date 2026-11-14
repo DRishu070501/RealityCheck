@@ -14,7 +14,7 @@ Base package `com.realitycheck`.
 | Package | Owns | May depend on |
 |---|---|---|
 | `common` | Error handling, API envelope types, CORS and OpenAPI config, clock, system info | nothing |
-| `factory` | Factory, working calendar (shifts, breaks, closed days) | `common` |
+| `factory` | Factory, working calendar (shifts, breaks, closed days), `FactoryResolver`, `FactoryCountProvider` port | `common` |
 | `workflow` | Workflow, WorkflowStage, StageRequirement | `factory`, `resource` (ids only) |
 | `resource` | Resource pools, ResourceAvailability (downtime, capacity overrides) | `factory` |
 | `production` | ProductionOrder, ProductionBatch, OperationalEvent, timeline, state reconstruction | `factory`, `workflow`, `resource` (ids and ports) |
@@ -32,7 +32,12 @@ Rules enforced by ArchUnit:
 3. Controllers do not use repositories; entities do not appear in controller signatures.
 
 Inside a feature package: `api` (controllers and DTOs), `domain` (entities, enums), `service`,
-`persistence` (repositories).
+`persistence` (repositories). A feature's DTO records live together in one `<Feature>Dtos` holder class.
+
+Modules exchange records, never entities, and refer to each other's rows by id. Where a lower module needs
+something from a higher one, it declares an interface that the higher module implements
+(`FactoryCountProvider`, `RequirementUsage`). Demonstration seed sections live in `demo` and create rows
+through the feature services, so seeded data passes the same validation as API input.
 
 ## Data model
 
@@ -115,7 +120,8 @@ record before persistence.
 
 Endpoints beyond the original list, added because the flows need them: `PATCH /api/scenarios/{id}`,
 `PUT` and `DELETE /api/scenarios/{id}/changes/{changeId}`, `GET /api/scenarios/{id}/simulations`,
-`GET /api/factories/{id}/state?at=`, `GET /api/system/info`, `POST /api/demo/reset` (only when
+`GET /api/factories/{id}/state?at=`, `GET /api/resources/{id}`, `POST /api/resources/{id}/availability`,
+`GET /api/system/info`, `POST /api/demo/reset` (only when
 `realitycheck.demo.reset-enabled=true`).
 
 ## Frontend modules
