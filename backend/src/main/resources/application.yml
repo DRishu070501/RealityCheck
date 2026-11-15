@@ -60,7 +60,7 @@ springdoc:
 
 realitycheck:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   ai:
     provider: ${AI_PROVIDER:none}
     api-key: ${AI_API_KEY:}

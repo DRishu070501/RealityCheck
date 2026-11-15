@@ -130,6 +130,9 @@ class ApplicationIT extends IntegrationTest {
     void corsAllowsTheConfiguredOriginOnly() {
         assertThat(preflight("http://localhost:5173").getHeaders().getAccessControlAllowOrigin())
                 .isEqualTo("http://localhost:5173");
+        // The Docker frontend's own origin: browsers send Origin on writes even through its proxy.
+        assertThat(preflight("http://localhost:3000").getHeaders().getAccessControlAllowOrigin())
+                .isEqualTo("http://localhost:3000");
 
         ResponseEntity<String> rejected = preflight("https://evil.example");
         assertThat(rejected.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);

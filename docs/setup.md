@@ -30,7 +30,7 @@ All configuration is environment variables. `.env.example` lists every one with 
 | `DB_HOST_PORT` | `15432` | Host port for PostgreSQL (loopback only) |
 | `BACKEND_HOST_PORT` | `8080` | Host port for the API (loopback only) |
 | `FRONTEND_HOST_PORT` | `3000` | Host port for the web application |
-| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Origins allowed to call the API from a browser |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Origins allowed to call the API from a browser. Keep the Docker frontend's origin in the list: browsers send `Origin` on every write, even through its proxy, and a missing entry makes every save fail with 403 |
 | `API_DOCS_ENABLED` | `true` | Serve Swagger UI and the OpenAPI document |
 | `REALITYCHECK_DEMO_SEED` | `true` in `.env.example`, `false` when unset | Seed the demonstration factory at start-up if the database has no factory |
 | `REALITYCHECK_DEMO_RESET_ENABLED` | `true` in `.env.example`, `false` when unset | Allow `POST /api/demo/reset`, which erases all data. See [demo-data.md](demo-data.md). |
