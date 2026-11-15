@@ -1,11 +1,21 @@
-import type { ComponentProps } from 'react'
+import { useRef, type ComponentProps } from 'react'
 
+import { useScrolls } from '@/lib/useScrollFocus'
 import { cn } from '@/lib/utils'
 
-/** Scrolls sideways inside its own box on narrow screens so the page itself never does. */
+/**
+ * Scrolls sideways inside its own box on narrow screens so the page itself never does. While it
+ * scrolls, the box takes keyboard focus (with a visible ring) so arrow keys can scroll it.
+ */
 export function Table({ className, ...props }: ComponentProps<'table'>) {
+  const box = useRef<HTMLDivElement>(null)
+  const scrolls = useScrolls(box, 'x')
   return (
-    <div className="w-full overflow-x-auto">
+    <div
+      ref={box}
+      className="w-full overflow-x-auto rounded-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+      {...(scrolls ? { tabIndex: 0, role: 'region', 'aria-label': 'Table, scrolls sideways' } : {})}
+    >
       <table data-slot="table" className={cn('w-full border-collapse text-left text-sm', className)} {...props} />
     </div>
   )

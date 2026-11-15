@@ -1,9 +1,10 @@
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { Sidebar } from '@/app/Sidebar'
 import { Button } from '@/components/ui/button'
+import { useScrolls } from '@/lib/useScrollFocus'
 
 /**
  * Application frame: a persistent sidebar on wide screens, an off-canvas drawer below the `lg`
@@ -12,6 +13,8 @@ import { Button } from '@/components/ui/button'
 export function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { pathname } = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  const mainScrolls = useScrolls(mainRef, 'y', pathname)
 
   useEffect(() => {
     if (!drawerOpen) return
@@ -98,8 +101,10 @@ export function AppShell() {
         <main
           id="main-content"
           key={pathname}
-          tabIndex={-1}
-          className="relative min-w-0 flex-1 overflow-y-auto outline-none"
+          ref={mainRef}
+          // Focusable by the skip link always; in the tab order only while it scrolls, so the keyboard can scroll it.
+          tabIndex={mainScrolls ? 0 : -1}
+          className="relative min-w-0 flex-1 overflow-y-auto outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
         >
           <div className="mx-auto w-full max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
             <Outlet />

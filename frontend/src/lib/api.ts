@@ -229,6 +229,8 @@ export const systemInfoSchema = z.object({
     appliedCount: z.number().int().nonnegative(),
     currentVersion: z.string().nullish(),
   }),
+  /** The version every new simulation run records. */
+  simulation: z.object({ algorithmVersion: z.string().nullish() }).optional(),
   /** The AI analyst. `enabled`: a language model is configured; otherwise the built-in template analyst answers. */
   ai: z.object({
     enabled: z.boolean(),

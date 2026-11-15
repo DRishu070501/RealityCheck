@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { NOT_AVAILABLE } from '@/lib/metrics'
+import { Table } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
 /** One headline figure. A null value shows "—" with the reason as a tooltip, never zero. */
@@ -69,36 +70,34 @@ export function SimpleTable({
   className?: string
 }) {
   return (
-    <div className="w-full overflow-x-auto">
-      <table className={cn('w-full border-collapse text-left text-xs', className)}>
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr>
-            {headers.map((header) => (
-              <th key={header} scope="col" className="border-b border-border px-2 py-1.5 font-medium text-muted-foreground">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={index} className="border-b border-border last:border-b-0">
-              {row.map((cell, cellIndex) =>
-                cellIndex === 0 ? (
-                  <th key={cellIndex} scope="row" className="px-2 py-1.5 font-normal text-foreground">
-                    {cell}
-                  </th>
-                ) : (
-                  <td key={cellIndex} className="metric px-2 py-1.5 text-foreground">
-                    {cell}
-                  </td>
-                ),
-              )}
-            </tr>
+    <Table className={cn('text-xs', className)}>
+      <caption className="sr-only">{caption}</caption>
+      <thead>
+        <tr>
+          {headers.map((header) => (
+            <th key={header} scope="col" className="border-b border-border px-2 py-1.5 font-medium text-muted-foreground">
+              {header}
+            </th>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, index) => (
+          <tr key={index} className="border-b border-border last:border-b-0">
+            {row.map((cell, cellIndex) =>
+              cellIndex === 0 ? (
+                <th key={cellIndex} scope="row" className="px-2 py-1.5 font-normal text-foreground">
+                  {cell}
+                </th>
+              ) : (
+                <td key={cellIndex} className="metric px-2 py-1.5 text-foreground">
+                  {cell}
+                </td>
+              ),
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </Table>
   )
 }

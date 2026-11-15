@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CircleCheck, RotateCcw, TriangleAlert } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { RotateCcw, TriangleAlert } from 'lucide-react'
+import { useId, useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { ErrorState } from '@/components/ErrorState'
 import { PageHeader } from '@/components/PageHeader'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
@@ -19,7 +21,6 @@ import {
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, ApiError } from '@/lib/api'
-import { formatDateTime } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
@@ -31,18 +32,26 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+/** Typed to confirm the reset, so it cannot happen by a stray click. */
+const RESET_CONFIRMATION = 'RESET'
+
 function DemoReset() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [confirming, setConfirming] = useState(false)
+  const [typed, setTyped] = useState('')
+  const confirmId = useId()
 
   const reset = useMutation({
     mutationFn: () => api.demo.reset(),
-    onSuccess: async () => {
+    onSuccess: (result) => {
       setConfirming(false)
       // Every id may have changed and every edit is gone: nothing cached is still true.
-      await queryClient.invalidateQueries()
+      queryClient.clear()
+      void navigate('/', { state: { demoResetAt: result.resetAt } })
     },
   })
+  const confirmed = typed.trim() === RESET_CONFIRMATION
 
   return (
     <CardContent className="flex flex-col gap-4">
@@ -56,6 +65,7 @@ function DemoReset() {
           variant="outline"
           onClick={() => {
             reset.reset()
+            setTyped('')
             setConfirming(true)
           }}
         >
@@ -63,22 +73,6 @@ function DemoReset() {
           Reset demo data
         </Button>
       </div>
-
-      {reset.isSuccess ? (
-        <p
-          role="status"
-          className="flex items-start gap-2 rounded-md border border-status-ok/30 bg-status-ok-surface px-3 py-2.5 text-sm text-foreground"
-        >
-          <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-ok" />
-          <span>
-            Demo data was reset at{' '}
-            <time className="metric" dateTime={reset.data.resetAt}>
-              {formatDateTime(reset.data.resetAt)}
-            </time>
-            .
-          </span>
-        </p>
-      ) : null}
 
       <Dialog
         open={confirming}
@@ -93,9 +87,25 @@ function DemoReset() {
           </DialogHeader>
           <DialogBody className="flex flex-col gap-3 text-sm text-muted-foreground">
             <p>
-              Every factory, workflow, resource pool and availability window will be deleted, including your own
-              changes. The demonstration factory is then created again from its fixed seed.
+              Every factory, workflow, resource pool, order, recorded event, scenario, simulation run and AI insight
+              will be deleted, including your own changes. The demonstration factory, its history and its six
+              scenarios are then created again from the fixed seed.
             </p>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={confirmId} className="text-foreground">
+                Type <strong className="metric">{RESET_CONFIRMATION}</strong> to confirm
+              </label>
+              <Input
+                id={confirmId}
+                value={typed}
+                autoComplete="off"
+                spellCheck={false}
+                disabled={reset.isPending}
+                onChange={(event) => {
+                  setTyped(event.target.value)
+                }}
+              />
+            </div>
             {reset.isError ? (
               <p
                 role="alert"
@@ -118,7 +128,7 @@ function DemoReset() {
             </DialogClose>
             <Button
               className="bg-status-error text-background hover:bg-status-error/90"
-              disabled={reset.isPending}
+              disabled={reset.isPending || !confirmed}
               onClick={() => {
                 reset.mutate()
               }}
@@ -180,6 +190,9 @@ export function SettingsPage() {
                   {info.data.migrations.appliedCount} applied
                   {info.data.migrations.currentVersion ? `, current version ${info.data.migrations.currentVersion}` : ''}
                 </span>
+              </Row>
+              <Row label="Simulation algorithm">
+                <span className="metric">{info.data.simulation?.algorithmVersion ?? 'Unknown'}</span>
               </Row>
               <Row label="AI layer">
                 {info.data.ai.enabled ? (

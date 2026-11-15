@@ -8,7 +8,7 @@ import { RunStatusBadge } from '@/components/RunStatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProblemBanner } from '@/features/scenarios/ProblemBanner'
-import { asApiError, scenarioProblemMessages } from '@/features/scenarios/scenarioShared'
+import { asApiError, baselineNameFor, scenarioProblemMessages } from '@/features/scenarios/scenarioShared'
 import { api, type ApiError } from '@/lib/api'
 import { formatShortDateTimeInZone } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
@@ -192,6 +192,25 @@ export function RunPanel({ factory, scenario, valid, checkFailed = false }: RunP
     })
   }
 
+  // No baseline scenario starts where this one does (it was forked from its own moment): make one.
+  const createBaseline = useMutation({
+    mutationFn: () =>
+      api.scenarios.create({
+        factoryId: scenario.factoryId,
+        name: baselineNameFor(scenario.name),
+        description: `The factory as recorded, with no changes, from the same moment as "${scenario.name}".`,
+        forkAt: scenario.forkAt,
+        includeFutureOrders: scenario.includeFutureOrders,
+      }),
+    onSuccess: (created) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.scenarios.all })
+      startBaseline(created.id)
+    },
+    onError: (error) => {
+      setBaselineNotice({ kind: 'error', error: asApiError(error, 'The baseline could not be created') })
+    },
+  })
+
   const running = isActive(runStatus)
   const disabledReason =
     valid === null
@@ -205,6 +224,8 @@ export function RunPanel({ factory, scenario, valid, checkFailed = false }: RunP
           : null
   const compareTo = comparisons.data?.items[0]?.baseline.runId ?? null
   const suggested = comparisons.data?.baselineMissing ? comparisons.data.suggestedBaselineScenarioId : null
+  const noBaselineScenario =
+    comparisons.data?.baselineMissing === true && suggested === null && baselineRunId === null
 
   return (
     <Card aria-labelledby="run-title">
@@ -247,6 +268,44 @@ export function RunPanel({ factory, scenario, valid, checkFailed = false }: RunP
           <RunOutcome run={run.data} compareTo={compareTo} timeZone={factory.timeZone} />
         ) : runId === null ? (
           <p className="text-sm text-muted-foreground">This scenario has not been run yet.</p>
+        ) : null}
+
+        {noBaselineScenario ? (
+          <div className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised px-4 py-3">
+            <p className="text-sm text-foreground">
+              No baseline starts at this scenario's moment yet, so there is nothing to compare it with. A baseline is the
+              factory as recorded from the same moment, with no changes.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                disabled={createBaseline.isPending || simulate.isPending}
+                onClick={() => {
+                  setBaselineNotice(null)
+                  createBaseline.mutate()
+                }}
+              >
+                <Play aria-hidden="true" />
+                {createBaseline.isPending ? 'Creating baseline' : 'Create and run baseline'}
+              </Button>
+            </div>
+            <NoticeView notice={baselineNotice} />
+          </div>
+        ) : null}
+
+        {baselineRunId !== null && !suggested ? (
+          <div className="flex flex-col gap-2 rounded-md border border-border bg-surface-raised px-4 py-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm text-foreground">Baseline</p>
+              {baselineRun.data ? <RunStatusBadge status={baselineRun.data.status} /> : null}
+            </div>
+            <NoticeView notice={baselineNotice} />
+            {baselineRun.data?.status === 'FAILED' ? (
+              <ProblemBanner title="The baseline simulation failed">
+                <p className="text-muted-foreground">{baselineRun.data.failureMessage ?? 'No reason was recorded.'}</p>
+              </ProblemBanner>
+            ) : null}
+          </div>
         ) : null}
 
         {suggested ? (

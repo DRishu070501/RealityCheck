@@ -385,6 +385,22 @@ export const alternativeComparisonSchema = z.object({
 })
 export type AlternativeComparison = z.infer<typeof alternativeComparisonSchema>
 
+/**
+ * What recorded history shows happened after the fork to the work the baseline run simulated. History
+ * stops at `asOf` while a simulation runs to completion, so these are shown beside simulated figures, never
+ * subtracted from them.
+ */
+export const actualOutcomeSchema = z.object({
+  source: z.literal('ACTUAL'),
+  asOf: instant,
+  ordersInScope: z.number().int().nonnegative(),
+  ordersCompleted: z.number().int().nonnegative(),
+  outputStones: z.string(),
+  outputCarats: z.string(),
+  orders: z.array(z.object({ orderId: uuid, orderNumber: z.string(), completedAt: instant.nullable() })),
+})
+export type ActualOutcome = z.infer<typeof actualOutcomeSchema>
+
 export const comparisonSchema = z.object({
   source: z.literal('SIMULATED'),
   currencyCode: z.string().nullable(),
@@ -393,7 +409,7 @@ export const comparisonSchema = z.object({
   warnings: z.array(z.object({ code: z.string(), runId: uuid, message: z.string() })),
   baseline: comparedRunSchema,
   alternatives: z.array(alternativeComparisonSchema),
-  actual: z.null(),
+  actual: actualOutcomeSchema.nullable(),
 })
 export type Comparison = z.infer<typeof comparisonSchema>
 
@@ -430,4 +446,6 @@ export interface CompareInput {
   baselineRunId: string
   alternativeRunIds: string[]
   allowDifferentBaseline?: boolean
+  /** Add what recorded history shows happened after the fork (`actual`). */
+  includeActual?: boolean
 }

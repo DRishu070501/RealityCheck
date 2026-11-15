@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, RotateCw } from 'lucide-react'
+import { CircleCheck, ExternalLink, RotateCw } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { ErrorState } from '@/components/ErrorState'
 import { PageHeader } from '@/components/PageHeader'
@@ -23,6 +24,32 @@ function StatusRow({ label, children }: { label: string; children: ReactNode }) 
       <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-foreground">{children}</dd>
     </div>
+  )
+}
+
+/** Shown once after Settings reset the demonstration data and returned here. */
+function ResetNotice() {
+  const location = useLocation()
+  const state: unknown = location.state
+  const resetAt =
+    typeof state === 'object' && state !== null && 'demoResetAt' in state && typeof state.demoResetAt === 'string'
+      ? state.demoResetAt
+      : null
+  if (resetAt === null) return null
+  return (
+    <p
+      role="status"
+      className="flex items-start gap-2 rounded-md border border-status-ok/30 bg-status-ok-surface px-3 py-2.5 text-sm text-foreground"
+    >
+      <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-ok" />
+      <span>
+        Demo data was reset at{' '}
+        <time className="metric" dateTime={resetAt}>
+          {formatDateTime(resetAt)}
+        </time>
+        . Surat Diamond Works is back to its seeded state.
+      </span>
+    </p>
   )
 }
 
@@ -70,6 +97,7 @@ export function OverviewPage() {
       />
 
       <div className="flex flex-col gap-6">
+        <ResetNotice />
         <FactorySummary />
         <OperationsSummary />
         <SimulatedBaselinePanel />

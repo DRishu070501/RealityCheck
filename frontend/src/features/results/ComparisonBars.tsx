@@ -36,7 +36,7 @@ export default function ComparisonBars({
   return (
     <div aria-hidden="true" className={slanted ? 'h-64 w-full' : 'h-56 w-full'}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={[...rows]} margin={{ top: 4, right: 8, bottom: 0, left: 8 }} barCategoryGap="24%">
+        <BarChart accessibilityLayer={false} data={[...rows]} margin={{ top: 4, right: 8, bottom: 0, left: 8 }} barCategoryGap="24%">
           <CartesianGrid vertical={false} stroke="var(--border)" />
           <XAxis
             dataKey="label"

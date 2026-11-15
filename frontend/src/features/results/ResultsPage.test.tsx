@@ -139,6 +139,7 @@ describe('ResultsPage, comparison', () => {
       baselineRunId: BASELINE_RUN_ID,
       alternativeRunIds: [RUN_ID],
       allowDifferentBaseline: false,
+      includeActual: true,
     })
     expect(screen.getByText(/Chosen automatically/)).toBeInTheDocument()
 
@@ -158,6 +159,10 @@ describe('ResultsPage, comparison', () => {
     expect(screen.getByText('The bottleneck stays at Polishing.')).toBeInTheDocument()
     expect(screen.getByText('Add shifts: Mon, Tue, Wed, Thu, Fri, Sat 18:00-22:00')).toBeInTheDocument()
     expect(screen.getByText('No changes: the factory as recorded.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Explain with AI Analyst' })).toHaveAttribute(
+      'href',
+      `/analyst?run=${RUN_ID}&baseline=${BASELINE_RUN_ID}`,
+    )
   })
 
   it('gives every chart a table with the same numbers', async () => {
@@ -179,6 +184,38 @@ describe('ResultsPage, comparison', () => {
     const completion = tableByCaption('Completion time in hours')
     expect(within(completion).getByText('346.7 h')).toBeInTheDocument() // 1248248 s
     expect(within(completion).getByText('231.7 h')).toBeInTheDocument() // 834247 s
+  })
+
+  it('shows what recorded history says happened after the fork beside the simulated baseline, without differences', async () => {
+    mockBackend(routes())
+
+    renderWithProviders(<ResultsPage />, { route: `/results?run=${RUN_ID}&baseline=${BASELINE_RUN_ID}` })
+
+    const heading = await screen.findByText('What actually happened after the fork')
+    const card = heading.closest('[aria-labelledby="actual-title"]') as HTMLElement
+    expect(within(card).getByText('Actual')).toBeInTheDocument()
+    const table = tableByCaption("Recorded outcome beside the baseline's simulated outcome")
+    const actual = fixtures.comparison.actual
+    expect(within(table).getByText(`${actual.ordersCompleted} of ${actual.ordersInScope}`)).toBeInTheDocument()
+    expect(within(table).getByText(formatByUnit(actual.outputStones, 'stones', ''))).toBeInTheDocument()
+    expect(within(table).getByText(formatByUnit(actual.outputCarats, 'carats', ''))).toBeInTheDocument()
+    // The baseline's simulated figures, verbatim from its metrics.
+    const outputStones = capturedAlternative().metrics.find((m) => m.key === 'outputStones')
+    expect(within(table).getByText(formatByUnit(outputStones?.baseline ?? null, 'stones', ''))).toBeInTheDocument()
+    expect(within(table).queryByText(/Difference/)).not.toBeInTheDocument()
+    const completions = tableByCaption('Orders completed in recorded history after the fork')
+    expect(within(completions).getAllByRole('row')).toHaveLength(actual.ordersCompleted + 1)
+  })
+
+  it('shows no recorded outcome when the comparison has none', async () => {
+    mockBackend(
+      routes({ 'POST /api/simulations/compare': () => jsonResponse({ ...fixtures.comparison, actual: null }) }),
+    )
+
+    renderWithProviders(<ResultsPage />, { route: `/results?run=${RUN_ID}&baseline=${BASELINE_RUN_ID}` })
+
+    await screen.findByText('Headline metrics')
+    expect(screen.queryByText('What actually happened after the fork')).not.toBeInTheDocument()
   })
 
   it('describes a moved bottleneck with both stages and their scores', async () => {

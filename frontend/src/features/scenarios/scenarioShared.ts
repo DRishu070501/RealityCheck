@@ -66,3 +66,9 @@ export function scenarioProblemMessages(error: ApiError): string[] {
   }
   return messages
 }
+
+/** A name for the baseline created for a scenario, within the 120 characters a name may have. */
+export function baselineNameFor(scenarioName: string): string {
+  const shown = scenarioName.length > 100 ? `${scenarioName.slice(0, 99)}…` : scenarioName
+  return `Baseline for "${shown}"`
+}

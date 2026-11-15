@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SettingsPage } from '@/features/settings/SettingsPage'
 import { FACTORY_ID, fixtures, mockBackend, problem } from '@/test/backend'
+import { LocationProbe } from '@/test/LocationProbe'
 import { jsonResponse, renderWithProviders } from '@/test/utils'
 
 afterEach(() => {
@@ -23,6 +24,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('PostgreSQL 17.12')).toBeInTheDocument()
     expect(screen.getByText('4 applied, current version 4')).toBeInTheDocument()
     expect(screen.getByText('Built-in analyst')).toBeInTheDocument()
+    expect(screen.getByText('1.0.0')).toBeInTheDocument()
   })
 
   it('offers no reset when it is disabled by configuration', async () => {
@@ -35,30 +37,40 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('button', { name: 'Reset demo data' })).not.toBeInTheDocument()
   })
 
-  it('asks for confirmation, stating that all data is erased, before resetting', async () => {
+  it('needs the confirmation typed, then resets, discards cached data and returns to Overview', async () => {
     const user = userEvent.setup()
     const backend = mockBackend({
       'GET /api/system/info': info(true),
       [RESET]: () => jsonResponse({ factoryId: FACTORY_ID, resetAt: '2026-11-14T06:40:00.123456Z' }),
     })
-    renderWithProviders(<SettingsPage />)
+    renderWithProviders(
+      <>
+        <SettingsPage />
+        <LocationProbe />
+      </>,
+      { route: '/settings' },
+    )
 
     await user.click(await screen.findByRole('button', { name: 'Reset demo data' }))
 
     const dialog = await screen.findByRole('dialog', { name: 'Erase all data and reset the demo?' })
     expect(within(dialog).getByText('This cannot be undone.')).toBeInTheDocument()
     expect(within(dialog).getByText(/will be deleted, including your own\s+changes/)).toBeInTheDocument()
+    const erase = within(dialog).getByRole('button', { name: 'Erase and reset' })
+    expect(erase).toBeDisabled()
+    await user.type(within(dialog).getByLabelText(/to confirm/), 'reset')
+    expect(erase).toBeDisabled()
+    await user.clear(within(dialog).getByLabelText(/to confirm/))
+    await user.type(within(dialog).getByLabelText(/to confirm/), 'RESET')
     expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(0)
 
-    await user.click(within(dialog).getByRole('button', { name: 'Erase and reset' }))
+    await user.click(erase)
 
-    expect(await screen.findByText(/Demo data was reset at/)).toBeInTheDocument()
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(1)
-    // Cached data is discarded: system info is read again.
     await waitFor(() => {
-      expect(backend.sent('GET', '/api/system/info').length).toBeGreaterThan(1)
+      expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/)
     })
+    expect(backend.sent('POST', '/api/demo/reset')).toHaveLength(1)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('resets nothing when the confirmation is cancelled', async () => {
@@ -85,6 +97,7 @@ describe('SettingsPage', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Reset demo data' }))
     const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText(/to confirm/), 'RESET')
     await user.click(within(dialog).getByRole('button', { name: 'Erase and reset' }))
 
     expect(await within(dialog).findByRole('alert')).toHaveTextContent('Something went wrong on the server.')

@@ -80,7 +80,7 @@ export function ActivityChart({ summary, selectedDay, onSelectDay }: ActivityCha
     <div>
       <div aria-hidden="true" className="h-56 w-full px-2 pt-4">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 4, right: 12, bottom: 0, left: 0 }} barCategoryGap="18%">
+          <BarChart accessibilityLayer={false} data={rows} margin={{ top: 4, right: 12, bottom: 0, left: 0 }} barCategoryGap="18%">
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="label"

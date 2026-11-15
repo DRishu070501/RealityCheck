@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { ChartColumn, TriangleAlert } from 'lucide-react'
+import { ChartColumn, Sparkles, TriangleAlert } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { SourceTag } from '@/components/DataTags'
@@ -110,6 +110,7 @@ function Results({ factory }: { factory: Factory }) {
         baselineRunId: baselineId ?? '',
         alternativeRunIds: [runId ?? ''],
         allowDifferentBaseline: allowDifferent,
+        includeActual: true,
       }),
     enabled: runId !== null && baselineId !== null && baselineId !== runId,
     retry: false,
@@ -201,7 +202,19 @@ function Results({ factory }: { factory: Factory }) {
                 Computed by the deterministic engine from recorded history at the fork and the scenario's changes.
               </CardDescription>
             </div>
-            <SourceTag source="Simulated" scenarioName={run.data.scenarioName ?? undefined} />
+            <div className="flex flex-wrap items-center gap-2">
+              <SourceTag source="Simulated" scenarioName={run.data.scenarioName ?? undefined} />
+              {run.data.status === 'COMPLETED' ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    to={`/analyst?run=${runId}&baseline=${baselineId !== null && baselineId !== runId ? baselineId : 'none'}`}
+                  >
+                    <Sparkles aria-hidden="true" />
+                    Explain with AI Analyst
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-4">

@@ -11,7 +11,7 @@ import { ChartFigure, SimpleTable } from '@/features/results/resultsUi'
 import { formatDecimal, formatInteger, formatMoney, formatShortDateTimeInZone } from '@/lib/format'
 import { formatByUnit, formatElapsed, NOT_AVAILABLE } from '@/lib/metrics'
 import { bottleneckSentence } from '@/features/results/resultsFormat'
-import type { AlternativeComparison, BottleneckChange, Comparison, Delta } from '@/lib/scenarioSchemas'
+import type { ActualOutcome, AlternativeComparison, BottleneckChange, Comparison, Delta } from '@/lib/scenarioSchemas'
 
 /** Recharts is large; it is fetched only when a comparison is drawn. */
 const ComparisonBars = lazy(() => import('@/features/results/ComparisonBars'))
@@ -77,6 +77,69 @@ function BottleneckChangeCard({
             ])}
           />
         ) : null}
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Recorded history after the fork beside the baseline's simulated figures. No differences: history stops at
+ * `asOf`, while the simulation runs every order to completion.
+ */
+function ActualOutcomeCard({
+  actual,
+  alternative,
+  baselineName,
+  timeZone,
+}: {
+  actual: ActualOutcome
+  alternative: AlternativeComparison
+  baselineName: string
+  timeZone: string
+}) {
+  const simulated = (key: string) => alternative.metrics.find((m) => m.key === key)?.baseline ?? null
+  const asOf = formatShortDateTimeInZone(actual.asOf, timeZone)
+  const completed = actual.orders
+    .filter((order) => order.completedAt !== null)
+    .sort((a, b) => (a.completedAt ?? '').localeCompare(b.completedAt ?? ''))
+  const simulatedOrders = simulated('ordersCompleted')
+  return (
+    <Card aria-labelledby="actual-title">
+      <CardHeader>
+        <div>
+          <CardTitle id="actual-title">What actually happened after the fork</CardTitle>
+          <CardDescription>
+            Recorded history for the same orders, up to the latest recorded event ({asOf}). History stops there while
+            the simulation runs every order to completion, so the two are shown side by side and not subtracted.
+          </CardDescription>
+        </div>
+        <SourceTag source="Actual" />
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <SimpleTable
+          caption="Recorded outcome beside the baseline's simulated outcome"
+          headers={['', `${baselineName} (simulated, to completion)`, `Recorded (as of ${asOf})`]}
+          rows={[
+            [
+              'Orders completed',
+              simulatedOrders === null
+                ? NOT_AVAILABLE
+                : `${formatInteger(Number(simulatedOrders))} of ${formatInteger(actual.ordersInScope)}`,
+              `${formatInteger(actual.ordersCompleted)} of ${formatInteger(actual.ordersInScope)}`,
+            ],
+            ['Output stones', formatByUnit(simulated('outputStones'), 'stones', ''), formatByUnit(actual.outputStones, 'stones', '')],
+            ['Output carats', formatByUnit(simulated('outputCarats'), 'carats', ''), formatByUnit(actual.outputCarats, 'carats', '')],
+          ]}
+        />
+        {completed.length > 0 ? (
+          <SimpleTable
+            caption="Orders completed in recorded history after the fork"
+            headers={['Order', 'Recorded completion']}
+            rows={completed.map((order) => [order.orderNumber, formatShortDateTimeInZone(order.completedAt ?? '', timeZone)])}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">None of these orders had finished by the latest recorded event.</p>
+        )}
       </CardContent>
     </Card>
   )
@@ -286,6 +349,15 @@ export function ComparisonView({ comparison, timeZone }: { comparison: Compariso
       <BottleneckChangeCard change={alternative.bottleneck} baselineName={baselineName} alternativeName={alternativeName} />
 
       <Charts alternative={alternative} baselineName={baselineName} alternativeName={alternativeName} currency={currency} />
+
+      {comparison.actual ? (
+        <ActualOutcomeCard
+          actual={comparison.actual}
+          alternative={alternative}
+          baselineName={baselineName}
+          timeZone={timeZone}
+        />
+      ) : null}
 
       <Card aria-labelledby="stage-compare-title">
         <CardHeader>

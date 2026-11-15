@@ -1347,5 +1347,159 @@
       ]
     }
   ],
-  "actual": null
+  "actual": {
+    "source": "ACTUAL",
+    "asOf": "2026-11-14T12:30:00Z",
+    "ordersInScope": 29,
+    "ordersCompleted": 11,
+    "outputStones": "1279.0000",
+    "outputCarats": "820.8626",
+    "orders": [
+      {
+        "orderId": "81f770cc-67fc-368f-8eab-54d380352a5b",
+        "orderNumber": "SDW-0030",
+        "completedAt": "2026-11-14T09:14:36Z"
+      },
+      {
+        "orderId": "97e608c9-f56b-3324-8a3a-47084d3efbc0",
+        "orderNumber": "SDW-0045",
+        "completedAt": null
+      },
+      {
+        "orderId": "98c408a5-0d45-37f0-930c-adfff242dc06",
+        "orderNumber": "SDW-0041",
+        "completedAt": null
+      },
+      {
+        "orderId": "ac13cca6-9151-3fa5-ae34-7f71c3c494a1",
+        "orderNumber": "SDW-0027",
+        "completedAt": "2026-11-14T06:38:54Z"
+      },
+      {
+        "orderId": "b939b1b5-4d67-369a-bb5e-309e075aece4",
+        "orderNumber": "SDW-0037",
+        "completedAt": null
+      },
+      {
+        "orderId": "c8957f30-64ac-3875-80bd-39095ecb73be",
+        "orderNumber": "SDW-0021",
+        "completedAt": "2026-11-11T08:33:05Z"
+      },
+      {
+        "orderId": "e7a019fe-3cbc-3174-92d6-469611d1d8a7",
+        "orderNumber": "SDW-0035",
+        "completedAt": null
+      },
+      {
+        "orderId": "e9fe58cc-05ba-3dc2-893e-849b475f0585",
+        "orderNumber": "SDW-0039",
+        "completedAt": null
+      },
+      {
+        "orderId": "eb3fff91-6ceb-3e4f-a1e7-c9ecb91c3fee",
+        "orderNumber": "SDW-0044",
+        "completedAt": null
+      },
+      {
+        "orderId": "ec583100-8acd-331b-94f7-e53f67936842",
+        "orderNumber": "SDW-0026",
+        "completedAt": "2026-11-11T03:47:56Z"
+      },
+      {
+        "orderId": "f0f613c0-a6a3-31ad-8db2-d623520b65cc",
+        "orderNumber": "SDW-0040",
+        "completedAt": null
+      },
+      {
+        "orderId": "f998c157-7fe3-35a9-ba94-a4e899c1ff34",
+        "orderNumber": "SDW-0025",
+        "completedAt": "2026-11-12T09:27:52Z"
+      },
+      {
+        "orderId": "05a1d59c-6efe-31f3-844e-b86452b4e376",
+        "orderNumber": "SDW-0047",
+        "completedAt": null
+      },
+      {
+        "orderId": "0710efd4-64ec-381a-b38d-9e82547b2b49",
+        "orderNumber": "SDW-0049",
+        "completedAt": null
+      },
+      {
+        "orderId": "082d46e1-0baf-3659-bdf2-c80ae6a1986e",
+        "orderNumber": "SDW-0042",
+        "completedAt": null
+      },
+      {
+        "orderId": "10340c66-ec7d-3e10-8b22-cf5eb675fed2",
+        "orderNumber": "SDW-0036",
+        "completedAt": null
+      },
+      {
+        "orderId": "1272a76f-12e6-3283-92c4-2b4c5b4a9fe9",
+        "orderNumber": "SDW-0048",
+        "completedAt": null
+      },
+      {
+        "orderId": "15a5eb2e-9656-30a7-a863-25500b593694",
+        "orderNumber": "SDW-0043",
+        "completedAt": null
+      },
+      {
+        "orderId": "18d7bb59-63c5-3362-808a-fdc4b8dc5f38",
+        "orderNumber": "SDW-0028",
+        "completedAt": "2026-11-13T05:50:02Z"
+      },
+      {
+        "orderId": "1b8d9216-dfbd-32d8-8339-9e3a89591609",
+        "orderNumber": "SDW-0024",
+        "completedAt": "2026-11-11T09:27:08Z"
+      },
+      {
+        "orderId": "1b8f03e7-7623-3859-8909-e110590163ce",
+        "orderNumber": "SDW-0033",
+        "completedAt": null
+      },
+      {
+        "orderId": "1be0f01b-af74-3426-9f51-e7fb9ff494b9",
+        "orderNumber": "SDW-0034",
+        "completedAt": null
+      },
+      {
+        "orderId": "20bf0de0-8e09-361c-bb62-79bbe7eda978",
+        "orderNumber": "SDW-0038",
+        "completedAt": null
+      },
+      {
+        "orderId": "4746b9dd-a406-3ae9-8376-3a6a8c76f710",
+        "orderNumber": "SDW-0023",
+        "completedAt": "2026-11-10T05:28:36Z"
+      },
+      {
+        "orderId": "48cd3419-c94b-3b1c-9342-a6e1f4caae92",
+        "orderNumber": "SDW-0022",
+        "completedAt": "2026-11-12T05:10:35Z"
+      },
+      {
+        "orderId": "4ef7da82-5a50-39d7-92c0-16e45529dace",
+        "orderNumber": "SDW-0046",
+        "completedAt": null
+      },
+      {
+        "orderId": "68ea6a7a-8b7c-3ec5-b992-0d426f32429b",
+        "orderNumber": "SDW-0031",
+        "completedAt": "2026-11-14T06:29:18Z"
+      },
+      {
+        "orderId": "7175bcad-8a39-39f7-8f2e-8440a521a796",
+        "orderNumber": "SDW-0032",
+        "completedAt": null
+      },
+      {
+        "orderId": "7d3cacb8-923c-33b0-928a-207a2cec27fc",
+        "orderNumber": "SDW-0029",
+        "completedAt": "2026-11-14T11:01:58Z"
+      }
+    ]
+  }
 }

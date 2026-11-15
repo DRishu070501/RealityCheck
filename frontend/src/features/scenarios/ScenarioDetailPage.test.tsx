@@ -198,6 +198,33 @@ describe('ScenarioDetailPage', () => {
     expect(await screen.findByText('Running')).toBeInTheDocument()
   })
 
+  it('creates and runs a baseline from the same moment when none starts there', async () => {
+    const created = { ...fixtures.scenarioBaseline, id: BASELINE_SCENARIO_ID, name: `Baseline for "${fixtures.scenario.name}"` }
+    const { backend, user } = renderPage({
+      [`GET ${PATH}/comparisons`]: () =>
+        jsonResponse({ baselineMissing: true, suggestedBaselineScenarioId: null, items: [] }),
+      'POST /api/scenarios': () => jsonResponse(created, { status: 201 }),
+      [`POST /api/scenarios/${BASELINE_SCENARIO_ID}/simulate`]: () => submitted(BASELINE_RUN_ID),
+      [`GET /api/simulations/${BASELINE_RUN_ID}`]: () =>
+        runIn('RUNNING', { runId: BASELINE_RUN_ID, scenarioId: BASELINE_SCENARIO_ID, finishedAt: null }),
+    })
+
+    expect(await screen.findByText(/No baseline starts at this scenario's moment yet/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Create and run baseline' }))
+
+    await waitFor(() => {
+      expect(backend.sent('POST', `/api/scenarios/${BASELINE_SCENARIO_ID}/simulate`)).toHaveLength(1)
+    })
+    const body = backend.last('POST', '/api/scenarios').body as Record<string, unknown>
+    expect(body).toMatchObject({
+      factoryId: fixtures.scenario.factoryId,
+      name: `Baseline for "${fixtures.scenario.name}"`,
+      forkAt: fixtures.scenario.forkAt,
+      includeFutureOrders: fixtures.scenario.includeFutureOrders,
+    })
+    expect(await screen.findByText('Running')).toBeInTheDocument()
+  })
+
   it('renames with the current version and explains a conflicting edit', async () => {
     const { backend, user } = renderPage({
       [`PATCH ${PATH}`]: () =>
