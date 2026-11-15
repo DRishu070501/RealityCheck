@@ -1,0 +1,1 @@
+Task: analyse order delivery. Say how many orders are delayed and which ones, using their outcomes, due times and simulated completion times. Explain the likely cause from the bottleneck and waiting times in the evidence. Use risks for orders at risk. Recommendations focus on getting delayed orders out on time, each as something to simulate.

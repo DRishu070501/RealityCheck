@@ -37,21 +37,21 @@ class SystemInfoServiceTest {
         databaseIsUp("PostgreSQL", "17.2");
         migrationsApplied(3, "3");
 
-        SystemInfoResponse info = service(new Ai("none", null), "0.1.0").current();
+        SystemInfoResponse info = service(Ai.of("none", null), "0.1.0").current();
 
         assertThat(info.application()).isEqualTo("RealityCheck");
         assertThat(info.version()).isEqualTo("0.1.0");
         assertThat(info.serverTime()).isEqualTo(NOW);
         assertThat(info.database()).isEqualTo(new SystemInfoResponse.Database("UP", "PostgreSQL", "17.2"));
         assertThat(info.migrations()).isEqualTo(new SystemInfoResponse.Migrations(3, "3"));
-        assertThat(info.ai()).isEqualTo(new SystemInfoResponse.Ai(false, "none"));
+        assertThat(info.ai()).isEqualTo(new SystemInfoResponse.Ai(false, "template", null, true));
     }
 
     @Test
     void reportsDownInsteadOfFailingWhenTheDatabaseIsUnreachable() throws SQLException {
         when(dataSource.getConnection()).thenThrow(new SQLException("Connection refused"));
 
-        SystemInfoResponse info = service(new Ai("none", null), "0.1.0").current();
+        SystemInfoResponse info = service(Ai.of("none", null), "0.1.0").current();
 
         assertThat(info.database()).isEqualTo(new SystemInfoResponse.Database("DOWN", null, null));
         assertThat(info.migrations()).isEqualTo(new SystemInfoResponse.Migrations(0, null));
@@ -63,10 +63,13 @@ class SystemInfoServiceTest {
         databaseIsUp("PostgreSQL", "17.2");
         migrationsApplied(1, "1");
 
-        assertThat(service(new Ai("anthropic", "key"), "0.1.0").current().ai())
-                .isEqualTo(new SystemInfoResponse.Ai(true, "anthropic"));
-        assertThat(service(new Ai("anthropic", " "), "0.1.0").current().ai().enabled()).isFalse();
-        assertThat(service(new Ai("none", "key"), "0.1.0").current().ai().enabled()).isFalse();
+        assertThat(service(Ai.of("anthropic", "key"), "0.1.0").current().ai())
+                .isEqualTo(new SystemInfoResponse.Ai(true, "anthropic", "claude-haiku-5-5", true));
+        // Without a key the template analyst answers, and says so.
+        assertThat(service(Ai.of("anthropic", " "), "0.1.0").current().ai())
+                .isEqualTo(new SystemInfoResponse.Ai(false, "template", null, true));
+        assertThat(service(Ai.of("none", "key"), "0.1.0").current().ai().enabled()).isFalse();
+        assertThat(service(Ai.of("template", "key"), "0.1.0").current().ai().enabled()).isFalse();
     }
 
     @Test
@@ -74,12 +77,12 @@ class SystemInfoServiceTest {
         databaseIsUp("PostgreSQL", "17.2");
         migrationsApplied(1, "1");
 
-        assertThat(service(new Ai("none", null), null).current().version()).isEqualTo("dev");
+        assertThat(service(Ai.of("none", null), null).current().version()).isEqualTo("dev");
     }
 
     @Test
     void theApiKeyNeverAppearsInTheConfigurationsTextForm() {
-        assertThat(new Ai("anthropic", "sk-very-secret").toString())
+        assertThat(Ai.of("anthropic", "sk-very-secret").toString())
                 .doesNotContain("sk-very-secret")
                 .contains("<set>");
     }

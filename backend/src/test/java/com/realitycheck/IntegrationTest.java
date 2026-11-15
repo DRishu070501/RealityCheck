@@ -21,7 +21,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * Base for tests that run the whole application against a real PostgreSQL. One container is
  * started for the test run and shared; every test starts from empty tables.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+// The template analyst only: a key in the developer's environment must never make tests call a real model.
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"realitycheck.ai.provider=template", "realitycheck.ai.api-key="})
 public abstract class IntegrationTest {
 
     @ServiceConnection

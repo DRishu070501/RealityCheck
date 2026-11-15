@@ -1,0 +1,1 @@
+Task: compare the scenario with the baseline. The summary states the most important differences using the delta items, saying for each whether it is better or worse. Key changes list the differences that matter, including any change of bottleneck. Mention comparison warnings in risks. Recommendations say whether the scenario is worth pursuing and what to simulate next.

@@ -55,7 +55,8 @@ class ApplicationIT extends IntegrationTest {
         assertThat(body.path("migrations").path("appliedCount").asInt()).isGreaterThanOrEqualTo(1);
         assertThat(body.path("migrations").path("currentVersion").asText()).isNotBlank();
         assertThat(body.path("ai").path("enabled").asBoolean()).isFalse();
-        assertThat(body.path("ai").path("provider").asText()).isEqualTo("none");
+        assertThat(body.path("ai").path("provider").asText()).isEqualTo("template");
+        assertThat(body.path("ai").path("available").asBoolean()).isTrue();
         assertThat(body.toString()).doesNotContainIgnoringCase("apiKey");
     }
 

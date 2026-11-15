@@ -1,0 +1,1 @@
+Task: explain what happens in this run. The summary says how long the work takes, what it produces, what it costs and how many orders are delayed. Key changes list the scenario changes that were simulated or, with a baseline, the most important differences. Explain the bottleneck in bottleneckExplanation. Add risks and practical recommendations.

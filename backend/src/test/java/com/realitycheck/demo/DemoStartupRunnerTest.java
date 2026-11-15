@@ -52,7 +52,7 @@ class DemoStartupRunnerTest {
 
     private DemoStartupRunner runner(boolean seedOnStartup) {
         RealityCheckProperties properties = new RealityCheckProperties(
-                new Cors(List.of()), new Ai("none", null), new Demo(seedOnStartup, false));
+                new Cors(List.of()), Ai.of("none", null), new Demo(seedOnStartup, false));
         return new DemoStartupRunner(properties, factoryService, seeder, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 }

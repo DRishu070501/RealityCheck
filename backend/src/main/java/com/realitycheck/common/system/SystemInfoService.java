@@ -49,7 +49,8 @@ public class SystemInfoService {
     public SystemInfoResponse current() {
         Database database = readDatabase();
         Migrations migrations = Database.UP.equals(database.status()) ? readMigrations() : new Migrations(0, null);
-        Ai ai = new Ai(properties.ai().enabled(), properties.ai().provider());
+        RealityCheckProperties.Ai config = properties.ai();
+        Ai ai = new Ai(config.enabled(), config.activeProvider(), config.activeModel(), true);
         return new SystemInfoResponse(APPLICATION_NAME, version, clock.instant(), database, migrations, ai,
                 new SystemInfoResponse.Demo(properties.demo().resetEnabled()));
     }

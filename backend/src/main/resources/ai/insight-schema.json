@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "keyChanges", "risks", "bottleneckExplanation", "recommendations", "metricRefs",
+    "assumptions", "limitations"],
+  "properties": {
+    "summary": {"type": "string"},
+    "keyChanges": {"type": "array", "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "bottleneckExplanation": {"type": "string"},
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "rationale", "metricRefs"],
+        "properties": {
+          "title": {"type": "string"},
+          "rationale": {"type": "string"},
+          "metricRefs": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "metricRefs": {"type": "array", "items": {"type": "string"}},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

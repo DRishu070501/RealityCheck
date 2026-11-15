@@ -62,8 +62,15 @@ realitycheck:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   ai:
-    provider: ${AI_PROVIDER:none}
+    # template = the built-in analyst (no network). anthropic = Claude, used only when AI_API_KEY is set.
+    provider: ${AI_PROVIDER:template}
     api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:claude-haiku-5-5}
+    base-url: ${AI_BASE_URL:}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:30}
+    max-retries: ${AI_MAX_RETRIES:2}
+    max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:4000}
+    requests-per-minute: ${AI_REQUESTS_PER_MINUTE:20}
   demo:
     seed-on-startup: ${REALITYCHECK_DEMO_SEED:false}
     reset-enabled: ${REALITYCHECK_DEMO_RESET_ENABLED:false}

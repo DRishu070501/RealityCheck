@@ -1,0 +1,1 @@
+Task: write an executive report for the factory owner. The summary is a short paragraph covering timing, output, cost and delivery, and, with a baseline, the main differences. Key changes, risks and recommendations are the few points an owner needs to decide what to do next. Keep the language non-technical.

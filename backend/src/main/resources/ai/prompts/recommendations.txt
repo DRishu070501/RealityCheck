@@ -1,0 +1,1 @@
+Task: recommend what to look at or simulate next. Give between two and five recommendations, most important first. Each title is a short action and each rationale explains, from the evidence, why it matters. Recommend simulating a change before making it. Keep the summary short.

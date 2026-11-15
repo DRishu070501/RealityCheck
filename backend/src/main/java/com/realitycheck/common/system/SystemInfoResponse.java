@@ -26,7 +26,14 @@ public record SystemInfoResponse(
     public record Migrations(int appliedCount, String currentVersion) {
     }
 
-    /** Whether AI features are switched on, and which provider. Never includes credentials. */
-    public record Ai(boolean enabled, String provider) {
+    /**
+     * The AI analyst. Never includes credentials.
+     *
+     * @param enabled   a language model is configured (provider named and key present)
+     * @param provider  the provider that answers: {@code template} (built in) or the language-model vendor
+     * @param model     the model name; null for the template analyst
+     * @param available AI endpoints answer; always true, because the template analyst needs nothing external
+     */
+    public record Ai(boolean enabled, String provider, String model, boolean available) {
     }
 }

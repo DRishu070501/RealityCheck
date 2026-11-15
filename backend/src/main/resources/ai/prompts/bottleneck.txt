@@ -1,0 +1,1 @@
+Task: explain the bottleneck. Say which stage limits the flow of work and why, using its busiest resource pool's utilization, waiting time, queue length, saturation and bottleneck score. If no stage qualifies as a bottleneck, say so and explain why from the evidence. Recommendations focus on relieving the constraint, each as something to simulate first.

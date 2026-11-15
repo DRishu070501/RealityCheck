@@ -95,6 +95,31 @@ class ArchitectureTest {
                     "com.realitycheck.demo..");
 
     @ArchTest
+    static final ArchRule onlyTheProviderPackageKnowsTheLanguageModelClient = noClasses()
+            .that().resideOutsideOfPackage("com.realitycheck.ai.provider..")
+            .should().dependOnClassesThat().resideInAPackage("com.anthropic..")
+            .because("switching vendors must mean changing one provider class, never business logic");
+
+    @ArchTest
+    static final ArchRule nothingOutsideAiDependsOnAi = noClasses()
+            .that().resideOutsideOfPackage("com.realitycheck.ai..")
+            .should().dependOnClassesThat().resideInAPackage("com.realitycheck.ai..")
+            .because("AI explains results; no other module may depend on it");
+
+    @ArchTest
+    static final ArchRule aiReadsOnlyStoredResults = noClasses()
+            .that().resideInAPackage("com.realitycheck.ai..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "com.realitycheck.factory..",
+                    "com.realitycheck.workflow..",
+                    "com.realitycheck.resource..",
+                    "com.realitycheck.production..",
+                    "com.realitycheck.demo..",
+                    "com.realitycheck.simulation.engine..",
+                    "com.realitycheck.simulation.persistence..")
+            .because("AI sees only stored simulation results and comparisons, never live data or the engine");
+
+    @ArchTest
     static final ArchRule controllersDoNotTouchRepositories = noClasses()
             .that().areAnnotatedWith(RestController.class)
             .should().dependOnClassesThat().areAssignableTo(Repository.class)
