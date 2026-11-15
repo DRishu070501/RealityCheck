@@ -13,6 +13,8 @@ frontend/dist/
 frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/
+frontend/blob-report/
+frontend/test-results/
 *.tsbuildinfo
 
 # Editors and OS
