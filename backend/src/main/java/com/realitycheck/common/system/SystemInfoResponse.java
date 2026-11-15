@@ -8,8 +8,13 @@ public record SystemInfoResponse(
         Instant serverTime,
         Database database,
         Migrations migrations,
+        Simulation simulation,
         Ai ai,
         Demo demo) {
+
+    /** @param algorithmVersion the version new simulation runs record; null if no engine is present */
+    public record Simulation(String algorithmVersion) {
+    }
 
     /** Whether this deployment allows the demonstration data to be reset from the UI. */
     public record Demo(boolean resetEnabled) {

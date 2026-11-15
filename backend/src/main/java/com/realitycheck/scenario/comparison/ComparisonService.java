@@ -54,16 +54,16 @@ public class ComparisonService {
 
     private final RunResultsPort results;
     private final ScenarioReader scenarioReader;
+    private final ActualOutcomeService actualOutcome;
 
-    public ComparisonService(RunResultsPort results, ScenarioReader scenarioReader) {
+    public ComparisonService(RunResultsPort results, ScenarioReader scenarioReader,
+            ActualOutcomeService actualOutcome) {
         this.results = results;
         this.scenarioReader = scenarioReader;
+        this.actualOutcome = actualOutcome;
     }
 
     public ComparisonResponse compare(CompareRequest request) {
-        if (Boolean.TRUE.equals(request.includeActual())) {
-            throw ApiException.badRequest("includeActual is not available yet; omit it or set it to false.");
-        }
         List<UUID> alternativeIds = request.alternativeRunIds();
         if (new HashSet<>(alternativeIds).size() != alternativeIds.size()) {
             throw ApiException.badRequest("alternativeRunIds must not repeat a run.");
@@ -73,7 +73,15 @@ public class ComparisonService {
         }
         RunView baseline = load(request.baselineRunId());
         List<RunView> alternatives = alternativeIds.stream().map(this::load).toList();
-        return compare(baseline, alternatives, Boolean.TRUE.equals(request.allowDifferentBaseline()));
+        ComparisonResponse response = compare(baseline, alternatives,
+                Boolean.TRUE.equals(request.allowDifferentBaseline()));
+        if (!Boolean.TRUE.equals(request.includeActual())) {
+            return response;
+        }
+        // Shown beside the simulated figures only: history stops at asOf, a simulation runs to completion.
+        return new ComparisonResponse(response.source(), response.currencyCode(), response.sameStartingState(),
+                response.forkAt(), response.warnings(), response.baseline(), response.alternatives(),
+                actualOutcome.after(baseline).orElse(null));
     }
 
     /** The scenario's latest completed run against the latest matching run of each baseline scenario. */
@@ -119,7 +127,7 @@ public class ComparisonService {
             if (!COMPLETED.equals(run.status())) {
                 throw ApiException.conflict("Run " + run.runId() + " is " + run.status()
                         + "; only COMPLETED runs can be compared.")
-                        .withProperty("runId", run.runId()).withProperty("status", run.status());
+                        .withProperty("runId", run.runId()).withProperty("runStatus", run.status());
             }
         }
         List<ComparisonWarning> warnings = new ArrayList<>();

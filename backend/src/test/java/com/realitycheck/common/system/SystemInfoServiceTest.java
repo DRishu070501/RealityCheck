@@ -45,6 +45,7 @@ class SystemInfoServiceTest {
         assertThat(info.database()).isEqualTo(new SystemInfoResponse.Database("UP", "PostgreSQL", "17.2"));
         assertThat(info.migrations()).isEqualTo(new SystemInfoResponse.Migrations(3, "3"));
         assertThat(info.ai()).isEqualTo(new SystemInfoResponse.Ai(false, "template", null, true));
+        assertThat(info.simulation().algorithmVersion()).isEqualTo("9.9.9");
     }
 
     @Test
@@ -116,6 +117,9 @@ class SystemInfoServiceTest {
         RealityCheckProperties properties =
                 new RealityCheckProperties(new Cors(List.of("http://localhost:5173")), ai,
                         new RealityCheckProperties.Demo(false, false));
-        return new SystemInfoService(dataSource, flyway, Clock.fixed(NOW, ZoneOffset.UTC), properties, buildProperties);
+        ObjectProvider<AlgorithmVersionSource> algorithm = mock(ObjectProvider.class);
+        when(algorithm.getIfAvailable()).thenReturn(() -> "9.9.9");
+        return new SystemInfoService(dataSource, flyway, Clock.fixed(NOW, ZoneOffset.UTC), properties, buildProperties,
+                algorithm);
     }
 }

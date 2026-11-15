@@ -45,6 +45,11 @@ public class ProductionReader {
         return events.findFirstOccurrence(factoryId);
     }
 
+    /** @return when the factory's latest recorded event occurred; null when it has none */
+    public Instant lastEventAt(UUID factoryId) {
+        return events.findLastOccurrence(factoryId);
+    }
+
     /** @return the orders that exist among the ids, keyed by id */
     public Map<UUID, OrderView> byIds(Collection<UUID> ids) {
         return toViews(orders.findAllById(ids)).stream().collect(Collectors.toMap(OrderView::id, order -> order));

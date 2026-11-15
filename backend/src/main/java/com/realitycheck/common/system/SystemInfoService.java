@@ -35,15 +35,19 @@ public class SystemInfoService {
     private final Clock clock;
     private final RealityCheckProperties properties;
     private final String version;
+    private final String algorithmVersion;
 
     public SystemInfoService(DataSource dataSource, Flyway flyway, Clock clock,
-            RealityCheckProperties properties, ObjectProvider<BuildProperties> buildProperties) {
+            RealityCheckProperties properties, ObjectProvider<BuildProperties> buildProperties,
+            ObjectProvider<AlgorithmVersionSource> algorithmVersion) {
         this.dataSource = dataSource;
         this.flyway = flyway;
         this.clock = clock;
         this.properties = properties;
         BuildProperties build = buildProperties.getIfAvailable();
         this.version = build == null ? UNKNOWN_VERSION : build.getVersion();
+        AlgorithmVersionSource source = algorithmVersion.getIfAvailable();
+        this.algorithmVersion = source == null ? null : source.algorithmVersion();
     }
 
     public SystemInfoResponse current() {
@@ -51,7 +55,8 @@ public class SystemInfoService {
         Migrations migrations = Database.UP.equals(database.status()) ? readMigrations() : new Migrations(0, null);
         RealityCheckProperties.Ai config = properties.ai();
         Ai ai = new Ai(config.enabled(), config.activeProvider(), config.activeModel(), true);
-        return new SystemInfoResponse(APPLICATION_NAME, version, clock.instant(), database, migrations, ai,
+        return new SystemInfoResponse(APPLICATION_NAME, version, clock.instant(), database, migrations,
+                new SystemInfoResponse.Simulation(algorithmVersion), ai,
                 new SystemInfoResponse.Demo(properties.demo().resetEnabled()));
     }
 

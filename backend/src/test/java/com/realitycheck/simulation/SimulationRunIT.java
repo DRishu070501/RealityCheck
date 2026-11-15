@@ -222,7 +222,9 @@ class SimulationRunIT extends ScenarioTestSupport {
         ResponseEntity<JsonNode> response = get("/api/simulations/" + pending + "/results");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response.getBody().path("status").asText()).isEqualTo("PENDING");
+        // The problem's own status stays the HTTP status; the run's state is a separate property.
+        assertThat(response.getBody().path("status").asInt()).isEqualTo(409);
+        assertThat(response.getBody().path("runStatus").asText()).isEqualTo("PENDING");
         assertThat(get("/api/simulations/" + pending + "/stages").getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(get("/api/simulations/" + pending).getBody().path("status").asText()).isEqualTo("PENDING");
         assertThat(get("/api/simulations/00000000-0000-0000-0000-000000000009").getStatusCode())

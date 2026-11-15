@@ -22,7 +22,7 @@ public final class ComparisonDtos {
 
     /**
      * @param allowDifferentBaseline compare even if a run started from a different factory state
-     * @param includeActual          not available yet (planned); must be false or absent
+     * @param includeActual          add what recorded history shows happened after the fork (the {@code actual} block)
      */
     public record CompareRequest(@NotNull UUID baselineRunId,
             @NotEmpty @Size(max = 5) List<@NotNull UUID> alternativeRunIds, Boolean allowDifferentBaseline,
@@ -31,11 +31,30 @@ public final class ComparisonDtos {
 
     /**
      * @param sameStartingState every alternative has the baseline's fork and starting-state hash
-     * @param actual            always null for now: the recorded-outcome block is not built yet
+     * @param actual            what recorded history shows after the fork; null unless requested and such history exists
      */
     public record ComparisonResponse(String source, String currencyCode, boolean sameStartingState, Instant forkAt,
             List<ComparisonWarning> warnings, ComparedRun baseline, List<AlternativeComparison> alternatives,
-            Object actual) {
+            ActualOutcome actual) {
+    }
+
+    /**
+     * What recorded history shows happened after the fork to the work the baseline run simulated: the
+     * batches unfinished at the fork, of the orders in the baseline run. History stops at {@code asOf}
+     * while a simulation runs to completion, so these figures are shown beside simulated ones and never
+     * subtracted from them.
+     *
+     * @param asOf            the latest recorded event; nothing later is known
+     * @param ordersInScope   orders in the baseline run
+     * @param ordersCompleted of those, orders whose every batch had finished the last stage by {@code asOf}
+     * @param outputStones    recorded at the last stage after the fork, by batches unfinished at the fork
+     */
+    public record ActualOutcome(String source, Instant asOf, int ordersInScope, int ordersCompleted,
+            String outputStones, String outputCarats, List<ActualOrder> orders) {
+    }
+
+    /** @param completedAt when the order's last batch finished the last stage; null when not finished by {@code asOf} */
+    public record ActualOrder(UUID orderId, String orderNumber, Instant completedAt) {
     }
 
     /** @param code {@code DIFFERENT_STARTING_STATE}, {@code DIFFERENT_ALGORITHM_VERSION} or {@code INCOMPLETE_SIMULATION} */

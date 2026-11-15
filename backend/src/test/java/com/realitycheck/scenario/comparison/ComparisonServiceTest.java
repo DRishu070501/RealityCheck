@@ -43,7 +43,7 @@ class ComparisonServiceTest {
     void setUp() {
         ScenarioReader reader = mock(ScenarioReader.class);
         when(reader.names(any())).thenReturn(Map.of());
-        service = new ComparisonService(mock(RunResultsPort.class), reader);
+        service = new ComparisonService(mock(RunResultsPort.class), reader, mock(ActualOutcomeService.class));
     }
 
     @Test

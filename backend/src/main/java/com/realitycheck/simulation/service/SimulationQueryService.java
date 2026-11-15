@@ -243,7 +243,7 @@ public class SimulationQueryService implements ScenarioRunLookup, RunResultsPort
         if (run.getStatus() != RunStatus.COMPLETED) {
             throw ApiException.conflict("Run " + runId + " is " + run.getStatus()
                     + "; results are available once it is COMPLETED")
-                    .withProperty("status", run.getStatus().name());
+                    .withProperty("runStatus", run.getStatus().name());
         }
         return run;
     }

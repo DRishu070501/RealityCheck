@@ -176,6 +176,79 @@ class DemoScenariosIT extends ScenarioTestSupport {
                 .formatted(baselineRun)).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
+    @Test
+    void showsWhatRecordedHistorySaysHappenedAfterTheForkBesideTheSimulation() {
+        emptyAllTables();
+        String demoFactory = seeder.seed(SEEDED_AT).toString();
+        Map<String, String> ids = new HashMap<>();
+        for (JsonNode item : get("/api/scenarios?factoryId=" + demoFactory).getBody().path("items")) {
+            ids.put(item.path("name").asText(), item.path("id").asText());
+        }
+        String baselineRun = runToCompletion(ids.get("Current factory operations"));
+        String shiftRun = runToCompletion(ids.get("Introduce an additional shift"));
+        String history = fingerprint("operational_event", "production_order", "production_batch");
+
+        JsonNode withoutActual = post("/api/simulations/compare", """
+                {"baselineRunId": "%s", "alternativeRunIds": ["%s"]}""".formatted(baselineRun, shiftRun)).getBody();
+        assertThat(withoutActual.path("actual").isNull()).isTrue();
+
+        ResponseEntity<JsonNode> response = post("/api/simulations/compare", """
+                {"baselineRunId": "%s", "alternativeRunIds": ["%s"], "includeActual": true}"""
+                .formatted(baselineRun, shiftRun));
+        assertThat(response.getStatusCode()).as(String.valueOf(response.getBody())).isEqualTo(HttpStatus.OK);
+        JsonNode actual = response.getBody().path("actual");
+        // The simulated part is unchanged by asking for the recorded one.
+        assertThat(response.getBody().path("alternatives")).isEqualTo(withoutActual.path("alternatives"));
+
+        assertThat(actual.path("source").asText()).isEqualTo("ACTUAL");
+        Instant lastEvent = jdbc.queryForObject(
+                "select max(occurred_at) from operational_event where factory_id = ?::uuid", Instant.class, demoFactory);
+        assertThat(Instant.parse(actual.path("asOf").asText())).isEqualTo(lastEvent);
+
+        // Scope: exactly the orders in the baseline run.
+        JsonNode simulatedOrders = get("/api/simulations/" + baselineRun + "/results").getBody().path("orders");
+        assertThat(actual.path("ordersInScope").asInt()).isEqualTo(simulatedOrders.size());
+        assertThat(texts(actual.path("orders"), "orderNumber"))
+                .containsExactlyElementsOf(texts(simulatedOrders, "orderNumber"));
+
+        // Completion times equal what the order projection recorded, independently of the service.
+        int completed = 0;
+        for (JsonNode order : actual.path("orders")) {
+            Instant recorded = jdbc.queryForObject("select completed_at from production_order where id = ?::uuid",
+                    Instant.class, order.path("orderId").asText());
+            if (order.path("completedAt").isNull()) {
+                assertThat(recorded).as(order.path("orderNumber").asText()).isNull();
+            } else {
+                completed++;
+                assertThat(Instant.parse(order.path("completedAt").asText()))
+                        .as(order.path("orderNumber").asText()).isEqualTo(recorded);
+            }
+        }
+        assertThat(actual.path("ordersCompleted").asInt()).isEqualTo(completed).isPositive();
+
+        // Output: final-stage completions after the fork, by batches of those orders (no correction touches them).
+        String scope = """
+                from operational_event e
+                join production_batch b on b.id = e.batch_id
+                where e.event_type = 'STAGE_COMPLETED' and e.occurred_at > ?::timestamptz
+                  and e.stage_id = (select s.id from workflow_stage s join workflow w on w.id = s.workflow_id
+                                    where w.factory_id = ?::uuid and w.status = 'ACTIVE'
+                                    order by s.sequence desc limit 1)
+                  and b.order_id in (select (o ->> 'id')::uuid
+                                     from simulation_run r, jsonb_array_elements(r.input_snapshot -> 'orders') o
+                                     where r.id = ?::uuid)""";
+        assertThat(jdbc.queryForObject("select count(*) from operational_event c where c.corrects_event_id in"
+                + " (select e.id " + scope + ")", Long.class, DEMO_FORK.toString(), demoFactory, baselineRun)).isZero();
+        BigDecimal stones = jdbc.queryForObject("select coalesce(sum(e.stone_quantity), 0) " + scope,
+                BigDecimal.class, DEMO_FORK.toString(), demoFactory, baselineRun);
+        BigDecimal carats = jdbc.queryForObject("select coalesce(sum(e.carat_quantity), 0) " + scope,
+                BigDecimal.class, DEMO_FORK.toString(), demoFactory, baselineRun);
+        assertThat(new BigDecimal(actual.path("outputStones").asText())).isEqualByComparingTo(stones).isPositive();
+        assertThat(new BigDecimal(actual.path("outputCarats").asText())).isEqualByComparingTo(carats);
+
+        assertThat(fingerprint("operational_event", "production_order", "production_batch")).isEqualTo(history);
+    }
+
     private static JsonNode pool(JsonNode validation, String name) {
         for (JsonNode pool : validation.path("preview").path("pools")) {
             if (pool.path("name").asText().equals(name)) {
