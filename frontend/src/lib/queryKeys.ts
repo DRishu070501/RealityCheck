@@ -34,4 +34,22 @@ export const queryKeys = {
     list: (factoryId: string, kind?: ResourceKind) => ['resources', 'list', factoryId, kind ?? 'ALL'] as const,
     availability: (id: string) => ['resources', 'availability', id] as const,
   },
+  scenarios: {
+    all: ['scenarios'] as const,
+    list: (factoryId: string) => ['scenarios', 'list', factoryId] as const,
+    detail: (id: string) => ['scenarios', 'detail', id] as const,
+    validation: (id: string, version: number) => ['scenarios', 'validation', id, version] as const,
+    runs: (id: string) => ['scenarios', 'runs', id] as const,
+    comparisons: (id: string) => ['scenarios', 'comparisons', id] as const,
+  },
+  simulations: {
+    all: ['simulations'] as const,
+    run: (runId: string) => ['simulations', 'run', runId] as const,
+    results: (runId: string) => ['simulations', 'results', runId] as const,
+    stages: (runId: string) => ['simulations', 'stages', runId] as const,
+    events: (runId: string) => ['simulations', 'events', runId] as const,
+    /** Comparisons are computed from immutable runs, so the inputs identify the answer. */
+    compare: (baselineRunId: string, alternativeRunId: string, allowDifferent: boolean) =>
+      ['simulations', 'compare', baselineRunId, alternativeRunId, allowDifferent] as const,
+  },
 } as const

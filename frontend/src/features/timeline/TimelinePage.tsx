@@ -403,6 +403,7 @@ function TimelineExplorer({ factory }: { factory: Factory }) {
       <StateInspector
         factory={factory}
         at={filters.at}
+        firstEventAt={summary.data?.firstEventAt ?? null}
         onAt={(at) => {
           update({ at: at ?? undefined }, true)
         }}

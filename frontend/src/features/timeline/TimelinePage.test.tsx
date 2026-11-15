@@ -316,7 +316,7 @@ describe('TimelinePage point-in-time inspector', () => {
     expect(backend.sent('GET', STATE_PATH)).toHaveLength(0)
   })
 
-  it('cannot branch a scenario yet, and says when that arrives', async () => {
+  it('cannot branch a scenario until a moment is chosen', async () => {
     mockBackend(demoRoutes())
     renderPage()
     await eventsCard()
@@ -324,7 +324,50 @@ describe('TimelinePage point-in-time inspector', () => {
     const button = screen.getByRole('button', { name: 'Create scenario from this point' })
 
     expect(button).toBeDisabled()
-    expect(button).toHaveAccessibleDescription('Scenario branching arrives in Milestone 5.')
+    expect(button).toHaveAccessibleDescription('Choose a moment first.')
+  })
+
+  it('cannot branch a scenario before the recorded history begins', async () => {
+    mockBackend(demoRoutes())
+    renderPage('/timeline?at=2026-10-01T00:00:00Z')
+    await eventsCard()
+
+    const button = screen.getByRole('button', { name: 'Create scenario from this point' })
+
+    await waitFor(() => {
+      expect(button).toHaveAccessibleDescription(/before the recorded history begins/)
+    })
+    expect(button).toBeDisabled()
+  })
+
+  it('creates a scenario at the inspected moment and opens it', async () => {
+    const user = userEvent.setup()
+    const backend = mockBackend({
+      ...demoRoutes(),
+      'POST /api/scenarios': () => jsonResponse(fixtures.scenario, { status: 201 }),
+    })
+    renderPage('/timeline?at=2026-11-10T03:30:00Z')
+    await eventsCard()
+
+    const button = screen.getByRole('button', { name: 'Create scenario from this point' })
+    await waitFor(() => {
+      expect(button).toBeEnabled()
+    })
+    await user.click(button)
+    const dialog = await screen.findByRole('dialog', { name: 'New scenario' })
+    expect(within(dialog).queryByLabelText(/Start from/)).not.toBeInTheDocument()
+    await user.type(within(dialog).getByLabelText('Name'), 'From Tuesday morning')
+    await user.click(within(dialog).getByRole('button', { name: 'Create scenario' }))
+
+    await waitFor(() => {
+      expect(location()).toBe(`/scenarios/${fixtures.scenario.id}`)
+    })
+    expect(backend.last('POST', '/api/scenarios').body).toEqual({
+      factoryId: FACTORY_ID,
+      name: 'From Tuesday morning',
+      forkAt: '2026-11-10T03:30:00Z',
+      includeFutureOrders: true,
+    })
   })
 
   it('rebuilds the factory at the moment of an event and keeps that moment in the address', async () => {

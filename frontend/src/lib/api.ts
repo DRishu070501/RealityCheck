@@ -23,6 +23,23 @@ import {
   type ResourceKind,
   type UpdateResourceInput,
 } from '@/lib/schemas'
+import {
+  comparisonSchema,
+  runResultsSchema,
+  runSchema,
+  runSubmittedSchema,
+  scenarioChangeSchema,
+  scenarioComparisonsSchema,
+  scenarioSchema,
+  scenarioSummarySchema,
+  scenarioValidationSchema,
+  simulatedEventSchema,
+  stageResultSchema,
+  type ChangeInput,
+  type CompareInput,
+  type CreateScenarioInput,
+  type UpdateScenarioInput,
+} from '@/lib/scenarioSchemas'
 
 /**
  * The single place the application talks to the backend. Every response is parsed with a Zod
@@ -31,15 +48,19 @@ import {
 
 const fieldErrorSchema = z.object({ field: z.string(), message: z.string() })
 
-/** RFC 9457 problem details, as produced by the backend's exception handler. */
-const problemSchema = z.object({
+/**
+ * RFC 9457 problem details, as produced by the backend's exception handler. Extra members (for
+ * example `status` of a run, or `errors` that are scenario problems rather than field errors) are
+ * kept in {@link ApiError.body}.
+ */
+const problemSchema = z.looseObject({
   type: z.string().optional(),
   title: z.string().optional(),
   status: z.number().optional(),
   detail: z.string().optional(),
   instance: z.string().optional(),
   code: z.string().optional(),
-  errors: z.array(fieldErrorSchema).optional(),
+  errors: z.array(z.unknown()).optional(),
 })
 
 export type FieldError = z.infer<typeof fieldErrorSchema>
@@ -60,6 +81,8 @@ export class ApiError extends Error {
   /** Machine-readable reason from the backend, for example `STALE_VERSION`. */
   readonly code: string | undefined
   readonly fieldErrors: readonly FieldError[]
+  /** The whole problem document, for members beyond the standard ones. */
+  readonly body: Readonly<Record<string, unknown>>
 
   constructor(init: {
     kind: ApiErrorKind
@@ -68,6 +91,7 @@ export class ApiError extends Error {
     detail?: string
     code?: string
     fieldErrors?: readonly FieldError[]
+    body?: Record<string, unknown>
     cause?: unknown
   }) {
     super(init.detail ?? init.title, { cause: init.cause })
@@ -78,6 +102,7 @@ export class ApiError extends Error {
     this.detail = init.detail
     this.code = init.code
     this.fieldErrors = init.fieldErrors ?? []
+    this.body = init.body ?? {}
   }
 }
 
@@ -122,7 +147,11 @@ function toHttpError(response: Response, body: unknown): ApiError {
     title: problem.data.title ?? fallbackTitle,
     detail: problem.data.detail,
     code: problem.data.code,
-    fieldErrors: problem.data.errors,
+    fieldErrors: (problem.data.errors ?? []).flatMap((entry) => {
+      const parsed = fieldErrorSchema.safeParse(entry)
+      return parsed.success ? [parsed.data] : []
+    }),
+    body: problem.data,
   })
 }
 
@@ -166,6 +195,8 @@ export async function request<T>(
   if (!response.ok) {
     throw toHttpError(response, payload)
   }
+
+  if (response.status === 204) return undefined as T
 
   const parsed = schema.safeParse(payload)
   if (!parsed.success) {
@@ -228,6 +259,9 @@ const stagePageSchema = pageOf(stageSchema)
 const resourcePageSchema = pageOf(resourceSchema)
 const orderPageSchema = pageOf(orderSchema)
 const eventPageSchema = pageOf(eventSchema)
+const scenarioPageSchema = pageOf(scenarioSummarySchema)
+const runPageSchema = pageOf(runSchema)
+const simulatedEventPageSchema = pageOf(simulatedEventSchema)
 
 /** Filters of `GET /api/orders`. The backend sorts earliest due first. */
 export interface OrderListParams {
@@ -299,6 +333,43 @@ export const api = {
       ),
     addAvailability: (id: string, body: CreateAvailabilityInput) =>
       request(`/api/resources/${id}/availability`, availabilityWindowSchema, { method: 'POST', body }),
+  },
+  scenarios: {
+    list: (factoryId: string, signal?: AbortSignal) =>
+      request(`/api/scenarios${query({ factoryId, size: ALL })}`, scenarioPageSchema, { signal }),
+    get: (id: string, signal?: AbortSignal) => request(`/api/scenarios/${id}`, scenarioSchema, { signal }),
+    create: (body: CreateScenarioInput) => request('/api/scenarios', scenarioSchema, { method: 'POST', body }),
+    update: (id: string, body: UpdateScenarioInput) =>
+      request(`/api/scenarios/${id}`, scenarioSchema, { method: 'PATCH', body }),
+    addChange: (id: string, body: ChangeInput) =>
+      request(`/api/scenarios/${id}/changes`, scenarioChangeSchema, { method: 'POST', body }),
+    replaceChange: (id: string, changeId: string, body: ChangeInput) =>
+      request(`/api/scenarios/${id}/changes/${changeId}`, scenarioChangeSchema, { method: 'PUT', body }),
+    deleteChange: (id: string, changeId: string) =>
+      request(`/api/scenarios/${id}/changes/${changeId}`, z.undefined(), { method: 'DELETE' }),
+    /** Assembles and checks the scenario without storing anything. */
+    validate: (id: string, signal?: AbortSignal) =>
+      request(`/api/scenarios/${id}/validate`, scenarioValidationSchema, { method: 'POST', signal }),
+    /** Starts a run; a repeated `idempotencyKey` returns the run it first created. */
+    simulate: (id: string, idempotencyKey: string, force = false) =>
+      request(`/api/scenarios/${id}/simulate${query({ force: force ? true : undefined })}`, runSubmittedSchema, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': idempotencyKey },
+      }),
+    runs: (id: string, signal?: AbortSignal) =>
+      request(`/api/scenarios/${id}/simulations${query({ size: ALL })}`, runPageSchema, { signal }),
+    comparisons: (id: string, signal?: AbortSignal) =>
+      request(`/api/scenarios/${id}/comparisons`, scenarioComparisonsSchema, { signal }),
+  },
+  simulations: {
+    get: (runId: string, signal?: AbortSignal) => request(`/api/simulations/${runId}`, runSchema, { signal }),
+    results: (runId: string, signal?: AbortSignal) =>
+      request(`/api/simulations/${runId}/results`, runResultsSchema, { signal }),
+    stages: (runId: string, signal?: AbortSignal) =>
+      request(`/api/simulations/${runId}/stages`, z.array(stageResultSchema), { signal }),
+    events: (runId: string, page: number, size: number, signal?: AbortSignal) =>
+      request(`/api/simulations/${runId}/events${query({ page, size })}`, simulatedEventPageSchema, { signal }),
+    compare: (body: CompareInput) => request('/api/simulations/compare', comparisonSchema, { method: 'POST', body }),
   },
   demo: {
     /** Erases all data and re-creates the demonstration factory. Answers 404 when disabled. */

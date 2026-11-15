@@ -1,0 +1,19 @@
+{
+  "id": "766bda0b-5c62-39d3-9600-0af3d9f53776",
+  "factoryId": "3e56055a-c69d-3e33-9ffa-c6844e063ed2",
+  "name": "Current factory operations",
+  "description": "The factory as recorded, with nothing changed: the reference the other scenarios are compared with. (Demonstration scenario.)",
+  "parentScenarioId": null,
+  "forkAt": "2026-11-09T18:03:14Z",
+  "includeFutureOrders": true,
+  "baseline": true,
+  "changes": [],
+  "latestRun": {
+    "runId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3",
+    "status": "COMPLETED",
+    "finishedAt": "2026-11-14T18:03:39.409285Z"
+  },
+  "version": 0,
+  "createdAt": "2026-11-14T18:03:09.318520Z",
+  "updatedAt": "2026-11-14T18:03:09.318520Z"
+}

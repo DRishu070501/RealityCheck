@@ -1,6 +1,18 @@
 import { vi } from 'vitest'
 
 import availability from '@/test/fixtures/availability.json'
+import baselineResults from '@/test/fixtures/baselineResults.json'
+import comparison from '@/test/fixtures/comparison.json'
+import simulatedEvents from '@/test/fixtures/events.json'
+import results from '@/test/fixtures/results.json'
+import run from '@/test/fixtures/run.json'
+import runStages from '@/test/fixtures/runStages.json'
+import runs from '@/test/fixtures/runs.json'
+import scenario from '@/test/fixtures/scenario.json'
+import scenarioBaseline from '@/test/fixtures/scenarioBaseline.json'
+import scenarioComparisons from '@/test/fixtures/scenarioComparisons.json'
+import scenarios from '@/test/fixtures/scenarios.json'
+import validation from '@/test/fixtures/validation.json'
 import factories from '@/test/fixtures/factories.json'
 import factory from '@/test/fixtures/factory.json'
 import orderDetail from '@/test/fixtures/orderDetail.json'
@@ -22,6 +34,18 @@ import { jsonResponse } from '@/test/utils'
  */
 export const fixtures = {
   availability,
+  baselineResults,
+  comparison,
+  results,
+  run,
+  runStages,
+  runs,
+  scenario,
+  scenarioBaseline,
+  scenarioComparisons,
+  scenarios,
+  simulatedEvents,
+  validation,
   factories,
   factory,
   orderDetail,
@@ -41,6 +65,35 @@ export const WORKFLOW_ID = workflow.id
 /** SDW-0002: dispatched, one batch, with one corrected stage completion. */
 export const ORDER_ID = orderDetail.order.id
 
+/**
+ * Scenario fixtures, captured on 15 November 2026 from the six seeded demonstration scenarios after
+ * all six were run. `scenario` is "Introduce an additional shift" and `run` its completed run;
+ * `comparison` compares it with the baseline run, whose results are `baselineResults`.
+ * `simulatedEvents` is the first 200 of that run's 674 simulated events.
+ */
+export const SCENARIO_ID = scenario.id
+export const BASELINE_SCENARIO_ID = scenarioBaseline.id
+export const RUN_ID = run.runId
+export const BASELINE_RUN_ID = comparison.baseline.runId
+
+/** The scenario endpoints for the captured scenarios and runs. */
+export function scenarioRoutes(): Routes {
+  return {
+    'GET /api/scenarios': () => jsonResponse(scenarios),
+    [`GET /api/scenarios/${SCENARIO_ID}`]: () => jsonResponse(scenario),
+    [`GET /api/scenarios/${BASELINE_SCENARIO_ID}`]: () => jsonResponse(scenarioBaseline),
+    [`POST /api/scenarios/${SCENARIO_ID}/validate`]: () => jsonResponse(validation),
+    [`GET /api/scenarios/${SCENARIO_ID}/simulations`]: () => jsonResponse(runs),
+    [`GET /api/scenarios/${SCENARIO_ID}/comparisons`]: () => jsonResponse(scenarioComparisons),
+    [`GET /api/simulations/${RUN_ID}`]: () => jsonResponse(run),
+    [`GET /api/simulations/${RUN_ID}/results`]: () => jsonResponse(results),
+    [`GET /api/simulations/${RUN_ID}/stages`]: () => jsonResponse(runStages),
+    [`GET /api/simulations/${RUN_ID}/events`]: () => jsonResponse(simulatedEvents),
+    [`GET /api/simulations/${BASELINE_RUN_ID}/results`]: () => jsonResponse(baselineResults),
+    'POST /api/simulations/compare': () => jsonResponse(comparison),
+  }
+}
+
 export function poolNamed(name: string) {
   const pool = resources.items.find((item) => item.name === name)
   if (!pool) throw new Error(`No fixture pool named ${name}`)
@@ -58,6 +111,8 @@ export interface MockRequest {
   path: string
   query: URLSearchParams
   body: unknown
+  /** Request headers as sent; names are lower-case. */
+  headers: Record<string, string>
 }
 
 type Handler = (request: MockRequest) => Response | Promise<Response>
@@ -137,6 +192,7 @@ export function mockBackend(routes: Routes) {
       path: url.pathname,
       query: url.searchParams,
       body: typeof init?.body === 'string' ? (JSON.parse(init.body) as unknown) : undefined,
+      headers: Object.fromEntries(new Headers(init?.headers).entries()),
     }
     requests.push(request)
     const exact = routes[`${method} ${url.pathname}`]

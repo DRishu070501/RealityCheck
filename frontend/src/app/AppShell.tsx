@@ -99,7 +99,7 @@ export function AppShell() {
           id="main-content"
           key={pathname}
           tabIndex={-1}
-          className="relative flex-1 overflow-y-auto outline-none"
+          className="relative min-w-0 flex-1 overflow-y-auto outline-none"
         >
           <div className="mx-auto w-full max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
             <Outlet />

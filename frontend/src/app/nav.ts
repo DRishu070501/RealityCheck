@@ -32,26 +32,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/resources', label: 'Resources', icon: Boxes },
   { path: '/orders', label: 'Production Orders', icon: Activity },
   { path: '/timeline', label: 'Operational Timeline', icon: History },
-  {
-    path: '/scenarios',
-    label: 'Scenario Lab',
-    icon: FlaskConical,
-    planned: {
-      milestone: 'Milestones 5 and 6',
-      summary:
-        'Branch from a historical point in time, change capacity, staffing, demand, rates or schedules, and run a simulation.',
-    },
-  },
-  {
-    path: '/results',
-    label: 'Simulation Results',
-    icon: ChartColumn,
-    planned: {
-      milestone: 'Milestones 5 and 6',
-      summary:
-        'Baseline versus alternative: completion time, cost, throughput, utilization, waiting time and bottleneck evidence.',
-    },
-  },
+  { path: '/scenarios', label: 'Scenario Lab', icon: FlaskConical },
+  { path: '/results', label: 'Simulation Results', icon: ChartColumn },
   {
     path: '/analyst',
     label: 'AI Analyst',

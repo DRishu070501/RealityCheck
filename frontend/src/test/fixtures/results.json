@@ -1,0 +1,469 @@
+{
+  "runId": "06086f09-2c74-48ad-a83f-155c00e83de0",
+  "scenarioId": "6cc6cf7d-3d31-36c8-b339-465137a8b540",
+  "source": "SIMULATED",
+  "algorithmVersion": "1.0.0",
+  "currencyCode": "INR",
+  "forkAt": "2026-11-09T18:03:14Z",
+  "simulatedEndAt": "2026-11-19T09:47:21Z",
+  "terminationReason": "COMPLETED",
+  "eventsProcessed": 513,
+  "summary": {
+    "elapsedSeconds": 834247,
+    "workingSeconds": 364641,
+    "processingSeconds": 3674395,
+    "waitingWorkingSeconds": 709308,
+    "waitingCalendarSeconds": 1835774,
+    "inputStones": "3407.0000",
+    "outputStones": "3227.8149",
+    "outputStonesRounded": "3228",
+    "inputCarats": "3880.6114",
+    "outputCarats": "2066.7984",
+    "stoneYield": "0.947407",
+    "caratYield": "0.532596",
+    "throughputStonesPerHour": "31.8673",
+    "machineUtilization": "0.467027",
+    "employeeUtilization": "0.483995",
+    "cost": {
+      "employee": "680663.21",
+      "machine": "171796.62",
+      "fixed": "23010.00",
+      "total": "875469.83",
+      "perOutputStone": "271.2268",
+      "currencyCode": "INR"
+    },
+    "ordersTotal": 29,
+    "ordersCompleted": 29,
+    "ordersDelayed": 0,
+    "ordersWithDueDate": 29,
+    "onTimeDeliveryRate": "1.000000"
+  },
+  "bottleneck": {
+    "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+    "stageCode": "POLISHING",
+    "stageName": "Polishing",
+    "reasonCode": "CONSTRAINED_POOL_WITH_QUEUE",
+    "explanation": "Polishing is the bottleneck: work waited behind full slots for 63% of the time the stage had work (mean wait 5.4 working hours, queue up to 6); its most used pool, Polishing wheels, was at 82% over the whole run.",
+    "scoreThreshold": "0.50",
+    "saturationThreshold": "0.50"
+  },
+  "orders": [
+    {
+      "orderId": "81f770cc-67fc-368f-8eab-54d380352a5b",
+      "orderNumber": "SDW-0030",
+      "completesAt": "2026-11-14T14:35:36Z",
+      "dueAt": "2026-11-15T11:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "97e608c9-f56b-3324-8a3a-47084d3efbc0",
+      "orderNumber": "SDW-0045",
+      "completesAt": "2026-11-17T11:13:44Z",
+      "dueAt": "2026-11-21T07:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "98c408a5-0d45-37f0-930c-adfff242dc06",
+      "orderNumber": "SDW-0041",
+      "completesAt": "2026-11-14T13:40:44Z",
+      "dueAt": "2026-11-19T12:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "ac13cca6-9151-3fa5-ae34-7f71c3c494a1",
+      "orderNumber": "SDW-0027",
+      "completesAt": "2026-11-12T04:16:55Z",
+      "dueAt": "2026-11-15T10:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "b939b1b5-4d67-369a-bb5e-309e075aece4",
+      "orderNumber": "SDW-0037",
+      "completesAt": "2026-11-12T13:41:11Z",
+      "dueAt": "2026-11-18T07:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "c8957f30-64ac-3875-80bd-39095ecb73be",
+      "orderNumber": "SDW-0021",
+      "completesAt": "2026-11-10T12:30:21Z",
+      "dueAt": "2026-11-11T07:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "e7a019fe-3cbc-3174-92d6-469611d1d8a7",
+      "orderNumber": "SDW-0035",
+      "completesAt": "2026-11-17T05:54:15Z",
+      "dueAt": "2026-11-19T10:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "e9fe58cc-05ba-3dc2-893e-849b475f0585",
+      "orderNumber": "SDW-0039",
+      "completesAt": "2026-11-14T14:54:50Z",
+      "dueAt": "2026-11-21T05:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "eb3fff91-6ceb-3e4f-a1e7-c9ecb91c3fee",
+      "orderNumber": "SDW-0044",
+      "completesAt": "2026-11-16T13:05:22Z",
+      "dueAt": "2026-11-20T04:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "ec583100-8acd-331b-94f7-e53f67936842",
+      "orderNumber": "SDW-0026",
+      "completesAt": "2026-11-10T06:54:38Z",
+      "dueAt": "2026-11-14T06:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "f0f613c0-a6a3-31ad-8db2-d623520b65cc",
+      "orderNumber": "SDW-0040",
+      "completesAt": "2026-11-16T06:27:20Z",
+      "dueAt": "2026-11-18T09:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "f998c157-7fe3-35a9-ba94-a4e899c1ff34",
+      "orderNumber": "SDW-0025",
+      "completesAt": "2026-11-11T08:40:56Z",
+      "dueAt": "2026-11-12T12:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "05a1d59c-6efe-31f3-844e-b86452b4e376",
+      "orderNumber": "SDW-0047",
+      "completesAt": "2026-11-17T10:30:59Z",
+      "dueAt": "2026-11-24T05:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "0710efd4-64ec-381a-b38d-9e82547b2b49",
+      "orderNumber": "SDW-0049",
+      "completesAt": "2026-11-19T04:01:08Z",
+      "dueAt": "2026-11-22T12:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "082d46e1-0baf-3659-bdf2-c80ae6a1986e",
+      "orderNumber": "SDW-0042",
+      "completesAt": "2026-11-16T13:36:18Z",
+      "dueAt": "2026-11-21T06:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "10340c66-ec7d-3e10-8b22-cf5eb675fed2",
+      "orderNumber": "SDW-0036",
+      "completesAt": "2026-11-14T11:02:54Z",
+      "dueAt": "2026-11-17T04:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "1272a76f-12e6-3283-92c4-2b4c5b4a9fe9",
+      "orderNumber": "SDW-0048",
+      "completesAt": "2026-11-19T09:47:21Z",
+      "dueAt": "2026-11-21T09:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "15a5eb2e-9656-30a7-a863-25500b593694",
+      "orderNumber": "SDW-0043",
+      "completesAt": "2026-11-17T11:02:22Z",
+      "dueAt": "2026-11-22T10:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "18d7bb59-63c5-3362-808a-fdc4b8dc5f38",
+      "orderNumber": "SDW-0028",
+      "completesAt": "2026-11-12T08:40:18Z",
+      "dueAt": "2026-11-13T04:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "1b8d9216-dfbd-32d8-8339-9e3a89591609",
+      "orderNumber": "SDW-0024",
+      "completesAt": "2026-11-10T13:56:48Z",
+      "dueAt": "2026-11-11T09:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "1b8f03e7-7623-3859-8909-e110590163ce",
+      "orderNumber": "SDW-0033",
+      "completesAt": "2026-11-13T12:54:33Z",
+      "dueAt": "2026-11-15T12:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "1be0f01b-af74-3426-9f51-e7fb9ff494b9",
+      "orderNumber": "SDW-0034",
+      "completesAt": "2026-11-13T04:31:15Z",
+      "dueAt": "2026-11-18T06:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "20bf0de0-8e09-361c-bb62-79bbe7eda978",
+      "orderNumber": "SDW-0038",
+      "completesAt": "2026-11-14T08:44:47Z",
+      "dueAt": "2026-11-19T11:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "4746b9dd-a406-3ae9-8376-3a6a8c76f710",
+      "orderNumber": "SDW-0023",
+      "completesAt": "2026-11-10T03:53:12Z",
+      "dueAt": "2026-11-14T05:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "48cd3419-c94b-3b1c-9342-a6e1f4caae92",
+      "orderNumber": "SDW-0022",
+      "completesAt": "2026-11-11T03:37:10Z",
+      "dueAt": "2026-11-12T11:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "4ef7da82-5a50-39d7-92c0-16e45529dace",
+      "orderNumber": "SDW-0046",
+      "completesAt": "2026-11-18T07:05:49Z",
+      "dueAt": "2026-11-22T11:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "68ea6a7a-8b7c-3ec5-b992-0d426f32429b",
+      "orderNumber": "SDW-0031",
+      "completesAt": "2026-11-12T03:52:34Z",
+      "dueAt": "2026-11-17T05:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "7175bcad-8a39-39f7-8f2e-8440a521a796",
+      "orderNumber": "SDW-0032",
+      "completesAt": "2026-11-12T14:55:22Z",
+      "dueAt": "2026-11-14T09:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    },
+    {
+      "orderId": "7d3cacb8-923c-33b0-928a-207a2cec27fc",
+      "orderNumber": "SDW-0029",
+      "completesAt": "2026-11-12T08:52:00Z",
+      "dueAt": "2026-11-14T07:30:00Z",
+      "outcome": "ON_TIME",
+      "delayed": false
+    }
+  ],
+  "resources": [
+    {
+      "resourceId": "ad3bfb60-2f66-3d7f-bf66-eecff273065e",
+      "name": "Bruting lathes",
+      "kind": "MACHINE",
+      "capacity": 3,
+      "busyUnitSeconds": 486710,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 607213,
+      "utilization": "0.444922",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "21631.56"
+    },
+    {
+      "resourceId": "c72d0f99-4030-37df-827b-423ea53552dc",
+      "name": "Grading microscopes",
+      "kind": "MACHINE",
+      "capacity": 3,
+      "busyUnitSeconds": 298960,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 794963,
+      "utilization": "0.273292",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "7474.00"
+    },
+    {
+      "resourceId": "6981321b-df06-3ee9-bd62-fadfa7444301",
+      "name": "Laser marking units",
+      "kind": "MACHINE",
+      "capacity": 2,
+      "busyUnitSeconds": 154400,
+      "availableUnitSeconds": 729282,
+      "idleUnitSeconds": 574882,
+      "utilization": "0.211715",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "7720.00"
+    },
+    {
+      "resourceId": "2487f525-0a19-3ac9-9e49-eceef78571b5",
+      "name": "Laser saws",
+      "kind": "MACHINE",
+      "capacity": 4,
+      "busyUnitSeconds": 620850,
+      "availableUnitSeconds": 1458564,
+      "idleUnitSeconds": 837714,
+      "utilization": "0.425658",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "51737.50"
+    },
+    {
+      "resourceId": "fb27d6ed-71b6-39e8-8431-fc41f09c6056",
+      "name": "Planning scanners",
+      "kind": "MACHINE",
+      "capacity": 3,
+      "busyUnitSeconds": 218700,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 875223,
+      "utilization": "0.199923",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "13365.00"
+    },
+    {
+      "resourceId": "4893ff2f-d69b-3996-872b-c4050b3383c3",
+      "name": "Polishing wheels",
+      "kind": "MACHINE",
+      "capacity": 6,
+      "busyUnitSeconds": 1796620,
+      "availableUnitSeconds": 2187846,
+      "idleUnitSeconds": 391226,
+      "utilization": "0.821182",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "69868.56"
+    },
+    {
+      "resourceId": "6367f6c8-cea4-3bed-ad9a-a58140eb1de5",
+      "name": "Bruters",
+      "kind": "EMPLOYEE",
+      "capacity": 3,
+      "busyUnitSeconds": 486710,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 607213,
+      "utilization": "0.444922",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "63812.18"
+    },
+    {
+      "resourceId": "ed24f039-4c23-3d3c-a88a-26d4932e62f9",
+      "name": "Cutters",
+      "kind": "EMPLOYEE",
+      "capacity": 4,
+      "busyUnitSeconds": 620850,
+      "availableUnitSeconds": 1458564,
+      "idleUnitSeconds": 837714,
+      "utilization": "0.425658",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "97237.60"
+    },
+    {
+      "resourceId": "56cfb1fc-f93c-3712-9f6e-cf339d88a825",
+      "name": "Dispatch clerks",
+      "kind": "EMPLOYEE",
+      "capacity": 2,
+      "busyUnitSeconds": 61555,
+      "availableUnitSeconds": 729282,
+      "idleUnitSeconds": 667727,
+      "utilization": "0.084405",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "24309.40"
+    },
+    {
+      "resourceId": "7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35",
+      "name": "Intake clerks",
+      "kind": "EMPLOYEE",
+      "capacity": 2,
+      "busyUnitSeconds": 36600,
+      "availableUnitSeconds": 729282,
+      "idleUnitSeconds": 692682,
+      "utilization": "0.050186",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "22283.62"
+    },
+    {
+      "resourceId": "f8472665-edcc-36dc-8ec9-91a1978d9c57",
+      "name": "Markers",
+      "kind": "EMPLOYEE",
+      "capacity": 2,
+      "busyUnitSeconds": 154400,
+      "availableUnitSeconds": 729282,
+      "idleUnitSeconds": 574882,
+      "utilization": "0.211715",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "38489.88"
+    },
+    {
+      "resourceId": "ddfcbace-9ca5-316f-819c-7d059051253f",
+      "name": "Planners",
+      "kind": "EMPLOYEE",
+      "capacity": 3,
+      "busyUnitSeconds": 218700,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 875223,
+      "utilization": "0.199923",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "79005.55"
+    },
+    {
+      "resourceId": "5f7ec8e0-dcef-3363-a6e9-0c155948fbc5",
+      "name": "Polishers",
+      "kind": "EMPLOYEE",
+      "capacity": 12,
+      "busyUnitSeconds": 3593240,
+      "availableUnitSeconds": 4375692,
+      "idleUnitSeconds": 782452,
+      "utilization": "0.821182",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "279558.10"
+    },
+    {
+      "resourceId": "025445c9-3032-3a36-aa69-cc1be9499af5",
+      "name": "Quality inspectors",
+      "kind": "EMPLOYEE",
+      "capacity": 3,
+      "busyUnitSeconds": 298960,
+      "availableUnitSeconds": 1093923,
+      "idleUnitSeconds": 794963,
+      "utilization": "0.273292",
+      "utilizationNullReason": null,
+      "overcommitted": false,
+      "cost": "75966.88"
+    }
+  ],
+  "unfinished": []
+}

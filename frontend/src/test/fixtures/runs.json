@@ -1,0 +1,26 @@
+{
+  "items": [
+    {
+      "runId": "06086f09-2c74-48ad-a83f-155c00e83de0",
+      "scenarioId": "6cc6cf7d-3d31-36c8-b339-465137a8b540",
+      "scenarioName": "Introduce an additional shift",
+      "factoryId": "3e56055a-c69d-3e33-9ffa-c6844e063ed2",
+      "status": "COMPLETED",
+      "forkAt": "2026-11-09T18:03:14Z",
+      "algorithmVersion": "1.0.0",
+      "inputHash": "a936cd8b8f5ba996201a581c04972d1712ec05d05a6ba4a4f3d7fd66a311617b",
+      "baseStateHash": "db7d9beec1b7e4bc474d33bc57391f64d23231cfee6ad8050530707747abb490",
+      "terminationReason": "COMPLETED",
+      "simulatedEndAt": "2026-11-19T09:47:21Z",
+      "eventsProcessed": 513,
+      "failureMessage": null,
+      "submittedAt": "2026-11-14T18:04:00.800286Z",
+      "startedAt": "2026-11-14T18:04:00.809284Z",
+      "finishedAt": "2026-11-14T18:04:00.823378Z"
+    }
+  ],
+  "page": 0,
+  "size": 50,
+  "totalItems": 1,
+  "totalPages": 1
+}

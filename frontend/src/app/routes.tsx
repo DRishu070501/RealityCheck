@@ -48,6 +48,12 @@ export const routes: RouteObject[] = [
       { path: '/orders', element: screen(() => import('@/features/orders/OrdersPage'), 'OrdersPage') },
       { path: '/orders/:id', element: screen(() => import('@/features/orders/OrderDetailPage'), 'OrderDetailPage') },
       { path: '/timeline', element: screen(() => import('@/features/timeline/TimelinePage'), 'TimelinePage') },
+      { path: '/scenarios', element: screen(() => import('@/features/scenarios/ScenariosPage'), 'ScenariosPage') },
+      {
+        path: '/scenarios/:id',
+        element: screen(() => import('@/features/scenarios/ScenarioDetailPage'), 'ScenarioDetailPage'),
+      },
+      { path: '/results', element: screen(() => import('@/features/results/ResultsPage'), 'ResultsPage') },
       { path: '/settings', element: screen(() => import('@/features/settings/SettingsPage'), 'SettingsPage') },
       ...placeholderRoutes,
       { path: '*', element: <NotFoundPage /> },

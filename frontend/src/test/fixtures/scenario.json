@@ -1,0 +1,68 @@
+{
+  "id": "6cc6cf7d-3d31-36c8-b339-465137a8b540",
+  "factoryId": "3e56055a-c69d-3e33-9ffa-c6844e063ed2",
+  "name": "Introduce an additional shift",
+  "description": "An evening shift, Monday to Saturday 18:00 to 22:00, with every pool at its normal capacity. (Demonstration scenario.)",
+  "parentScenarioId": null,
+  "forkAt": "2026-11-09T18:03:14Z",
+  "includeFutureOrders": true,
+  "baseline": false,
+  "changes": [
+    {
+      "id": "b506c342-b073-307f-bfb8-59dea4bb5475",
+      "ordinal": 1,
+      "changeType": "WORKING_SCHEDULE",
+      "inherited": false,
+      "payload": {
+        "mode": "ADD",
+        "shifts": [
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 1,
+            "startTime": "18:00"
+          },
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 2,
+            "startTime": "18:00"
+          },
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 3,
+            "startTime": "18:00"
+          },
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 4,
+            "startTime": "18:00"
+          },
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 5,
+            "startTime": "18:00"
+          },
+          {
+            "breaks": null,
+            "endTime": "22:00",
+            "dayOfWeek": 6,
+            "startTime": "18:00"
+          }
+        ]
+      },
+      "summary": "Add shifts: Mon, Tue, Wed, Thu, Fri, Sat 18:00-22:00"
+    }
+  ],
+  "latestRun": {
+    "runId": "06086f09-2c74-48ad-a83f-155c00e83de0",
+    "status": "COMPLETED",
+    "finishedAt": "2026-11-14T18:04:00.823378Z"
+  },
+  "version": 0,
+  "createdAt": "2026-11-14T18:03:14.318520Z",
+  "updatedAt": "2026-11-14T18:03:14.318520Z"
+}

@@ -1,0 +1,1351 @@
+{
+  "source": "SIMULATED",
+  "currencyCode": "INR",
+  "sameStartingState": true,
+  "forkAt": "2026-11-09T18:03:14Z",
+  "warnings": [],
+  "baseline": {
+    "runId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3",
+    "scenarioId": "766bda0b-5c62-39d3-9600-0af3d9f53776",
+    "scenarioName": "Current factory operations",
+    "algorithmVersion": "1.0.0",
+    "terminationReason": "COMPLETED",
+    "appliedChanges": []
+  },
+  "alternatives": [
+    {
+      "run": {
+        "runId": "06086f09-2c74-48ad-a83f-155c00e83de0",
+        "scenarioId": "6cc6cf7d-3d31-36c8-b339-465137a8b540",
+        "scenarioName": "Introduce an additional shift",
+        "algorithmVersion": "1.0.0",
+        "terminationReason": "COMPLETED",
+        "appliedChanges": [
+          {
+            "ordinal": 1,
+            "changeType": "WORKING_SCHEDULE",
+            "summary": "Add shifts: Mon, Tue, Wed, Thu, Fri, Sat 18:00-22:00"
+          }
+        ]
+      },
+      "metrics": [
+        {
+          "key": "elapsedSeconds",
+          "label": "Completion time",
+          "unit": "seconds",
+          "baseline": "1248248",
+          "alternative": "834247",
+          "absolute": "-414001",
+          "percent": "-33.17",
+          "betterWhen": "LOWER",
+          "direction": "IMPROVED"
+        },
+        {
+          "key": "processingSeconds",
+          "label": "Processing time",
+          "unit": "seconds",
+          "baseline": "3828779",
+          "alternative": "3674395",
+          "absolute": "-154384",
+          "percent": "-4.03",
+          "betterWhen": null,
+          "direction": null
+        },
+        {
+          "key": "waitingWorkingSeconds",
+          "label": "Working time spent waiting",
+          "unit": "seconds",
+          "baseline": "1606136",
+          "alternative": "709308",
+          "absolute": "-896828",
+          "percent": "-55.84",
+          "betterWhen": "LOWER",
+          "direction": "IMPROVED"
+        },
+        {
+          "key": "throughputStonesPerHour",
+          "label": "Throughput",
+          "unit": "stones/hour",
+          "baseline": "33.1774",
+          "alternative": "31.8673",
+          "absolute": "-1.3101",
+          "percent": "-3.95",
+          "betterWhen": "HIGHER",
+          "direction": "WORSENED"
+        },
+        {
+          "key": "outputStones",
+          "label": "Output stones",
+          "unit": "stones",
+          "baseline": "3227.8149",
+          "alternative": "3227.8149",
+          "absolute": "0.0000",
+          "percent": "0.00",
+          "betterWhen": "HIGHER",
+          "direction": "UNCHANGED"
+        },
+        {
+          "key": "outputCarats",
+          "label": "Output carats",
+          "unit": "carats",
+          "baseline": "2066.7984",
+          "alternative": "2066.7984",
+          "absolute": "0.0000",
+          "percent": "0.00",
+          "betterWhen": "HIGHER",
+          "direction": "UNCHANGED"
+        },
+        {
+          "key": "cost.total",
+          "label": "Total cost",
+          "unit": "currency",
+          "baseline": "856352.00",
+          "alternative": "875469.83",
+          "absolute": "19117.83",
+          "percent": "2.23",
+          "betterWhen": "LOWER",
+          "direction": "WORSENED"
+        },
+        {
+          "key": "cost.perOutputStone",
+          "label": "Cost per output stone",
+          "unit": "currency/stone",
+          "baseline": "265.3039",
+          "alternative": "271.2268",
+          "absolute": "5.9229",
+          "percent": "2.23",
+          "betterWhen": "LOWER",
+          "direction": "WORSENED"
+        },
+        {
+          "key": "cost.employee",
+          "label": "Employee cost",
+          "unit": "currency",
+          "baseline": "653785.08",
+          "alternative": "680663.21",
+          "absolute": "26878.13",
+          "percent": "4.11",
+          "betterWhen": "LOWER",
+          "direction": "WORSENED"
+        },
+        {
+          "key": "cost.machine",
+          "label": "Machine cost",
+          "unit": "currency",
+          "baseline": "179556.92",
+          "alternative": "171796.62",
+          "absolute": "-7760.30",
+          "percent": "-4.32",
+          "betterWhen": "LOWER",
+          "direction": "IMPROVED"
+        },
+        {
+          "key": "cost.fixed",
+          "label": "Fixed cost",
+          "unit": "currency",
+          "baseline": "23010.00",
+          "alternative": "23010.00",
+          "absolute": "0.00",
+          "percent": "0.00",
+          "betterWhen": "LOWER",
+          "direction": "UNCHANGED"
+        },
+        {
+          "key": "machineUtilization",
+          "label": "Machine utilization",
+          "unit": "fraction",
+          "baseline": "0.507217",
+          "alternative": "0.467027",
+          "absolute": "-0.040190",
+          "percent": "-7.92",
+          "betterWhen": null,
+          "direction": null
+        },
+        {
+          "key": "employeeUtilization",
+          "label": "Employee utilization",
+          "unit": "fraction",
+          "baseline": "0.526069",
+          "alternative": "0.483995",
+          "absolute": "-0.042074",
+          "percent": "-8.00",
+          "betterWhen": null,
+          "direction": null
+        },
+        {
+          "key": "ordersCompleted",
+          "label": "Orders completed",
+          "unit": "orders",
+          "baseline": "29",
+          "alternative": "29",
+          "absolute": "0",
+          "percent": "0.00",
+          "betterWhen": "HIGHER",
+          "direction": "UNCHANGED"
+        },
+        {
+          "key": "ordersDelayed",
+          "label": "Orders delayed",
+          "unit": "orders",
+          "baseline": "10",
+          "alternative": "0",
+          "absolute": "-10",
+          "percent": "-100.00",
+          "betterWhen": "LOWER",
+          "direction": "IMPROVED"
+        },
+        {
+          "key": "onTimeDeliveryRate",
+          "label": "On-time delivery rate",
+          "unit": "fraction",
+          "baseline": "0.655172",
+          "alternative": "1.000000",
+          "absolute": "0.344828",
+          "percent": "52.63",
+          "betterWhen": "HIGHER",
+          "direction": "IMPROVED"
+        }
+      ],
+      "bottleneck": {
+        "change": "SAME",
+        "baselineStage": {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "baselineScore": "0.939906",
+          "alternativeScore": "0.881322"
+        },
+        "alternativeStage": {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "baselineScore": "0.939906",
+          "alternativeScore": "0.881322"
+        }
+      },
+      "stages": [
+        {
+          "stageId": "d13cdecf-d98d-306d-9bb3-0a71e72b2ae6",
+          "code": "ROUGH_INTAKE",
+          "name": "Rough Intake",
+          "sequence": 1,
+          "meanWaitWorkingSeconds": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "meanQueueLength": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "maxQueueLength": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "throughputStonesPerHour": {
+            "baseline": "17.2681",
+            "alternative": "16.5862",
+            "absolute": "-0.6819",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.052250",
+            "alternative": "0.050186",
+            "absolute": "-0.002064",
+            "percent": "-3.95"
+          },
+          "bottleneckScore": {
+            "baseline": "0.018288",
+            "alternative": "0.017565",
+            "absolute": "-0.000723",
+            "percent": "-3.95"
+          }
+        },
+        {
+          "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+          "code": "PLANNING",
+          "name": "Planning",
+          "sequence": 2,
+          "meanWaitWorkingSeconds": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "meanQueueLength": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "maxQueueLength": {
+            "baseline": "0",
+            "alternative": "0",
+            "absolute": "0",
+            "percent": null
+          },
+          "throughputStonesPerHour": {
+            "baseline": "18.2959",
+            "alternative": "17.5734",
+            "absolute": "-0.7225",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.215845",
+            "alternative": "0.199923",
+            "absolute": "-0.015922",
+            "percent": "-7.38"
+          },
+          "bottleneckScore": {
+            "baseline": "0.075546",
+            "alternative": "0.069973",
+            "absolute": "-0.005573",
+            "percent": "-7.38"
+          }
+        },
+        {
+          "stageId": "715810e8-2fc8-30da-a95f-0fb5721a55ac",
+          "code": "MARKING",
+          "name": "Marking",
+          "sequence": 3,
+          "meanWaitWorkingSeconds": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "meanQueueLength": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "maxQueueLength": {
+            "baseline": "0",
+            "alternative": "1",
+            "absolute": "1",
+            "percent": null
+          },
+          "throughputStonesPerHour": {
+            "baseline": "19.1182",
+            "alternative": "18.3633",
+            "absolute": "-0.7549",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.224553",
+            "alternative": "0.211715",
+            "absolute": "-0.012838",
+            "percent": "-5.72"
+          },
+          "bottleneckScore": {
+            "baseline": "0.078594",
+            "alternative": "0.074100",
+            "absolute": "-0.004494",
+            "percent": "-5.72"
+          }
+        },
+        {
+          "stageId": "8c34fd68-837b-36d8-bd9b-c5fb210bcd37",
+          "code": "CUTTING",
+          "name": "Cutting",
+          "sequence": 4,
+          "meanWaitWorkingSeconds": {
+            "baseline": "847.9615",
+            "alternative": "0.0000",
+            "absolute": "-847.9615",
+            "percent": "-100.00"
+          },
+          "meanQueueLength": {
+            "baseline": "0.0629",
+            "alternative": "0.0000",
+            "absolute": "-0.0629",
+            "percent": "-100.00"
+          },
+          "maxQueueLength": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "throughputStonesPerHour": {
+            "baseline": "23.5899",
+            "alternative": "22.6584",
+            "absolute": "-0.9315",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.468316",
+            "alternative": "0.425658",
+            "absolute": "-0.042658",
+            "percent": "-9.11"
+          },
+          "bottleneckScore": {
+            "baseline": "0.188856",
+            "alternative": "0.148980",
+            "absolute": "-0.039876",
+            "percent": "-21.11"
+          }
+        },
+        {
+          "stageId": "1e07d2be-42e3-3167-a2ef-3fec0698043d",
+          "code": "BRUTING",
+          "name": "Bruting",
+          "sequence": 5,
+          "meanWaitWorkingSeconds": {
+            "baseline": "538.6296",
+            "alternative": "391.4815",
+            "absolute": "-147.1481",
+            "percent": "-27.32"
+          },
+          "meanQueueLength": {
+            "baseline": "0.0415",
+            "alternative": "0.0290",
+            "absolute": "-0.0125",
+            "percent": "-30.12"
+          },
+          "maxQueueLength": {
+            "baseline": "1",
+            "alternative": "3",
+            "absolute": "2",
+            "percent": "200.00"
+          },
+          "throughputStonesPerHour": {
+            "baseline": "24.6788",
+            "alternative": "23.7043",
+            "absolute": "-0.9745",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.476918",
+            "alternative": "0.444922",
+            "absolute": "-0.031996",
+            "percent": "-6.71"
+          },
+          "bottleneckScore": {
+            "baseline": "0.182550",
+            "alternative": "0.170729",
+            "absolute": "-0.011821",
+            "percent": "-6.48"
+          }
+        },
+        {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "sequence": 6,
+          "meanWaitWorkingSeconds": {
+            "baseline": "43598.5000",
+            "alternative": "19335.3611",
+            "absolute": "-24263.1389",
+            "percent": "-55.65"
+          },
+          "meanQueueLength": {
+            "baseline": "4.4813",
+            "alternative": "1.9089",
+            "absolute": "-2.5724",
+            "percent": "-57.40"
+          },
+          "maxQueueLength": {
+            "baseline": "9",
+            "alternative": "6",
+            "absolute": "-3",
+            "percent": "-33.33"
+          },
+          "throughputStonesPerHour": {
+            "baseline": "32.9084",
+            "alternative": "31.6090",
+            "absolute": "-1.2994",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.896057",
+            "alternative": "0.821182",
+            "absolute": "-0.074875",
+            "percent": "-8.36"
+          },
+          "bottleneckScore": {
+            "baseline": "0.939906",
+            "alternative": "0.881322",
+            "absolute": "-0.058584",
+            "percent": "-6.23"
+          }
+        },
+        {
+          "stageId": "fcc0d941-7ae2-34f2-85e5-f1233a843fa7",
+          "code": "QUALITY_INSPECTION",
+          "name": "Quality Inspection",
+          "sequence": 7,
+          "meanWaitWorkingSeconds": {
+            "baseline": "0.0000",
+            "alternative": "70.1316",
+            "absolute": "70.1316",
+            "percent": null
+          },
+          "meanQueueLength": {
+            "baseline": "0.0000",
+            "alternative": "0.0073",
+            "absolute": "0.0073",
+            "percent": null
+          },
+          "maxQueueLength": {
+            "baseline": "0",
+            "alternative": "1",
+            "absolute": "1",
+            "percent": null
+          },
+          "throughputStonesPerHour": {
+            "baseline": "33.1774",
+            "alternative": "31.8673",
+            "absolute": "-1.3101",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.291520",
+            "alternative": "0.273292",
+            "absolute": "-0.018228",
+            "percent": "-6.25"
+          },
+          "bottleneckScore": {
+            "baseline": "0.102032",
+            "alternative": "0.099436",
+            "absolute": "-0.002596",
+            "percent": "-2.54"
+          }
+        },
+        {
+          "stageId": "772a6b27-1083-3ac2-a660-2cd10043ad5e",
+          "code": "DISPATCH",
+          "name": "Dispatch",
+          "sequence": 8,
+          "meanWaitWorkingSeconds": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "meanQueueLength": {
+            "baseline": "0.0000",
+            "alternative": "0.0000",
+            "absolute": "0.0000",
+            "percent": null
+          },
+          "maxQueueLength": {
+            "baseline": "0",
+            "alternative": "2",
+            "absolute": "2",
+            "percent": null
+          },
+          "throughputStonesPerHour": {
+            "baseline": "33.1774",
+            "alternative": "31.8673",
+            "absolute": "-1.3101",
+            "percent": "-3.95"
+          },
+          "limitingUtilization": {
+            "baseline": "0.087875",
+            "alternative": "0.084405",
+            "absolute": "-0.003470",
+            "percent": "-3.95"
+          },
+          "bottleneckScore": {
+            "baseline": "0.030756",
+            "alternative": "0.029542",
+            "absolute": "-0.001214",
+            "percent": "-3.95"
+          }
+        }
+      ],
+      "resources": [
+        {
+          "resourceId": "ad3bfb60-2f66-3d7f-bf66-eecff273065e",
+          "name": "Bruting lathes",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.476918",
+            "alternative": "0.444922",
+            "absolute": "-0.031996",
+            "percent": "-6.71"
+          },
+          "busyUnitSeconds": {
+            "baseline": "501110",
+            "alternative": "486710",
+            "absolute": "-14400",
+            "percent": "-2.87"
+          },
+          "idleUnitSeconds": {
+            "baseline": "549616",
+            "alternative": "607213",
+            "absolute": "57597",
+            "percent": "10.48"
+          },
+          "cost": {
+            "baseline": "22271.56",
+            "alternative": "21631.56",
+            "absolute": "-640.00",
+            "percent": "-2.87"
+          }
+        },
+        {
+          "resourceId": "c72d0f99-4030-37df-827b-423ea53552dc",
+          "name": "Grading microscopes",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.291520",
+            "alternative": "0.273292",
+            "absolute": "-0.018228",
+            "percent": "-6.25"
+          },
+          "busyUnitSeconds": {
+            "baseline": "306308",
+            "alternative": "298960",
+            "absolute": "-7348",
+            "percent": "-2.40"
+          },
+          "idleUnitSeconds": {
+            "baseline": "744418",
+            "alternative": "794963",
+            "absolute": "50545",
+            "percent": "6.79"
+          },
+          "cost": {
+            "baseline": "7657.70",
+            "alternative": "7474.00",
+            "absolute": "-183.70",
+            "percent": "-2.40"
+          }
+        },
+        {
+          "resourceId": "6981321b-df06-3ee9-bd62-fadfa7444301",
+          "name": "Laser marking units",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.224553",
+            "alternative": "0.211715",
+            "absolute": "-0.012838",
+            "percent": "-5.72"
+          },
+          "busyUnitSeconds": {
+            "baseline": "157296",
+            "alternative": "154400",
+            "absolute": "-2896",
+            "percent": "-1.84"
+          },
+          "idleUnitSeconds": {
+            "baseline": "543188",
+            "alternative": "574882",
+            "absolute": "31694",
+            "percent": "5.83"
+          },
+          "cost": {
+            "baseline": "7864.80",
+            "alternative": "7720.00",
+            "absolute": "-144.80",
+            "percent": "-1.84"
+          }
+        },
+        {
+          "resourceId": "2487f525-0a19-3ac9-9e49-eceef78571b5",
+          "name": "Laser saws",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "4",
+            "alternative": "4",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.468316",
+            "alternative": "0.425658",
+            "absolute": "-0.042658",
+            "percent": "-9.11"
+          },
+          "busyUnitSeconds": {
+            "baseline": "656096",
+            "alternative": "620850",
+            "absolute": "-35246",
+            "percent": "-5.37"
+          },
+          "idleUnitSeconds": {
+            "baseline": "744872",
+            "alternative": "837714",
+            "absolute": "92842",
+            "percent": "12.46"
+          },
+          "cost": {
+            "baseline": "54674.67",
+            "alternative": "51737.50",
+            "absolute": "-2937.17",
+            "percent": "-5.37"
+          }
+        },
+        {
+          "resourceId": "fb27d6ed-71b6-39e8-8431-fc41f09c6056",
+          "name": "Planning scanners",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.215845",
+            "alternative": "0.199923",
+            "absolute": "-0.015922",
+            "percent": "-7.38"
+          },
+          "busyUnitSeconds": {
+            "baseline": "226794",
+            "alternative": "218700",
+            "absolute": "-8094",
+            "percent": "-3.57"
+          },
+          "idleUnitSeconds": {
+            "baseline": "823932",
+            "alternative": "875223",
+            "absolute": "51291",
+            "percent": "6.23"
+          },
+          "cost": {
+            "baseline": "13859.63",
+            "alternative": "13365.00",
+            "absolute": "-494.63",
+            "percent": "-3.57"
+          }
+        },
+        {
+          "resourceId": "4893ff2f-d69b-3996-872b-c4050b3383c3",
+          "name": "Polishing wheels",
+          "kind": "MACHINE",
+          "capacity": {
+            "baseline": "6",
+            "alternative": "6",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.896057",
+            "alternative": "0.821182",
+            "absolute": "-0.074875",
+            "percent": "-8.36"
+          },
+          "busyUnitSeconds": {
+            "baseline": "1883020",
+            "alternative": "1796620",
+            "absolute": "-86400",
+            "percent": "-4.59"
+          },
+          "idleUnitSeconds": {
+            "baseline": "218432",
+            "alternative": "391226",
+            "absolute": "172794",
+            "percent": "79.11"
+          },
+          "cost": {
+            "baseline": "73228.56",
+            "alternative": "69868.56",
+            "absolute": "-3360.00",
+            "percent": "-4.59"
+          }
+        },
+        {
+          "resourceId": "6367f6c8-cea4-3bed-ad9a-a58140eb1de5",
+          "name": "Bruters",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.476918",
+            "alternative": "0.444922",
+            "absolute": "-0.031996",
+            "percent": "-6.71"
+          },
+          "busyUnitSeconds": {
+            "baseline": "501110",
+            "alternative": "486710",
+            "absolute": "-14400",
+            "percent": "-2.87"
+          },
+          "idleUnitSeconds": {
+            "baseline": "549616",
+            "alternative": "607213",
+            "absolute": "57597",
+            "percent": "10.48"
+          },
+          "cost": {
+            "baseline": "61292.35",
+            "alternative": "63812.18",
+            "absolute": "2519.83",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "ed24f039-4c23-3d3c-a88a-26d4932e62f9",
+          "name": "Cutters",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "4",
+            "alternative": "4",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.468316",
+            "alternative": "0.425658",
+            "absolute": "-0.042658",
+            "percent": "-9.11"
+          },
+          "busyUnitSeconds": {
+            "baseline": "656096",
+            "alternative": "620850",
+            "absolute": "-35246",
+            "percent": "-5.37"
+          },
+          "idleUnitSeconds": {
+            "baseline": "744872",
+            "alternative": "837714",
+            "absolute": "92842",
+            "percent": "12.46"
+          },
+          "cost": {
+            "baseline": "93397.87",
+            "alternative": "97237.60",
+            "absolute": "3839.73",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "56cfb1fc-f93c-3712-9f6e-cf339d88a825",
+          "name": "Dispatch clerks",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.087875",
+            "alternative": "0.084405",
+            "absolute": "-0.003470",
+            "percent": "-3.95"
+          },
+          "busyUnitSeconds": {
+            "baseline": "61555",
+            "alternative": "61555",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "idleUnitSeconds": {
+            "baseline": "638929",
+            "alternative": "667727",
+            "absolute": "28798",
+            "percent": "4.51"
+          },
+          "cost": {
+            "baseline": "23349.47",
+            "alternative": "24309.40",
+            "absolute": "959.93",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35",
+          "name": "Intake clerks",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.052250",
+            "alternative": "0.050186",
+            "absolute": "-0.002064",
+            "percent": "-3.95"
+          },
+          "busyUnitSeconds": {
+            "baseline": "36600",
+            "alternative": "36600",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "idleUnitSeconds": {
+            "baseline": "663884",
+            "alternative": "692682",
+            "absolute": "28798",
+            "percent": "4.34"
+          },
+          "cost": {
+            "baseline": "21403.68",
+            "alternative": "22283.62",
+            "absolute": "879.94",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "f8472665-edcc-36dc-8ec9-91a1978d9c57",
+          "name": "Markers",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "2",
+            "alternative": "2",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.224553",
+            "alternative": "0.211715",
+            "absolute": "-0.012838",
+            "percent": "-5.72"
+          },
+          "busyUnitSeconds": {
+            "baseline": "157296",
+            "alternative": "154400",
+            "absolute": "-2896",
+            "percent": "-1.84"
+          },
+          "idleUnitSeconds": {
+            "baseline": "543188",
+            "alternative": "574882",
+            "absolute": "31694",
+            "percent": "5.83"
+          },
+          "cost": {
+            "baseline": "36969.99",
+            "alternative": "38489.88",
+            "absolute": "1519.89",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "ddfcbace-9ca5-316f-819c-7d059051253f",
+          "name": "Planners",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.215845",
+            "alternative": "0.199923",
+            "absolute": "-0.015922",
+            "percent": "-7.38"
+          },
+          "busyUnitSeconds": {
+            "baseline": "226794",
+            "alternative": "218700",
+            "absolute": "-8094",
+            "percent": "-3.57"
+          },
+          "idleUnitSeconds": {
+            "baseline": "823932",
+            "alternative": "875223",
+            "absolute": "51291",
+            "percent": "6.23"
+          },
+          "cost": {
+            "baseline": "75885.77",
+            "alternative": "79005.55",
+            "absolute": "3119.78",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "5f7ec8e0-dcef-3363-a6e9-0c155948fbc5",
+          "name": "Polishers",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "12",
+            "alternative": "12",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.896057",
+            "alternative": "0.821182",
+            "absolute": "-0.074875",
+            "percent": "-8.36"
+          },
+          "busyUnitSeconds": {
+            "baseline": "3766040",
+            "alternative": "3593240",
+            "absolute": "-172800",
+            "percent": "-4.59"
+          },
+          "idleUnitSeconds": {
+            "baseline": "436864",
+            "alternative": "782452",
+            "absolute": "345588",
+            "percent": "79.11"
+          },
+          "cost": {
+            "baseline": "268518.87",
+            "alternative": "279558.10",
+            "absolute": "11039.23",
+            "percent": "4.11"
+          }
+        },
+        {
+          "resourceId": "025445c9-3032-3a36-aa69-cc1be9499af5",
+          "name": "Quality inspectors",
+          "kind": "EMPLOYEE",
+          "capacity": {
+            "baseline": "3",
+            "alternative": "3",
+            "absolute": "0",
+            "percent": "0.00"
+          },
+          "utilization": {
+            "baseline": "0.291520",
+            "alternative": "0.273292",
+            "absolute": "-0.018228",
+            "percent": "-6.25"
+          },
+          "busyUnitSeconds": {
+            "baseline": "306308",
+            "alternative": "298960",
+            "absolute": "-7348",
+            "percent": "-2.40"
+          },
+          "idleUnitSeconds": {
+            "baseline": "744418",
+            "alternative": "794963",
+            "absolute": "50545",
+            "percent": "6.79"
+          },
+          "cost": {
+            "baseline": "72967.08",
+            "alternative": "75966.88",
+            "absolute": "2999.80",
+            "percent": "4.11"
+          }
+        }
+      ],
+      "orders": [
+        {
+          "orderId": "81f770cc-67fc-368f-8eab-54d380352a5b",
+          "orderNumber": "SDW-0030",
+          "dueAt": "2026-11-15T11:30:00Z",
+          "baselineCompletionAt": "2026-11-23T07:24:46Z",
+          "alternativeCompletionAt": "2026-11-14T14:35:36Z",
+          "differenceSeconds": -751750,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "97e608c9-f56b-3324-8a3a-47084d3efbc0",
+          "orderNumber": "SDW-0045",
+          "dueAt": "2026-11-21T07:30:00Z",
+          "baselineCompletionAt": "2026-11-24T04:47:22Z",
+          "alternativeCompletionAt": "2026-11-17T11:13:44Z",
+          "differenceSeconds": -581618,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "98c408a5-0d45-37f0-930c-adfff242dc06",
+          "orderNumber": "SDW-0041",
+          "dueAt": "2026-11-19T12:30:00Z",
+          "baselineCompletionAt": "2026-11-18T05:24:43Z",
+          "alternativeCompletionAt": "2026-11-14T13:40:44Z",
+          "differenceSeconds": -315839,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "ac13cca6-9151-3fa5-ae34-7f71c3c494a1",
+          "orderNumber": "SDW-0027",
+          "dueAt": "2026-11-15T10:30:00Z",
+          "baselineCompletionAt": "2026-11-13T09:16:55Z",
+          "alternativeCompletionAt": "2026-11-12T04:16:55Z",
+          "differenceSeconds": -104400,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "b939b1b5-4d67-369a-bb5e-309e075aece4",
+          "orderNumber": "SDW-0037",
+          "dueAt": "2026-11-18T07:30:00Z",
+          "baselineCompletionAt": "2026-11-14T11:36:49Z",
+          "alternativeCompletionAt": "2026-11-12T13:41:11Z",
+          "differenceSeconds": -165338,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "c8957f30-64ac-3875-80bd-39095ecb73be",
+          "orderNumber": "SDW-0021",
+          "dueAt": "2026-11-11T07:30:00Z",
+          "baselineCompletionAt": "2026-11-11T08:30:21Z",
+          "alternativeCompletionAt": "2026-11-10T12:30:21Z",
+          "differenceSeconds": -72000,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "e7a019fe-3cbc-3174-92d6-469611d1d8a7",
+          "orderNumber": "SDW-0035",
+          "dueAt": "2026-11-19T10:30:00Z",
+          "baselineCompletionAt": "2026-11-23T07:28:42Z",
+          "alternativeCompletionAt": "2026-11-17T05:54:15Z",
+          "differenceSeconds": -524067,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "e9fe58cc-05ba-3dc2-893e-849b475f0585",
+          "orderNumber": "SDW-0039",
+          "dueAt": "2026-11-21T05:30:00Z",
+          "baselineCompletionAt": "2026-11-17T11:30:22Z",
+          "alternativeCompletionAt": "2026-11-14T14:54:50Z",
+          "differenceSeconds": -246932,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "eb3fff91-6ceb-3e4f-a1e7-c9ecb91c3fee",
+          "orderNumber": "SDW-0044",
+          "dueAt": "2026-11-20T04:30:00Z",
+          "baselineCompletionAt": "2026-11-17T11:13:12Z",
+          "alternativeCompletionAt": "2026-11-16T13:05:22Z",
+          "differenceSeconds": -79670,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "ec583100-8acd-331b-94f7-e53f67936842",
+          "orderNumber": "SDW-0026",
+          "dueAt": "2026-11-14T06:30:00Z",
+          "baselineCompletionAt": "2026-11-10T11:54:38Z",
+          "alternativeCompletionAt": "2026-11-10T06:54:38Z",
+          "differenceSeconds": -18000,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "f0f613c0-a6a3-31ad-8db2-d623520b65cc",
+          "orderNumber": "SDW-0040",
+          "dueAt": "2026-11-18T09:30:00Z",
+          "baselineCompletionAt": "2026-11-21T05:57:32Z",
+          "alternativeCompletionAt": "2026-11-16T06:27:20Z",
+          "differenceSeconds": -430212,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "f998c157-7fe3-35a9-ba94-a4e899c1ff34",
+          "orderNumber": "SDW-0025",
+          "dueAt": "2026-11-12T12:30:00Z",
+          "baselineCompletionAt": "2026-11-12T08:40:56Z",
+          "alternativeCompletionAt": "2026-11-11T08:40:56Z",
+          "differenceSeconds": -86400,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "05a1d59c-6efe-31f3-844e-b86452b4e376",
+          "orderNumber": "SDW-0047",
+          "dueAt": "2026-11-24T05:30:00Z",
+          "baselineCompletionAt": "2026-11-18T09:04:30Z",
+          "alternativeCompletionAt": "2026-11-17T10:30:59Z",
+          "differenceSeconds": -81211,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "0710efd4-64ec-381a-b38d-9e82547b2b49",
+          "orderNumber": "SDW-0049",
+          "dueAt": "2026-11-22T12:30:00Z",
+          "baselineCompletionAt": "2026-11-21T06:06:43Z",
+          "alternativeCompletionAt": "2026-11-19T04:01:08Z",
+          "differenceSeconds": -180335,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "082d46e1-0baf-3659-bdf2-c80ae6a1986e",
+          "orderNumber": "SDW-0042",
+          "dueAt": "2026-11-21T06:30:00Z",
+          "baselineCompletionAt": "2026-11-18T08:41:10Z",
+          "alternativeCompletionAt": "2026-11-16T13:36:18Z",
+          "differenceSeconds": -155092,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "10340c66-ec7d-3e10-8b22-cf5eb675fed2",
+          "orderNumber": "SDW-0036",
+          "dueAt": "2026-11-17T04:30:00Z",
+          "baselineCompletionAt": "2026-11-17T05:29:25Z",
+          "alternativeCompletionAt": "2026-11-14T11:02:54Z",
+          "differenceSeconds": -239191,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "1272a76f-12e6-3283-92c4-2b4c5b4a9fe9",
+          "orderNumber": "SDW-0048",
+          "dueAt": "2026-11-21T09:30:00Z",
+          "baselineCompletionAt": "2026-11-23T05:34:59Z",
+          "alternativeCompletionAt": "2026-11-19T09:47:21Z",
+          "differenceSeconds": -330458,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "15a5eb2e-9656-30a7-a863-25500b593694",
+          "orderNumber": "SDW-0043",
+          "dueAt": "2026-11-22T10:30:00Z",
+          "baselineCompletionAt": "2026-11-20T07:26:29Z",
+          "alternativeCompletionAt": "2026-11-17T11:02:22Z",
+          "differenceSeconds": -246247,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "18d7bb59-63c5-3362-808a-fdc4b8dc5f38",
+          "orderNumber": "SDW-0028",
+          "dueAt": "2026-11-13T04:30:00Z",
+          "baselineCompletionAt": "2026-11-14T09:00:50Z",
+          "alternativeCompletionAt": "2026-11-12T08:40:18Z",
+          "differenceSeconds": -174032,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "1b8d9216-dfbd-32d8-8339-9e3a89591609",
+          "orderNumber": "SDW-0024",
+          "dueAt": "2026-11-11T09:30:00Z",
+          "baselineCompletionAt": "2026-11-11T09:56:48Z",
+          "alternativeCompletionAt": "2026-11-10T13:56:48Z",
+          "differenceSeconds": -72000,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "1b8f03e7-7623-3859-8909-e110590163ce",
+          "orderNumber": "SDW-0033",
+          "dueAt": "2026-11-15T12:30:00Z",
+          "baselineCompletionAt": "2026-11-19T05:31:38Z",
+          "alternativeCompletionAt": "2026-11-13T12:54:33Z",
+          "differenceSeconds": -491825,
+          "baselineOutcome": "LATE",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "1be0f01b-af74-3426-9f51-e7fb9ff494b9",
+          "orderNumber": "SDW-0034",
+          "dueAt": "2026-11-18T06:30:00Z",
+          "baselineCompletionAt": "2026-11-13T09:32:34Z",
+          "alternativeCompletionAt": "2026-11-13T04:31:15Z",
+          "differenceSeconds": -18079,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "20bf0de0-8e09-361c-bb62-79bbe7eda978",
+          "orderNumber": "SDW-0038",
+          "dueAt": "2026-11-19T11:30:00Z",
+          "baselineCompletionAt": "2026-11-19T09:54:35Z",
+          "alternativeCompletionAt": "2026-11-14T08:44:47Z",
+          "differenceSeconds": -436188,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "4746b9dd-a406-3ae9-8376-3a6a8c76f710",
+          "orderNumber": "SDW-0023",
+          "dueAt": "2026-11-14T05:30:00Z",
+          "baselineCompletionAt": "2026-11-10T05:32:12Z",
+          "alternativeCompletionAt": "2026-11-10T03:53:12Z",
+          "differenceSeconds": -5940,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "48cd3419-c94b-3b1c-9342-a6e1f4caae92",
+          "orderNumber": "SDW-0022",
+          "dueAt": "2026-11-12T11:30:00Z",
+          "baselineCompletionAt": "2026-11-12T03:37:10Z",
+          "alternativeCompletionAt": "2026-11-11T03:37:10Z",
+          "differenceSeconds": -86400,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "4ef7da82-5a50-39d7-92c0-16e45529dace",
+          "orderNumber": "SDW-0046",
+          "dueAt": "2026-11-22T11:30:00Z",
+          "baselineCompletionAt": "2026-11-20T09:27:07Z",
+          "alternativeCompletionAt": "2026-11-18T07:05:49Z",
+          "differenceSeconds": -181278,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "68ea6a7a-8b7c-3ec5-b992-0d426f32429b",
+          "orderNumber": "SDW-0031",
+          "dueAt": "2026-11-17T05:30:00Z",
+          "baselineCompletionAt": "2026-11-13T08:52:34Z",
+          "alternativeCompletionAt": "2026-11-12T03:52:34Z",
+          "differenceSeconds": -104400,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "7175bcad-8a39-39f7-8f2e-8440a521a796",
+          "orderNumber": "SDW-0032",
+          "dueAt": "2026-11-14T09:30:00Z",
+          "baselineCompletionAt": "2026-11-14T05:34:50Z",
+          "alternativeCompletionAt": "2026-11-12T14:55:22Z",
+          "differenceSeconds": -139168,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        },
+        {
+          "orderId": "7d3cacb8-923c-33b0-928a-207a2cec27fc",
+          "orderNumber": "SDW-0029",
+          "dueAt": "2026-11-14T07:30:00Z",
+          "baselineCompletionAt": "2026-11-14T03:52:00Z",
+          "alternativeCompletionAt": "2026-11-12T08:52:00Z",
+          "differenceSeconds": -154800,
+          "baselineOutcome": "ON_TIME",
+          "alternativeOutcome": "ON_TIME"
+        }
+      ]
+    }
+  ],
+  "actual": null
+}

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Label } from '@/components/ui/form'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CreateScenarioDialog } from '@/features/scenarios/CreateScenarioDialog'
 import { Table, TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { api } from '@/lib/api'
 import {
@@ -192,13 +193,26 @@ interface StateInspectorProps {
   /** The instant being inspected, ISO-8601 UTC, or null when none is selected. */
   at: string | null
   onAt: (at: string | null) => void
+  /** When the factory's recorded history begins; null when it has none or it is not known yet. */
+  firstEventAt?: string | null
+}
+
+/** Why a scenario cannot start at `at`, or null when it can. */
+function forkProblem(at: string | null, firstEventAt: string | null, timeZone: string): string | null {
+  if (at === null || Number.isNaN(Date.parse(at))) return 'Choose a moment first.'
+  if (Date.parse(at) > Date.now()) return 'This moment is in the future: there is no recorded state to start from.'
+  if (firstEventAt !== null && Date.parse(at) < Date.parse(firstEventAt)) {
+    return `This moment is before the recorded history begins (${formatDateTimeInZone(firstEventAt, timeZone)}).`
+  }
+  return null
 }
 
 /**
  * The time machine's first half: pick any instant and see the factory as it stood then, rebuilt
- * from the event history. Branching a scenario from that state arrives with Milestone 5.
+ * from the event history, then branch a scenario from it.
  */
-export function StateInspector({ factory, at, onAt }: StateInspectorProps) {
+export function StateInspector({ factory, at, onAt, firstEventAt = null }: StateInspectorProps) {
+  const [creating, setCreating] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const [draft, setDraft] = useState(at === null ? '' : instantToZonedLocal(at, factory.timeZone))
   const [syncedAt, setSyncedAt] = useState(at)
@@ -221,6 +235,7 @@ export function StateInspector({ factory, at, onAt }: StateInspectorProps) {
   })
 
   const valid = at !== null && !Number.isNaN(Date.parse(at))
+  const problem = forkProblem(at, firstEventAt, factory.timeZone)
 
   return (
     <Card aria-labelledby="inspector-title">
@@ -273,14 +288,23 @@ export function StateInspector({ factory, at, onAt }: StateInspectorProps) {
           </Button>
         ) : null}
         <div className="ml-auto flex flex-col items-end gap-1">
-          <Button variant="outline" disabled aria-describedby="scenario-note">
+          <Button
+            variant="outline"
+            disabled={problem !== null}
+            aria-describedby={problem !== null ? 'scenario-note' : undefined}
+            onClick={() => {
+              setCreating(true)
+            }}
+          >
             <GitBranch aria-hidden="true" />
             Create scenario from this point
           </Button>
-          <p id="scenario-note" className="flex items-center gap-1.5 text-xs text-subtle-foreground">
-            <Info aria-hidden="true" className="size-3.5 shrink-0" />
-            Scenario branching arrives in Milestone 5.
-          </p>
+          {problem !== null ? (
+            <p id="scenario-note" className="flex items-center gap-1.5 text-xs text-subtle-foreground">
+              <Info aria-hidden="true" className="size-3.5 shrink-0" />
+              {problem}
+            </p>
+          ) : null}
         </div>
       </CardContent>
 
@@ -312,6 +336,15 @@ export function StateInspector({ factory, at, onAt }: StateInspectorProps) {
           <StateView state={state.data} timeZone={factory.timeZone} />
         </>
       )}
+      {creating && at !== null ? (
+        <CreateScenarioDialog
+          factory={factory}
+          mode={{ kind: 'fixedFork', forkAt: at }}
+          onClose={() => {
+            setCreating(false)
+          }}
+        />
+      ) : null}
     </Card>
   )
 }

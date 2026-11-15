@@ -20,9 +20,9 @@ Two principles hold throughout:
 | 1. Foundation | Backend, frontend shell, PostgreSQL, Flyway, OpenAPI, health checks, Docker Compose, Kiro steering and specs | **Done** |
 | 2. Factory configuration | Factory, workflow, stages, resource pools, requirements, demo seed | **Done** |
 | 3. Production operations | Orders, batches, append-only events, timeline | **Done** |
-| 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | **Done** (API only, no screen yet) |
-| 5. Scenario branching | Scenarios, changes, stored background runs, comparison | **Done** (API only, no screen yet) |
-| 6. Frontend | The ten application screens | Overview, Factory, Workflow, Resources, Orders, Timeline, Settings |
+| 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | **Done** |
+| 5. Scenario branching | Scenarios, changes, stored background runs, comparison | **Done** |
+| 6. Frontend | The ten application screens | **Done** except AI Analyst (Milestone 7) |
 | 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
 | 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
 
@@ -32,11 +32,12 @@ browse orders and their batches, follow the operational timeline, inspect the fa
 past moment, see current queues and units in use, edit pools, record downtime and reset the demonstration
 data. The deterministic simulation engine is built and can be run on the factory as recorded from any
 instant through `GET /api/factories/{id}/baseline-simulation` (see Swagger UI); it predicts completion, waiting,
-utilization, cost and delivery, and names the bottleneck with its evidence. Scenarios are built in the API:
-six ready-made what-ifs are seeded, and any scenario can be validated, simulated in the background with
-stored, reproducible results, and compared with the baseline (Swagger UI, tags Scenarios, Simulation and
-Comparison). The Scenario Lab and Results screens (Milestone 6) and AI (Milestone 7) are not built yet; those
-screens are placeholders that say which milestone delivers them.
+utilization, cost and delivery, and names the bottleneck with its evidence. In **Scenario Lab** you can open
+one of six ready-made what-ifs or create your own (from scratch, by branching, or from any moment on the
+Timeline), add changes, check them, and run the simulation; **Simulation Results** shows a run on its own or
+side by side with the baseline, with charts, bottleneck evidence and order-by-order delivery. Overview shows
+what the baseline predicts if nothing changes. The AI Analyst (Milestone 7) is not built yet; its screen is a
+placeholder that says so.
 
 ## Run it with Docker
 

@@ -4,7 +4,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { routes } from '@/app/routes'
-import { demoRoutes, mockBackend, ORDER_ID } from '@/test/backend'
+import { demoRoutes, mockBackend, ORDER_ID, scenarioRoutes } from '@/test/backend'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -29,20 +29,18 @@ describe('routes', () => {
     ['/orders', 'Production Orders'],
     [`/orders/${ORDER_ID}`, 'Order'],
     ['/timeline', 'Operational Timeline'],
+    ['/scenarios', 'Scenario Lab'],
+    ['/results', 'Simulation Results'],
     ['/settings', 'Settings'],
   ])('loads the screen for %s on demand', async (path, heading) => {
-    mockBackend(demoRoutes())
+    mockBackend({ ...demoRoutes(), ...scenarioRoutes() })
 
     renderAt(path)
 
     expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
   })
 
-  it.each([
-    ['/scenarios', 'Scenario Lab'],
-    ['/results', 'Simulation Results'],
-    ['/analyst', 'AI Analyst'],
-  ])('still shows a labelled placeholder for %s', async (path, heading) => {
+  it.each([['/analyst', 'AI Analyst']])('still shows a labelled placeholder for %s', async (path, heading) => {
     mockBackend(demoRoutes())
 
     renderAt(path)

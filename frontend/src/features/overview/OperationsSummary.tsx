@@ -124,7 +124,7 @@ function ProductionNow({ overview, factory }: { overview: FactoryOverview; facto
       </dl>
       <p className="border-t border-border px-5 py-3 text-xs text-subtle-foreground">
         “In use now” counts units held by batches being worked on at this instant. It is not utilization over time;
-        that, throughput and bottleneck evidence come from simulation runs, which are not built yet.
+        that, throughput and bottleneck evidence come from a simulation run, shown in the simulated baseline below.
       </p>
     </Card>
   )

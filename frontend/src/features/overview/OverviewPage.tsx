@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { FactorySummary } from '@/features/overview/FactorySummary'
 import { OperationsSummary } from '@/features/overview/OperationsSummary'
+import { SimulatedBaselinePanel } from '@/features/overview/SimulatedBaselinePanel'
 import { api } from '@/lib/api'
 import { formatDateTime } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
@@ -35,8 +36,8 @@ function RowSkeleton({ label }: { label: string }) {
 
 /**
  * Overview: what is configured for the factory, what its recorded history says about the
- * present, and the live status of the backend, database, migrations and AI layer. Simulated
- * metrics join it when the engine exists; nothing here is sample data.
+ * present, the baseline scenario's simulated outlook (kept apart and tagged Simulated), and the
+ * live status of the backend, database, migrations and AI layer. Nothing here is sample data.
  */
 export function OverviewPage() {
   const health = useQuery({
@@ -71,6 +72,7 @@ export function OverviewPage() {
       <div className="flex flex-col gap-6">
         <FactorySummary />
         <OperationsSummary />
+        <SimulatedBaselinePanel />
 
         <Card aria-labelledby="system-status-title">
           <CardHeader>
@@ -78,6 +80,12 @@ export function OverviewPage() {
               <CardTitle id="system-status-title">System status</CardTitle>
               <CardDescription>Reported by the backend. Health is re-checked every 30 seconds.</CardDescription>
             </div>
+            <Button asChild variant="link" size="sm" className="px-0">
+              <a href="/swagger-ui.html" target="_blank" rel="noreferrer">
+                API documentation
+                <ExternalLink aria-hidden="true" />
+              </a>
+            </Button>
           </CardHeader>
 
           <dl className="divide-y divide-border" aria-busy={health.isPending || info.isPending}>
@@ -154,27 +162,6 @@ export function OverviewPage() {
           ) : null}
         </Card>
 
-        <Card aria-labelledby="next-title">
-          <CardHeader>
-            <div>
-              <CardTitle id="next-title">Not shown yet</CardTitle>
-              <CardDescription>Roadmap notes, not data.</CardDescription>
-            </div>
-            <Button asChild variant="link" size="sm" className="px-0">
-              <a href="/swagger-ui.html" target="_blank" rel="noreferrer">
-                API documentation
-                <ExternalLink aria-hidden="true" />
-              </a>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <p className="max-w-3xl text-sm text-muted-foreground">
-              Throughput and utilization over time, and which stage is the bottleneck, are results of a simulation run.
-              The simulation engine and scenario branching arrive in Milestones 4 and 5; until then those figures are
-              left out rather than estimated.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </>
   )

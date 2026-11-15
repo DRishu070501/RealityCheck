@@ -1,0 +1,201 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "preview": {
+    "pools": [
+      {
+        "resourceId": "ad3bfb60-2f66-3d7f-bf66-eecff273065e",
+        "name": "Bruting lathes",
+        "kind": "MACHINE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "c72d0f99-4030-37df-827b-423ea53552dc",
+        "name": "Grading microscopes",
+        "kind": "MACHINE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "ddfcbace-9ca5-316f-819c-7d059051253f",
+        "name": "Planners",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "ed24f039-4c23-3d3c-a88a-26d4932e62f9",
+        "name": "Cutters",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 4,
+        "capacityAfter": 4,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "f8472665-edcc-36dc-8ec9-91a1978d9c57",
+        "name": "Markers",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 2,
+        "capacityAfter": 2,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "fb27d6ed-71b6-39e8-8431-fc41f09c6056",
+        "name": "Planning scanners",
+        "kind": "MACHINE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "025445c9-3032-3a36-aa69-cc1be9499af5",
+        "name": "Quality inspectors",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "2487f525-0a19-3ac9-9e49-eceef78571b5",
+        "name": "Laser saws",
+        "kind": "MACHINE",
+        "capacityBefore": 4,
+        "capacityAfter": 4,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "4893ff2f-d69b-3996-872b-c4050b3383c3",
+        "name": "Polishing wheels",
+        "kind": "MACHINE",
+        "capacityBefore": 6,
+        "capacityAfter": 6,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "56cfb1fc-f93c-3712-9f6e-cf339d88a825",
+        "name": "Dispatch clerks",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 2,
+        "capacityAfter": 2,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "5f7ec8e0-dcef-3363-a6e9-0c155948fbc5",
+        "name": "Polishers",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 12,
+        "capacityAfter": 12,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "6367f6c8-cea4-3bed-ad9a-a58140eb1de5",
+        "name": "Bruters",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 3,
+        "capacityAfter": 3,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "6981321b-df06-3ee9-bd62-fadfa7444301",
+        "name": "Laser marking units",
+        "kind": "MACHINE",
+        "capacityBefore": 2,
+        "capacityAfter": 2,
+        "windowsAdded": 0
+      },
+      {
+        "resourceId": "7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35",
+        "name": "Intake clerks",
+        "kind": "EMPLOYEE",
+        "capacityBefore": 2,
+        "capacityAfter": 2,
+        "windowsAdded": 0
+      }
+    ],
+    "stages": [
+      {
+        "stageId": "d13cdecf-d98d-306d-9bb3-0a71e72b2ae6",
+        "code": "ROUGH_INTAKE",
+        "name": "Rough Intake",
+        "stonesPerHourBefore": "240.0000",
+        "stonesPerHourAfter": "240.0000",
+        "maxSlotsBefore": 2,
+        "maxSlotsAfter": 2
+      },
+      {
+        "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+        "code": "PLANNING",
+        "name": "Planning",
+        "stonesPerHourBefore": "30.0000",
+        "stonesPerHourAfter": "30.0000",
+        "maxSlotsBefore": 3,
+        "maxSlotsAfter": 3
+      },
+      {
+        "stageId": "715810e8-2fc8-30da-a95f-0fb5721a55ac",
+        "code": "MARKING",
+        "name": "Marking",
+        "stonesPerHourBefore": "45.0000",
+        "stonesPerHourAfter": "45.0000",
+        "maxSlotsBefore": 2,
+        "maxSlotsAfter": 2
+      },
+      {
+        "stageId": "8c34fd68-837b-36d8-bd9b-c5fb210bcd37",
+        "code": "CUTTING",
+        "name": "Cutting",
+        "stonesPerHourBefore": "12.0000",
+        "stonesPerHourAfter": "12.0000",
+        "maxSlotsBefore": 4,
+        "maxSlotsAfter": 4
+      },
+      {
+        "stageId": "1e07d2be-42e3-3167-a2ef-3fec0698043d",
+        "code": "BRUTING",
+        "name": "Bruting",
+        "stonesPerHourBefore": "18.0000",
+        "stonesPerHourAfter": "18.0000",
+        "maxSlotsBefore": 3,
+        "maxSlotsAfter": 3
+      },
+      {
+        "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+        "code": "POLISHING",
+        "name": "Polishing",
+        "stonesPerHourBefore": "6.0000",
+        "stonesPerHourAfter": "6.0000",
+        "maxSlotsBefore": 6,
+        "maxSlotsAfter": 6
+      },
+      {
+        "stageId": "fcc0d941-7ae2-34f2-85e5-f1233a843fa7",
+        "code": "QUALITY_INSPECTION",
+        "name": "Quality Inspection",
+        "stonesPerHourBefore": "40.0000",
+        "stonesPerHourAfter": "40.0000",
+        "maxSlotsBefore": 3,
+        "maxSlotsAfter": 3
+      },
+      {
+        "stageId": "772a6b27-1083-3ac2-a660-2cd10043ad5e",
+        "code": "DISPATCH",
+        "name": "Dispatch",
+        "stonesPerHourBefore": "300.0000",
+        "stonesPerHourAfter": "300.0000",
+        "maxSlotsBefore": 2,
+        "maxSlotsAfter": 2
+      }
+    ],
+    "weeklyWorkingSecondsBefore": 172800,
+    "weeklyWorkingSecondsAfter": 259200,
+    "unstartedStonesBefore": "1680.0000",
+    "unstartedStonesAfter": "1680.0000"
+  },
+  "baseStateHash": "db7d9beec1b7e4bc474d33bc57391f64d23231cfee6ad8050530707747abb490",
+  "inputHash": "a936cd8b8f5ba996201a581c04972d1712ec05d05a6ba4a4f3d7fd66a311617b"
+}
