@@ -70,7 +70,7 @@ describe('OverviewPage', () => {
     await expectInRow('Backend API', 'UP')
     expect(within(row('Database')).getByText('PostgreSQL 17.2')).toBeInTheDocument()
     expect(within(row('Schema migrations')).getByText('1 applied, current version 1')).toBeInTheDocument()
-    expect(within(row('AI layer')).getByText('Not configured')).toBeInTheDocument()
+    expect(within(row('AI layer')).getByText('Built-in analyst')).toBeInTheDocument()
     expect(within(row('Application version')).getByText('RealityCheck 0.1.0')).toBeInTheDocument()
     expect(row('Server time').querySelector('time')).toHaveAttribute('dateTime', '2026-11-14T06:30:00Z')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
@@ -79,13 +79,13 @@ describe('OverviewPage', () => {
   it('names the AI provider when the AI layer is enabled', async () => {
     mockBackend({
       health: () => Promise.resolve(jsonResponse({ status: 'UP' })),
-      info: () => Promise.resolve(jsonResponse({ ...systemInfoFixture, ai: { enabled: true, provider: 'anthropic' } })),
+      info: () => Promise.resolve(jsonResponse({ ...systemInfoFixture, ai: { enabled: true, provider: 'anthropic', model: 'claude-haiku-5-5', available: true } })),
     })
 
     renderWithProviders(<OverviewPage />)
 
-    await expectInRow('AI layer', 'Enabled')
-    expect(within(row('AI layer')).getByText('Provider: anthropic')).toBeInTheDocument()
+    await expectInRow('AI layer', 'Language model')
+    expect(within(row('AI layer')).getByText('anthropic, claude-haiku-5-5')).toBeInTheDocument()
   })
 
   it('reports an unreachable backend and recovers on retry', async () => {

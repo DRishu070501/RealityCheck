@@ -52,4 +52,8 @@ export const queryKeys = {
     compare: (baselineRunId: string, alternativeRunId: string, allowDifferent: boolean) =>
       ['simulations', 'compare', baselineRunId, alternativeRunId, allowDifferent] as const,
   },
+  ai: {
+    all: ['ai'] as const,
+    history: (runId: string) => ['ai', 'history', runId] as const,
+  },
 } as const

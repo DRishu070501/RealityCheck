@@ -31,6 +31,6 @@ export const systemInfoFixture = {
   serverTime: '2026-11-14T06:30:00Z',
   database: { status: 'UP', product: 'PostgreSQL', version: '17.2' },
   migrations: { appliedCount: 1, currentVersion: '1' },
-  ai: { enabled: false, provider: 'none' },
+  ai: { enabled: false, provider: 'template', model: null, available: true },
   demo: { resetEnabled: false },
 }

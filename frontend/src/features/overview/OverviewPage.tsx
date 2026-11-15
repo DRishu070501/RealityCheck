@@ -131,13 +131,18 @@ export function OverviewPage() {
                 <StatusRow label="AI layer">
                   {info.data.ai.enabled ? (
                     <>
-                      <StatusBadge label="Enabled" tone="ok" />
-                      <span className="text-muted-foreground">Provider: {info.data.ai.provider}</span>
+                      <StatusBadge label="Language model" tone="ok" />
+                      <span className="text-muted-foreground">
+                        {info.data.ai.provider}
+                        {info.data.ai.model ? `, ${info.data.ai.model}` : ''}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <StatusBadge label="Not configured" tone="neutral" />
-                      <span className="text-muted-foreground">The application is fully usable without it.</span>
+                      <StatusBadge label="Built-in analyst" tone="neutral" />
+                      <span className="text-muted-foreground">
+                        No language model configured; the AI Analyst answers from fixed rules.
+                      </span>
                     </>
                   )}
                 </StatusRow>

@@ -1,5 +1,8 @@
 import { vi } from 'vitest'
 
+import aiAnswer from '@/test/fixtures/aiAnswer.json'
+import aiFallbackInsight from '@/test/fixtures/aiFallbackInsight.json'
+import aiInsight from '@/test/fixtures/aiInsight.json'
 import availability from '@/test/fixtures/availability.json'
 import baselineResults from '@/test/fixtures/baselineResults.json'
 import comparison from '@/test/fixtures/comparison.json'
@@ -33,6 +36,9 @@ import { jsonResponse } from '@/test/utils'
  * runs from 26 October to that day; `timeline` holds only the newest 14 of its 1,376 events.
  */
 export const fixtures = {
+  aiAnswer,
+  aiFallbackInsight,
+  aiInsight,
   availability,
   baselineResults,
   comparison,
@@ -91,7 +97,20 @@ export function scenarioRoutes(): Routes {
     [`GET /api/simulations/${RUN_ID}/events`]: () => jsonResponse(simulatedEvents),
     [`GET /api/simulations/${BASELINE_RUN_ID}/results`]: () => jsonResponse(baselineResults),
     'POST /api/simulations/compare': () => jsonResponse(comparison),
+    // No stored insights unless a test says otherwise.
+    'GET /api/ai/insights/*': () => jsonResponse(pageOfItems([])),
   }
+}
+
+/**
+ * AI insights captured on 15 November 2026 from the running backend with Claude Haiku 5.5:
+ * `aiInsight` compares "Introduce an additional shift" with the baseline; `aiAnswer` answers
+ * "Which resource is underused?" about the baseline run; `aiFallbackInsight` is an executive
+ * report on "Make five employees unavailable" where Claude's answer failed the evidence check
+ * twice and the built-in analyst answered.
+ */
+export function pageOfItems<T>(items: readonly T[]) {
+  return { items, page: 0, size: 50, totalItems: items.length, totalPages: items.length === 0 ? 0 : 1 }
 }
 
 export function poolNamed(name: string) {

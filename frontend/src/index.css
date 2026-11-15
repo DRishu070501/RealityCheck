@@ -121,3 +121,22 @@
 @utility metric {
   font-variant-numeric: tabular-nums lining-nums;
 }
+
+/* AI Analyst: print only the chosen executive report. */
+@media print {
+  body.printing-insight * {
+    visibility: hidden;
+  }
+  body.printing-insight .print-target,
+  body.printing-insight .print-target * {
+    visibility: visible;
+  }
+  body.printing-insight .print-target {
+    position: absolute;
+    inset: 0 0 auto 0;
+    border: none;
+  }
+  body.printing-insight .print-target details {
+    display: block;
+  }
+}

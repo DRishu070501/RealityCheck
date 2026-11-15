@@ -31,6 +31,7 @@ describe('routes', () => {
     ['/timeline', 'Operational Timeline'],
     ['/scenarios', 'Scenario Lab'],
     ['/results', 'Simulation Results'],
+    ['/analyst', 'AI Analyst'],
     ['/settings', 'Settings'],
   ])('loads the screen for %s on demand', async (path, heading) => {
     mockBackend({ ...demoRoutes(), ...scenarioRoutes() })
@@ -40,12 +41,4 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
   })
 
-  it.each([['/analyst', 'AI Analyst']])('still shows a labelled placeholder for %s', async (path, heading) => {
-    mockBackend(demoRoutes())
-
-    renderAt(path)
-
-    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
-    expect(screen.getByText('Not implemented yet')).toBeInTheDocument()
-  })
 })

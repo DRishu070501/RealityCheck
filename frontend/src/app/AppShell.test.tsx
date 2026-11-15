@@ -50,7 +50,7 @@ describe('navigation config', () => {
   it('marks exactly the screens that are not built yet as planned', () => {
     const planned = NAV_ITEMS.filter((item) => item.planned).map((item) => item.label)
 
-    expect(planned).toEqual(['AI Analyst'])
+    expect(planned).toEqual([])
   })
 })
 

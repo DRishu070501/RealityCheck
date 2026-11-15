@@ -1,8 +1,8 @@
-import { ClipboardCheck, Cpu, FlaskRound, SlidersHorizontal } from 'lucide-react'
+import { ClipboardCheck, Cpu, FlaskRound, SlidersHorizontal, Sparkles } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 
-export type DataSource = 'Configuration' | 'Actual' | 'Simulated'
+export type DataSource = 'Configuration' | 'Actual' | 'Simulated' | 'AI interpretation'
 
 const SOURCES = {
   Configuration: {
@@ -21,12 +21,18 @@ const SOURCES = {
     title:
       'These values were computed by the deterministic simulation engine from recorded data and the scenario’s changes. They are estimates under the engine’s rules, not measurements.',
   },
+  'AI interpretation': {
+    icon: Sparkles,
+    className: 'border-source-ai/30 text-source-ai',
+    title:
+      'Written by the AI analyst from simulated results. It explains; it does not calculate. Every number in it was checked against the simulation’s evidence before it was shown.',
+  },
 } as const satisfies Record<DataSource, unknown>
 
 /**
- * Says where the figures in a view come from: "Configuration" (what was set up) or "Actual"
- * (recorded history) or "Simulated" (engine output, optionally with the scenario's name).
- * "AI interpretation" joins them in Milestone 7.
+ * Says where the content of a view comes from: "Configuration" (what was set up), "Actual"
+ * (recorded history), "Simulated" (engine output, optionally with the scenario's name) or
+ * "AI interpretation" (the analyst's explanation of simulated results).
  */
 export function SourceTag({ source = 'Configuration', scenarioName }: { source?: DataSource; scenarioName?: string }) {
   const { icon: Icon, className, title } = SOURCES[source]

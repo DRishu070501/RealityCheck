@@ -22,7 +22,7 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('RealityCheck 0.1.0')).toBeInTheDocument()
     expect(screen.getByText('PostgreSQL 17.12')).toBeInTheDocument()
     expect(screen.getByText('4 applied, current version 4')).toBeInTheDocument()
-    expect(screen.getByText('Not configured')).toBeInTheDocument()
+    expect(screen.getByText('Built-in analyst')).toBeInTheDocument()
   })
 
   it('offers no reset when it is disabled by configuration', async () => {

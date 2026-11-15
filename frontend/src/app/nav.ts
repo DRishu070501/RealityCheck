@@ -34,15 +34,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/timeline', label: 'Operational Timeline', icon: History },
   { path: '/scenarios', label: 'Scenario Lab', icon: FlaskConical },
   { path: '/results', label: 'Simulation Results', icon: ChartColumn },
-  {
-    path: '/analyst',
-    label: 'AI Analyst',
-    icon: Bot,
-    planned: {
-      milestone: 'Milestone 7',
-      summary:
-        'Explanations and recommendations grounded in a selected simulation run, each with the metrics that support it.',
-    },
-  },
+  { path: '/analyst', label: 'AI Analyst', icon: Bot },
   { path: '/settings', label: 'Settings', icon: Settings },
 ]

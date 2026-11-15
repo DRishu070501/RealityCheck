@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { insightSchema, type AskInput, type InsightInput } from '@/lib/aiSchemas'
 import {
   availabilityWindowSchema,
   capacityTimelineSchema,
@@ -228,9 +229,12 @@ export const systemInfoSchema = z.object({
     appliedCount: z.number().int().nonnegative(),
     currentVersion: z.string().nullish(),
   }),
+  /** The AI analyst. `enabled`: a language model is configured; otherwise the built-in template analyst answers. */
   ai: z.object({
     enabled: z.boolean(),
     provider: z.string(),
+    model: z.string().nullish(),
+    available: z.boolean().optional(),
   }),
   /** Whether this deployment allows the demonstration data to be reset from the UI. */
   demo: z.object({ resetEnabled: z.boolean() }),
@@ -370,6 +374,14 @@ export const api = {
     events: (runId: string, page: number, size: number, signal?: AbortSignal) =>
       request(`/api/simulations/${runId}/events${query({ page, size })}`, simulatedEventPageSchema, { signal }),
     compare: (body: CompareInput) => request('/api/simulations/compare', comparisonSchema, { method: 'POST', body }),
+  },
+  ai: {
+    /** Explains a completed run; a stored insight for the same evidence is returned unless `regenerate`. */
+    insight: (body: InsightInput) => request('/api/ai/insights', insightSchema, { method: 'POST', body }),
+    ask: (body: AskInput) => request('/api/ai/ask', insightSchema, { method: 'POST', body }),
+    /** Stored insights of a run, newest first. */
+    history: (runId: string, signal?: AbortSignal) =>
+      request(`/api/ai/insights/${runId}${query({ size: 50 })}`, pageOf(insightSchema), { signal }),
   },
   demo: {
     /** Erases all data and re-creates the demonstration factory. Answers 404 when disabled. */

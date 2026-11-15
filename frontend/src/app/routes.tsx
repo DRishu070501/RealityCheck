@@ -54,6 +54,7 @@ export const routes: RouteObject[] = [
         element: screen(() => import('@/features/scenarios/ScenarioDetailPage'), 'ScenarioDetailPage'),
       },
       { path: '/results', element: screen(() => import('@/features/results/ResultsPage'), 'ResultsPage') },
+      { path: '/analyst', element: screen(() => import('@/features/analyst/AnalystPage'), 'AnalystPage') },
       { path: '/settings', element: screen(() => import('@/features/settings/SettingsPage'), 'SettingsPage') },
       ...placeholderRoutes,
       { path: '*', element: <NotFoundPage /> },
