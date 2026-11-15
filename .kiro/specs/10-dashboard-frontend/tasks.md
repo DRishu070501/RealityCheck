@@ -64,7 +64,7 @@ component tests.
   - Test: values equal the mocked comparison verbatim; bottleneck change variants; limit warning; consent flow; table alternative for each chart.
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8_
 
-- [ ] 13. AI Analyst (M7)
+- [x] 13. AI Analyst (M7)
   - Context pickers, example questions, structured answer cards with evidence drawers, fallback notice, insight history, executive report print view.
   - Test: sections render; evidence beside recommendations tagged Simulated; fallback notice; empty state without runs.
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
@@ -109,3 +109,13 @@ baseline panel on Overview and "Create scenario from this point" on the Timeline
 - Run tests use real timers and wait about one poll interval rather than fake timers.
 - Charts are not drawn in jsdom; tests check their table alternatives, and the charts were checked in a
   browser against the running stack.
+
+## Implementation notes (Milestone 7)
+
+Task 13 is built in `features/analyst/`. The context pickers default to the latest non-baseline run, and to the
+baseline scenario's run when one exists. There are report buttons for each insight type and example questions
+for the chosen context. Each answer card has sections, an evidence disclosure beside the summary and beside
+every recommendation (tagged Simulated, with the source run's name), a fallback notice saying why the
+built-in analyst answered, and the run's insight history. An executive report prints on its own through print
+CSS (`body.printing-insight`). The test fixtures `aiInsight`, `aiAnswer` and `aiFallbackInsight` are real
+responses captured with Claude Haiku 5.5.

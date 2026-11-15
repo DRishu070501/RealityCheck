@@ -34,7 +34,7 @@ All configuration is environment variables. `.env.example` lists every one with 
 | `API_DOCS_ENABLED` | `true` | Serve Swagger UI and the OpenAPI document |
 | `REALITYCHECK_DEMO_SEED` | `true` in `.env.example`, `false` when unset | Seed the demonstration factory at start-up if the database has no factory |
 | `REALITYCHECK_DEMO_RESET_ENABLED` | `true` in `.env.example`, `false` when unset | Allow `POST /api/demo/reset`, which erases all data. See [demo-data.md](demo-data.md). |
-| `AI_PROVIDER`, `AI_API_KEY` | `none`, empty | Read now, used from Milestone 7. The key stays on the server. |
+| `AI_PROVIDER`, `AI_API_KEY` | `template`, empty | `anthropic` plus a key uses Claude for the AI Analyst; otherwise the built-in template analyst answers. The key stays in the backend container. Other `AI_*` settings: [ai.md](ai.md). |
 
 When the backend runs outside Docker it reads `DB_URL`, `DB_USERNAME` and `DB_PASSWORD`, defaulting to
 `jdbc:postgresql://localhost:15432/realitycheck` with user and password `realitycheck`, which matches

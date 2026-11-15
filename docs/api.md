@@ -67,7 +67,7 @@ What the backend is connected to. If the database is unreachable the call still 
   "serverTime": "2026-11-14T05:54:59Z",
   "database": { "status": "UP", "product": "PostgreSQL", "version": "17.2" },
   "migrations": { "appliedCount": 1, "currentVersion": "1" },
-  "ai": { "enabled": false, "provider": "none" },
+  "ai": { "enabled": false, "provider": "template", "model": null, "available": true },
   "demo": { "resetEnabled": true }
 }
 ```
@@ -635,6 +635,108 @@ The endpoint exists only when `REALITYCHECK_DEMO_RESET_ENABLED=true`; otherwise 
 
 No other actuator endpoint is exposed.
 
+### AI analyst
+
+Explanations of stored simulation results. The content is tagged `source: "AI_INTERPRETATION"`; the
+evidence items it cites are `SIMULATED` values quoted as stored. Every number in the text was checked against
+the evidence before the response was returned. The answering provider is the built-in template analyst unless
+a language model is configured (see [ai.md](ai.md)).
+
+| Method and path | Purpose |
+|---|---|
+| `POST /api/ai/insights` | Explain a completed run: `{"runId", "baselineRunId"?, "type", "regenerate"?}` |
+| `POST /api/ai/ask` | Answer a question about a run: `{"runId", "baselineRunId"?, "question"}`, question at most 500 characters |
+| `GET /api/ai/insights/{runId}?type=&page=&size=` | Stored insights of the run, newest first (list envelope) |
+
+`type` is `EXPLANATION`, `BOTTLENECK`, `RECOMMENDATIONS`, `DELAY_ANALYSIS`, `COMPARISON_SUMMARY` (needs
+`baselineRunId`) or `EXECUTIVE_REPORT`. A stored insight for the same run, baseline, type and evidence is
+returned without calling the provider unless `regenerate` is `true`. Questions are always answered afresh.
+
+Errors: `400` for a missing `runId`, a question over 500 characters, `COMPARISON_SUMMARY` without a baseline,
+or `type: "ANSWER"` (use `/ask`); `404` for an unknown run; `409` with `runStatus` for a run that is not
+`COMPLETED`; `422` `DIFFERENT_STARTING_STATE` when the baseline started from another state; `429` with
+`Retry-After` beyond `AI_REQUESTS_PER_MINUTE`. A failing or unreachable language model is **not** an error: the
+response is `200` with `fallback: true`, `fallbackReason` (`VALIDATION_FAILED`, `PROVIDER_ERROR` or `TIMEOUT`)
+and the template analyst's content.
+
+A real answer from Claude Haiku 5.5 about the demonstration baseline run, with each list cut to its first item
+and the evidence to one of its four items:
+
+```http
+POST /api/ai/ask
+{"runId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3", "question": "Which resource is underused?"}
+```
+
+```json
+{
+  "id": "605fc223-da1d-4a2b-9599-e28e73f64549",
+  "runId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3",
+  "baselineRunId": null,
+  "type": "ANSWER",
+  "question": "Which resource is underused?",
+  "source": "AI_INTERPRETATION",
+  "provider": "anthropic",
+  "model": "claude-haiku-5-5",
+  "fallback": false,
+  "fallbackReason": null,
+  "inputTokens": 19298,
+  "outputTokens": 858,
+  "createdAt": "2026-11-15T09:54:22.718680Z",
+  "content": {
+    "summary": "The least used resource pools are Planning scanners, Intake clerks and Dispatch clerks among those with the lowest utilization figures. Intake clerks are at 5.2% utilization, the lowest of the pools with a stated utilization, and Dispatch clerks are at 8.8%. Planning scanners are at 21.6% and their idle unit time is 229 hours.",
+    "keyChanges": [
+      "Intake clerks (employee) utilization is 5.2% with idle unit time of 184 hours."
+    ],
+    "risks": [
+      "Low utilization of these pools does not mean they can be cut, since they still carry cost, for example Planners cost INR 75,886 and Intake clerks cost INR 21,404."
+    ],
+    "bottleneckExplanation": "Polishing is the bottleneck, with its Polishing wheels pool at 89.6% utilization, so the low-use pools are not the constraint.",
+    "recommendations": [
+      {
+        "title": "Review staffing of Intake clerks and Dispatch clerks",
+        "rationale": "Both pools show very low utilization, so their hours could be checked against actual workload before any change is considered.",
+        "metricRefs": [
+          "run.resource.7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35.utilization",
+          "run.resource.56cfb1fc-f93c-3712-9f6e-cf339d88a825.utilization"
+        ]
+      }
+    ],
+    "metricRefs": [
+      "run.resource.7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35.utilization",
+      "run.resource.56cfb1fc-f93c-3712-9f6e-cf339d88a825.utilization",
+      "run.resource.fb27d6ed-71b6-39e8-8431-fc41f09c6056.utilization",
+      "run.bottleneck.primaryStage"
+    ],
+    "assumptions": [
+      "Utilization is taken as the share of the run's working time each pool was busy, as stated in the simulation."
+    ],
+    "limitations": [
+      "The evidence gives utilization for each pool but does not say what cutting any pool would do to output or delivery."
+    ]
+  },
+  "evidence": [
+    {
+      "key": "run.resource.7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35.utilization",
+      "label": "Intake clerks (employee): utilization",
+      "value": "0.052250",
+      "text": null,
+      "unit": "fraction",
+      "display": [
+        "5.2%",
+        "5%"
+      ],
+      "sourceRunId": "e2d9ceaf-4cf5-4aab-bb6b-d360bd124ad3",
+      "stageId": null,
+      "resourceId": "7b3d7dc8-39f1-3d4b-ba6e-29057ba04a35",
+      "source": "SIMULATED"
+    }
+  ]
+}
+```
+
+`inputTokens` and `outputTokens` cover every attempt sent to the language model; both are null for the template
+analyst.
+
 ## Planned endpoints
 
 Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows where each group lands.
@@ -642,4 +744,3 @@ Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows whe
 | Group | Endpoints | Milestone |
 |---|---|---|
 | Comparison | `includeActual` (recorded outcome next to simulated futures) | 8 |
-| AI | `POST /api/ai/insights`, `POST /api/ai/ask`, `GET /api/ai/insights/{runId}` | 7 |

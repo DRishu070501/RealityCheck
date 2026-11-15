@@ -22,8 +22,8 @@ Two principles hold throughout:
 | 3. Production operations | Orders, batches, append-only events, timeline | **Done** |
 | 4. Simulation engine | Discrete-event engine, calendar, yield, metrics, bottleneck detection | **Done** |
 | 5. Scenario branching | Scenarios, changes, stored background runs, comparison | **Done** |
-| 6. Frontend | The ten application screens | **Done** except AI Analyst (Milestone 7) |
-| 7. AI intelligence | Provider abstraction, explanations, Q&A | Not started |
+| 6. Frontend | The ten application screens | **Done** |
+| 7. AI intelligence | Provider abstraction, evidence-checked explanations, Q&A, AI Analyst screen | **Done** |
 | 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
 
 What runs today: a seeded demonstration factory, Surat Diamond Works, with its working calendar, fourteen
@@ -36,8 +36,11 @@ utilization, cost and delivery, and names the bottleneck with its evidence. In *
 one of six ready-made what-ifs or create your own (from scratch, by branching, or from any moment on the
 Timeline), add changes, check them, and run the simulation; **Simulation Results** shows a run on its own or
 side by side with the baseline, with charts, bottleneck evidence and order-by-order delivery. Overview shows
-what the baseline predicts if nothing changes. The AI Analyst (Milestone 7) is not built yet; its screen is a
-placeholder that says so.
+what the baseline predicts if nothing changes. **AI Analyst** explains a chosen run (on its own or against a
+baseline): reports on the bottleneck, delays, recommendations and an executive summary, and answers to your
+questions, each with the simulated evidence behind it. Every number in an answer is checked against the stored
+results before it is shown; answers that fail the check are replaced by the built-in analyst's. It uses Claude
+when `AI_API_KEY` is set and the built-in template analyst otherwise (see [docs/ai.md](docs/ai.md)).
 
 ## Run it with Docker
 

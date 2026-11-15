@@ -5,7 +5,7 @@ in `.kiro/steering/` (`architecture.md` for module boundaries and API convention
 the engine contract). This page is the narrative: the shape of the system, the decisions that are not
 obvious, and what was traded away.
 
-Status: Milestones 1 to 4 are built. Sections describing later milestones are the agreed design, not a description
+Status: Milestones 1 to 7 are built. Sections describing later milestones are the agreed design, not a description
 of existing code; each says so.
 
 ## System shape
@@ -169,10 +169,23 @@ cost per output stone so that comparisons are not distorted by horizon length.
 
 ### AI
 
-One interface, `AiProvider`. The `ai` module assembles an evidence document from stored results, requests
-structured JSON, validates it, and rejects any response containing a number absent from the evidence. A
-deterministic template provider serves when no key is configured or the model call fails, so the
+Built in Milestone 7; details in [ai.md](ai.md). One interface, `AiProvider`. The `ai` module assembles an
+evidence document from stored results and, with a baseline, the stored comparison; requests structured JSON;
+validates it; and rejects any response containing a number absent from the evidence, retrying once with the
+reasons. A deterministic template provider serves when no key is configured or the model fails, so the
 application is complete without AI.
+
+Dependencies: `ai` reads `simulation` (stored results through `SimulationQueryService`) and `scenario` (the
+comparison), never the engine, its persistence or the operational modules; nothing outside `ai` depends on
+it; only `ai.provider` may use a language-model client. All three rules are in `ArchitectureTest`. The module
+writes only `simulation_insight` and `insight_evidence`, both append-only.
+
+Claude is called through the official Anthropic Java SDK, not the hand-written `RestClient` the spec
+proposed: the SDK handles retries with backoff, timeouts and structured output, and it is confined to one
+class.
+
+Known limits of the number check: it compares magnitudes (a sign flip passes) and cannot tell a number used in
+the wrong context if that number is present elsewhere in the evidence. See ai.md.
 
 ## Decisions that differ from the original brief
 
