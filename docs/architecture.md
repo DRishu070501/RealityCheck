@@ -40,7 +40,7 @@ Everything a user sees is one of:
 The architecture exists to keep these apart. Dependencies point one way: `ai` reads `simulation` results;
 `simulation` cannot import `ai`; the engine cannot import anything.
 
-## What exists today (Milestones 1 to 5)
+## What exists today (Milestones 1 to 5; later milestones in the sections below and in the specs)
 
 - `common.config`: typed settings (`RealityCheckProperties`), CORS allow-list, OpenAPI metadata, the
   application `Clock`.
@@ -120,6 +120,12 @@ stores the complete input it was given. This gives the property that matters (a 
 reproduced and never changes after the fact) without building full temporal versioning of every
 configuration table. The cost is that forking far into the past uses today's configuration plus dated
 availability windows. Full effective-dated configuration is the natural next step if that becomes a limit.
+
+Because a fork lies in the past, history also records what really happened next. A comparison can include
+it (`includeActual`): `scenario.comparison.ActualOutcomeService` rebuilds the factory at the latest recorded
+event and reports, for the orders the baseline simulated, which finished and what the last stage produced
+after the fork. It is shown beside the simulated figures and never subtracted from them, because history
+stops at the latest event while a simulation runs to completion.
 
 ### Simulation runs
 
@@ -206,6 +212,28 @@ the wrong context if that number is present elsewhere in the evidence. See ai.md
 Added because the flows need them: a factory time zone and currency, calendar tables, a batch reference on
 events, a `CORRECTION` event type, per-resource result rows, an input hash and idempotency key on runs, and
 the extra endpoints listed in `docs/api.md`.
+
+## Performance
+
+Measured on 15 November 2026 against the Docker Compose stack on a Windows 11 laptop, with the seeded
+demonstration factory (49 orders, about 1,400 recorded events), five calls each, median and worst:
+
+| Request | Median | Worst |
+|---|---|---|
+| `GET /api/system/info` | 25 ms | 71 ms |
+| `GET /api/factories/{id}/overview` | 87 ms | 101 ms |
+| `GET /api/factories/{id}/state` (factory rebuilt from history) | 50 ms | 57 ms |
+| `GET /api/events` and `GET /api/orders`, 50 per page | 14 to 22 ms | 25 ms |
+| `GET /api/simulations/{id}/results` | 15 ms | 32 ms |
+| `POST /api/simulations/compare` | 30 ms | 40 ms |
+| the same with `includeActual` | 144 ms | 167 ms |
+| A simulation run, submission to completion | about 0.1 s (engine 3 to 38 ms) | |
+| An AI insight with Claude Haiku 5.5 | 4 to 13 s | |
+
+Measured with `127.0.0.1`: on Windows, `localhost` from a command-line client first tries IPv6 and adds about
+200 ms per request; browsers are unaffected. The frontend is split per screen: the entry chunk is 151 kB
+gzipped, each screen 1 to 12 kB, and the charting library (106 kB) loads only with a screen that draws a chart.
+The end-to-end journey, twelve steps including two simulations and one AI answer, takes about 35 s.
 
 ## Known risks
 

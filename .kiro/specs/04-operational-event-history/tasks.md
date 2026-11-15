@@ -38,7 +38,7 @@ Milestone: **M3 — Production operations**. Depends on specs 01, 02, 03.
   - Test: correcting a quantity changes the projection and leaves the original row byte-identical; voiding a middle event is rejected; correcting a correction is rejected.
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 8. Implement the resource ports
+- [x] 8. Implement the resource ports
   - `ResourceEventSink` and `ResourceUsageProvider` from spec 03 (see spec 03 task 7).
   - _Requirements: 2.1_
 
@@ -47,7 +47,7 @@ Milestone: **M3 — Production operations**. Depends on specs 01, 02, 03.
   - Test: `ProductionSeedIT`.
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 10. Guard history against simulation writes (M5)
+- [x] 10. Guard history against simulation writes (M5)
   - Test in spec 07's `SimulationRunIT`: row counts and a checksum of `operational_event`, `production_order`, `production_batch` are identical before and after a completed run and a failed run.
   - _Requirements: 2.5_
 
@@ -77,3 +77,12 @@ Differences from design.md, made during implementation:
 - Tests are `BatchHistoryTest`, `BatchHistoryProperties`, `ProductionApiIT` and `DemoIT` rather than the
   class names listed above. There is no Mockito test of `EventAppendService`; it is covered through the API
   against PostgreSQL, including the concurrent-start case.
+
+## Implementation notes (Milestone 8 review)
+
+- Task 8: `production.service.ResourceUnavailabilityRecorder` implements `ResourceEventSink`. There is no separate
+  `ResourceUsageProvider`: units in use come from the reconstructed factory state
+  (`GET /api/factories/{id}/state`, `resources[].unitsInUse`), which the Resources screen reads.
+- Task 10: `SimulationRunIT.aRunChangesNoHistoryOrConfiguration` compares a fingerprint of history and configuration
+  before and after a run; `aFailureWhileStoringResultsKeepsNoResultRows` and
+  `anExecutionFailureMarksTheRunFailedWithAMessageThatHidesInternals` cover failed runs.

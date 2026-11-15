@@ -67,6 +67,7 @@ What the backend is connected to. If the database is unreachable the call still 
   "serverTime": "2026-11-14T05:54:59Z",
   "database": { "status": "UP", "product": "PostgreSQL", "version": "17.2" },
   "migrations": { "appliedCount": 1, "currentVersion": "1" },
+  "simulation": { "algorithmVersion": "1.0.0" },
   "ai": { "enabled": false, "provider": "template", "model": null, "available": true },
   "demo": { "resetEnabled": true }
 }
@@ -536,7 +537,7 @@ identifies the exact run input: the snapshot with its changes and the algorithm 
 | `POST /api/scenarios/{id}/simulate?force=false` | Validate, store the input snapshot, answer **202** with `{ runId, scenarioId, status, reused, submittedAt }` and run in the background. Header `Idempotency-Key` (at most 100 characters): a repeated key returns the original run. A completed run with the same `inputHash` is returned with `reused: true` unless `force=true`. An invalid scenario is 422 with `errors`; no free worker slot is 429 with `Retry-After: 5` |
 | `GET /api/scenarios/{id}/simulations` | The scenario's runs, newest first |
 | `GET /api/simulations/{runId}` | Status (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`), timing, hashes, termination reason, failure message |
-| `GET /api/simulations/{runId}/results` | Summary, bottleneck, order outcomes, per-pool `resources` and unfinished batches; `source: "SIMULATED"`. 409 with `status` until the run is `COMPLETED` |
+| `GET /api/simulations/{runId}/results` | Summary, bottleneck, order outcomes, per-pool `resources` and unfinished batches; `source: "SIMULATED"`. 409 with `runStatus` until the run is `COMPLETED` |
 | `GET /api/simulations/{runId}/stages` | Per-stage results with bottleneck evidence, in sequence order |
 | `GET /api/simulations/{runId}/resources` | Per-pool utilization, capacity and cost, machines first |
 | `GET /api/simulations/{runId}/events?stageId=&orderId=&page=&size=` | The simulated trace in order, paginated |
@@ -567,15 +568,30 @@ The engine itself took 3 to 38 ms for each of the six demonstration scenarios in
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/simulations/compare` | `{ "baselineRunId", "alternativeRunIds": [1..5], "allowDifferentBaseline": false }` |
+| `POST /api/simulations/compare` | `{ "baselineRunId", "alternativeRunIds": [1..5], "allowDifferentBaseline": false, "includeActual": false }` |
 | `GET /api/scenarios/{id}/comparisons` | The scenario's latest completed run against the newest matching run of every baseline scenario (one with no changes) that started from the same state. `baselineMissing: true` and `suggestedBaselineScenarioId` when none has been run |
 
 Every value is read from stored results; the comparison only subtracts, with exact decimals. Runs must be
 `COMPLETED` (409 otherwise) and from one factory (400). If an alternative started from a different fork or
 `baseStateHash`, the answer is 422 `DIFFERENT_STARTING_STATE` unless `allowDifferentBaseline` is true, in
 which case `sameStartingState` is false and each such run gets a warning. Other warnings:
-`DIFFERENT_ALGORITHM_VERSION` and `INCOMPLETE_SIMULATION` (a run stopped on a limit). `includeActual` is not
-available yet (Milestone 8) and is refused with 400.
+`DIFFERENT_ALGORITHM_VERSION` and `INCOMPLETE_SIMULATION` (a run stopped on a limit). A run that is not
+`COMPLETED` answers 409 with `runId` and `runStatus`.
+
+**What actually happened.** With `includeActual: true`, `actual` holds what recorded history shows after the
+fork for the work the baseline run simulated: the orders in the baseline run, and the batches that were
+unfinished at the fork. It is read from the factory state rebuilt at the latest recorded event (`asOf`),
+corrections applied. History stops at `asOf` while a simulation runs every order to completion, so these
+figures are shown beside the simulated ones and **never subtracted from them**. `actual` is null when it was
+not requested or nothing was recorded after the fork. A real example (the demonstration baseline, forked
+five working days before seeding; 18 of the 29 orders omitted):
+
+```json
+"actual": { "source": "ACTUAL", "asOf": "2026-11-14T12:30:00Z", "ordersInScope": 29, "ordersCompleted": 11,
+            "outputStones": "1279.0000", "outputCarats": "820.8626",
+            "orders": [ { "orderId": "81f770cc-…", "orderNumber": "SDW-0030", "completedAt": "2026-11-14T09:14:36Z" },
+                        { "orderId": "97e608c9-…", "orderNumber": "SDW-0045", "completedAt": null } ] }
+```
 
 For each alternative: 16 summary `metrics` (each with `baseline`, `alternative`, `absolute`, `percent`,
 `unit`, `betterWhen` and `direction`), the `bottleneck` change (`SAME`, `MOVED`, `RESOLVED`, `EMERGED`,
@@ -736,11 +752,3 @@ POST /api/ai/ask
 
 `inputTokens` and `outputTokens` cover every attempt sent to the language model; both are null for the template
 analyst.
-
-## Planned endpoints
-
-Not implemented yet. Shapes are specified in `.kiro/specs/`; the table shows where each group lands.
-
-| Group | Endpoints | Milestone |
-|---|---|---|
-| Comparison | `includeActual` (recorded outcome next to simulated futures) | 8 |

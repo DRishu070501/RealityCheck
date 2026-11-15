@@ -69,16 +69,16 @@ component tests.
   - Test: sections render; evidence beside recommendations tagged Simulated; fallback notice; empty state without runs.
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 14. Settings (M8)
+- [x] 14. Settings (M8)
   - System information and guarded demo reset.
   - Test: reset requires typed confirmation; cache cleared and navigation on success; control hidden when reset is disabled.
   - _Requirements: 9.1, 9.2_
 
-- [ ] 15. Accessibility and responsive pass (M8)
+- [x] 15. Accessibility and responsive pass (M8)
   - `vitest-axe` checks per page; keyboard walkthrough; contrast check of tokens; layouts at 375, 768, 1024 and 1440 px.
   - _Requirements: 1.2, 10.3_
 
-- [ ] 16. End-to-end journey (M8)
+- [x] 16. End-to-end journey (M8)
   - Playwright project and `e2e/journey.spec.ts` covering the ten steps against Docker Compose; document the command in `docs/setup.md`.
   - _Requirements: 10.1, 10.2_
 
@@ -119,3 +119,23 @@ every recommendation (tagged Simulated, with the source run's name), a fallback 
 built-in analyst answered, and the run's insight history. An executive report prints on its own through print
 CSS (`body.printing-insight`). The test fixtures `aiInsight`, `aiAnswer` and `aiFallbackInsight` are real
 responses captured with Claude Haiku 5.5.
+
+## Implementation notes (Milestone 8)
+
+- **Task 14.** Settings shows the simulation algorithm version (new `simulation.algorithmVersion` in
+  `GET /api/system/info`, supplied by `simulation` through `common.system.AlgorithmVersionSource` so that
+  `common` depends on no feature). Reset needs RESET typed, clears the whole query cache and returns to Overview,
+  which confirms the reset.
+- **Task 15.** Done in a real browser rather than with `vitest-axe`: jsdom cannot compute colour contrast.
+  `e2e/accessibility.spec.ts` runs axe (WCAG 2.1 A and AA) on all ten screens at 375, 768, 1024 and 1440 px, fails
+  on serious or critical violations or sideways page scroll, and checks keyboard focus on the navigation. It found
+  and we fixed: Recharts surfaces focusable inside `aria-hidden` chart wrappers (`accessibilityLayer={false}`; each
+  chart has a table alternative), and scroll areas the keyboard could not reach (`useScrolls` makes a table box, and
+  `main`, focusable with a visible ring only while it actually scrolls).
+- **Task 16.** `e2e/journey.spec.ts` follows the twelve steps of the definition of success against Docker Compose,
+  through the UI only. Building it exposed two gaps, now fixed: a scenario branched from its own Timeline moment had
+  no baseline to compare with (Scenario Lab now offers **Create and run baseline**: a scenario with no changes from
+  the same moment), and Simulation Results had no way to the AI Analyst (**Explain with AI Analyst** carries the run
+  and baseline). Command and options in `docs/setup.md`; walkthrough in `docs/demo.md`.
+- Tasks 2 and 5 stay open as described above (no generic shared components; no simulation overlay on the workflow
+  explorer).

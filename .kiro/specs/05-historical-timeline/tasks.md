@@ -3,7 +3,7 @@
 Milestones: **M3 — Production operations** for the backend (tasks 1-7); **M6 — Frontend** for the timeline
 screen (task 8, detailed in spec 10). Depends on spec 04.
 
-- [ ] 1. Implement `CanonicalHasher` in `common`
+- [x] 1. Implement `CanonicalHasher` in `common`
   - Dedicated mapper, sorted keys, normalised decimals, SHA-256 hex.
   - Test: `CanonicalHasherTest`.
   - _Requirements: 3.6_
@@ -37,7 +37,7 @@ screen (task 8, detailed in spec 10). Depends on spec 04.
   - OpenAPI annotations; Timeline and State sections in `docs/api.md`, including what "effective" means.
   - _Requirements: 1.3, 3.8_
 
-- [ ] 8. Build the timeline screen (M6)
+- [x] 8. Build the timeline screen (M6)
   - Implemented under spec 10, task "Operational Timeline". The fork flow shows the reconstructed state and then calls `POST /api/scenarios`.
   - _Requirements: 6.1, 6.2, 6.3_
 
@@ -51,3 +51,10 @@ screen (task 8, detailed in spec 10). Depends on spec 04.
 - The timeline response uses `corrected`, `voided` and `original` rather than a nullable `original` alone.
 - The jqwik `ReconstructionProperties` were not written as such; prefix validity and forward-only movement
   are covered by `BatchHistoryProperties`, and reconstruction by `ProductionApiIT` and `DemoIT`.
+
+## Implementation notes (Milestone 8 review)
+
+- Task 1 was built in Milestone 5 as `scenario.snapshot.SnapshotJson` (canonical JSON with sorted keys and
+  normalised decimals, hashed with SHA-256) rather than a `CanonicalHasher` in `common`; `baseStateHash` and
+  `inputHash` use it. The AI evidence hash (`ai.evidence.EvidenceJson`) follows the same scheme.
+- Task 8 was built under spec 10 (Operational Timeline) in Milestone 6.

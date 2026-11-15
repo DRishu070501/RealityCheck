@@ -44,7 +44,7 @@ event store and state reconstruction. Depends on spec 01.
   - Test: `ResourceSeedIT`.
   - _Requirements: 5.1, 5.2_
 
-- [ ] 9. Verify snapshot isolation of updates (M5)
+- [x] 9. Verify snapshot isolation of updates (M5)
   - Test in spec 07's `SimulationRunIT`: update a pool's capacity after a run is submitted; the run's `input_snapshot` and results are unchanged.
   - _Requirements: 2.4_
 
@@ -63,3 +63,9 @@ event store and state reconstruction. Depends on spec 01.
 
 - Task 7: a negative availability window appends one `RESOURCE_UNAVAILABLE` event in the same transaction.
   Units in use are exposed through the factory state and overview endpoints, not on `ResourceResponse`.
+
+## Implementation notes (Milestone 8 review)
+
+Task 9 is covered by `SimulationRunIT.editingConfigurationOrTheScenarioAfterARunLeavesTheRunUntouched` (a pool is
+renamed and resized after a run; the run's stored input and results are unchanged) and
+`theStoredInputOfARunCannotBeRewritten`.

@@ -82,6 +82,34 @@ Frontend, from `frontend/`:
 | `npm run typecheck` | TypeScript, no emit |
 | `npm test` | Vitest, single run |
 | `npm run build` | Production build into `dist/` |
+| `npm run e2e` | Playwright end-to-end suite against a running stack (below) |
+
+### End-to-end tests
+
+`frontend/e2e/` holds two Playwright suites that run against the application as deployed, not against
+mocks:
+
+- `journey.spec.ts`: the twelve steps of the definition of success through the UI (see
+  [demo.md](demo.md)): open the factory, its stages and resources, browse history, inspect a past moment,
+  branch a scenario from it, add a capacity change, run it, create and run the baseline for that moment,
+  compare, read the bottleneck and the recorded outcome, and get the AI analyst's recommendations with their
+  evidence. Each run creates its own scenario, so it can be repeated. It passes with Claude or with the
+  built-in analyst.
+- `accessibility.spec.ts`: every screen at 375, 768, 1024 and 1440 px: no serious or critical axe
+  violations (WCAG 2.1 A and AA, colour contrast included) and no sideways page scroll; plus a keyboard check
+  of the navigation and its visible focus.
+
+```bash
+docker compose up --build -d      # from the repository root; wait until the frontend is healthy
+cd frontend
+npx playwright install chromium   # once
+npm run e2e                       # about three minutes
+```
+
+`E2E_BASE_URL` points it elsewhere (default `http://localhost:3000`), for example
+`E2E_BASE_URL=http://localhost:5173 npm run e2e` against `npm run dev`. A failure leaves a screenshot and a
+trace in `frontend/test-results/`; `npx playwright show-report` opens the HTML report. With Claude
+configured, one journey run costs about half a US cent.
 
 ## Database migrations
 

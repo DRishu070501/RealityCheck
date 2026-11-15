@@ -37,7 +37,7 @@ Milestone: **M5 — Scenario branching** (tasks 1-7). Task 8 is **M8**. Depends 
   - Test: `ComparisonApiIT` for found, missing and not-yet-run baselines and for a scenario with no run.
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 8. Add the actual-outcome block (M8)
+- [x] 8. Add the actual-outcome block (M8)
   - `ActualOutcomeService`, `includeActual` flag.
   - Test: `ActualOutcomeIT`.
   - _Requirements: 8.1, 8.2_
@@ -63,3 +63,19 @@ Tasks 1-7 and 9 are built; task 8 (actual outcome) is Milestone 8. Differences f
   one-sided pools, unfinished orders), `DemoScenariosIT` (end to end on the seeded factory, values equal each
   run's own results, applied changes come from the snapshot after the scenario is edited, different start
   refused then allowed with a warning).
+
+## Implementation notes (Milestone 8)
+
+Task 8 is built. `ActualOutcomeService` (in `scenario.comparison`) reads the factory state rebuilt at the latest
+recorded event through `production.FactoryStateService` (corrections applied) and `ProductionReader.lastEventAt`.
+Scope: the orders in the baseline run; output counts final-stage completions after the fork by batches that were
+unfinished at the fork, which is the work the simulation covers. An order is completed when every one of its
+batches finished the last stage; its time is the last of those. `actual` is null when not requested or nothing was
+recorded after the fork; nothing is subtracted from simulated values. Tests: `ActualOutcomeServiceTest` (no history
+after the fork) and `DemoScenariosIT.showsWhatRecordedHistorySaysHappenedAfterTheForkBesideTheSimulation`, which
+checks every figure against independent SQL over `operational_event` and `production_order` and that history is
+unchanged. The Simulation Results screen requests it and shows "What actually happened after the fork" beside the
+baseline's simulated figures.
+
+The 409 for an unfinished run now names the run's state `runStatus` (it was `status`, which overwrote the
+problem's HTTP status); the same fix was made in `SimulationQueryService`.

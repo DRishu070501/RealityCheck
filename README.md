@@ -24,7 +24,7 @@ Two principles hold throughout:
 | 5. Scenario branching | Scenarios, changes, stored background runs, comparison | **Done** |
 | 6. Frontend | The ten application screens | **Done** |
 | 7. AI intelligence | Provider abstraction, evidence-checked explanations, Q&A, AI Analyst screen | **Done** |
-| 8. Quality and deployment | End-to-end tests, polish, demo documentation | Not started |
+| 8. Quality and deployment | End-to-end and accessibility suites, recorded outcome after a fork, demonstration guide | **Done** |
 
 What runs today: a seeded demonstration factory, Surat Diamond Works, with its working calendar, fourteen
 resource pools, an eight-stage workflow, and two to three weeks of production history ending now. You can
@@ -35,12 +35,18 @@ instant through `GET /api/factories/{id}/baseline-simulation` (see Swagger UI); 
 utilization, cost and delivery, and names the bottleneck with its evidence. In **Scenario Lab** you can open
 one of six ready-made what-ifs or create your own (from scratch, by branching, or from any moment on the
 Timeline), add changes, check them, and run the simulation; **Simulation Results** shows a run on its own or
-side by side with the baseline, with charts, bottleneck evidence and order-by-order delivery. Overview shows
-what the baseline predicts if nothing changes. **AI Analyst** explains a chosen run (on its own or against a
+side by side with the baseline, with charts, bottleneck evidence and order-by-order delivery. A scenario branched from its own moment
+gets its baseline (the factory as recorded from that moment, no changes) with one press, and the comparison
+shows, beside the simulation, what recorded history says actually happened to the same orders after the fork.
+Overview shows what the baseline predicts if nothing changes. **AI Analyst** explains a chosen run (on its own or against a
 baseline): reports on the bottleneck, delays, recommendations and an executive summary, and answers to your
 questions, each with the simulated evidence behind it. Every number in an answer is checked against the stored
 results before it is shown; answers that fail the check are replaced by the built-in analyst's. It uses Claude
 when `AI_API_KEY` is set and the built-in template analyst otherwise (see [docs/ai.md](docs/ai.md)).
+
+**First time here?** Start it with the two commands below, then follow [docs/demo.md](docs/demo.md): a
+fifteen-minute walkthrough of the operational time machine, from a recorded moment to a simulated decision
+and the AI analyst's explanation.
 
 ## Run it with Docker
 
@@ -74,9 +80,11 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 
 ## Documentation
 
+- [docs/demo.md](docs/demo.md): demonstration walkthrough, starting again, troubleshooting
 - [docs/architecture.md](docs/architecture.md): modules, data flow, key decisions and their trade-offs
 - [docs/setup.md](docs/setup.md): prerequisites, configuration, commands, troubleshooting
-- [docs/api.md](docs/api.md): API conventions and the endpoints implemented so far
+- [docs/api.md](docs/api.md): API conventions and every endpoint
+- [docs/ai.md](docs/ai.md): the AI analyst: setup, cost, evidence checking, fallback
 - [docs/demo-data.md](docs/demo-data.md): the synthetic demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules
 - [.kiro/specs/](.kiro/specs/): requirements, design and tasks for each feature

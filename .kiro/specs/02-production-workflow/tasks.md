@@ -19,7 +19,7 @@ table and `ResourceReader`).
   - Test: `WorkflowApiIT` for ordering, 404, decimal-as-string serialisation, `maxSlots`.
   - _Requirements: 1.5, 1.6, 2.3, 3.5_
 
-- [ ] 4. Expose `WorkflowReader` for other modules
+- [x] 4. Expose `WorkflowReader` for other modules
   - Returns `WorkflowView` records for the active workflow of a factory; implements `factory`'s `WorkflowCounts`.
   - Test: unit test that stages are sorted by sequence and requirements by resource id.
   - _Requirements: 1.6, 4.1_
@@ -40,3 +40,8 @@ table and `ResourceReader`).
 - Requirements in a stage response are ordered machines first, then employees, each by pool name.
 - Validation is the pure `WorkflowValidator`, covered by `WorkflowValidatorTest`; database constraints and
   the API are covered by `WorkflowApiIT`; the seed by `DemoIT`.
+
+## Implementation notes (Milestone 8 review)
+
+Task 4 was built with its consumer in Milestone 5: `workflow.service.WorkflowReader` returns the active stages with
+their requirements for snapshot assembly and factory state. Ticked during the Milestone 8 review of open tasks.
