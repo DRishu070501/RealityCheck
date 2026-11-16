@@ -27,3 +27,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Real client data never enters the repository (spec 11).
+local/
+*.cnf
+*.calibration.json

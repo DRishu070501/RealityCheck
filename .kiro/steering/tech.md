@@ -98,3 +98,11 @@ running Docker daemon. A change is not complete until the relevant command passe
 
 Small, single-purpose commits with imperative subjects (`Add resource pool allocation`). A commit that changes
 simulation behaviour must bump the algorithm version and say so.
+
+## Client data (spec 11)
+
+Real factory data is read only by local tools, with read-only credentials from `TRYBE_DB_CNF` or another file
+outside the repository, and written only outside it (`local/` is ignored). Nothing from it is committed except
+the merged, rounded `backend/src/main/resources/demo/calibration.json`, which holds no department, person,
+party, lot, packet or order name or identifier. Tests never use real data. Accuracy figures from real
+factories are published only as rounded percentages.
