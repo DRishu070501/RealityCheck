@@ -55,6 +55,14 @@ worker is a small part of time in a working department.
   1.5 days in the checking department but under an hour with a worker. Capacity queuing alone will not reproduce that, so
   working stages may need a calibrated per-stage handling delay (deterministic, as above) on top of
   processing. If the backtest without it is within tolerance, it is not added.
+- **Decided (task 4, 16 November):** added. Workers hold packets in parcels, many at once, so time with a
+  worker is not processing time and worker-hours are not a capacity measure. Capacity is therefore modelled
+  as packets per day: a stage's busy-day output (90th percentile of daily output) divided among its workers.
+  On a typical day, Lab and Manufacturing run at 86–87% of busy-day output (near capacity), while Planning,
+  Quality check, Imaging and Recut run at 59–70% yet hold packets for one to two days. Queuing on capacity
+  cannot produce that, so each working stage gets a calibrated handling delay: dwell deciles minus the
+  queuing the engine already produces. Scenario changes to people change capacity, not the handling delay;
+  the docs say so, because it means "more people" helps only where a stage is near capacity.
 - Metrics gain `holdingSeconds`, `jobWorkSeconds` and `manufacturingLeadTime` (excluding holding).
 - Algorithm version 2.0.0. A factory with one route and only working stages produces 1.0.0 output, checked
   by an equivalence property test.

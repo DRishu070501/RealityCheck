@@ -75,7 +75,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
     median 9.5 days; TOPS 5.6 days; recut loss 16%) within rounding.
   - _Requirements: 1.1, 1.3_
 
-- [ ] 4. Offline backtest check (decides the engine design)
+- [x] 4. Offline backtest check (decides the engine design)
   - Depends on 3. A throwaway Python simulation (not the Java engine): fork 1 October, replay factory A's
     real arrivals through the calibrated stages with worker capacity only, and compare October dispatches,
     median lead time and per-stage WIP with what was recorded.
