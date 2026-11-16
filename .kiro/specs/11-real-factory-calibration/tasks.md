@@ -51,7 +51,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
   - MIT licence; `.gitignore` for `local/`, `*.cnf`, `*.calibration.json`; client-data rule in `tech.md`.
   - _Requirements: 1.1, 7.1_
 
-- [ ] 2. Factory A stage grouping (owner confirms)
+- [x] 2. Factory A stage grouping (owner confirms)
   - Draft is in `design.md`. Owner confirms or corrects: the checking department under Planning; the central
     stock department with Laser Cutting; the manufacturing service and machine departments as one Manufacturing stage.
   - Output: `local/factory-a.grouping.json` `{deptId: {stage, kind}}` with kinds `INWARD`, `PARKING`,
@@ -61,7 +61,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
 
 ### B. Measure (16–18 November)
 
-- [ ] 3. Calibration tool `tools/calibration/` (Python)
+- [x] 3. Calibration tool `tools/calibration/` (Python)
   - Depends on 2. Reads the October extracts already on disk (`history`, `movements`, `worker_moves`,
     `route_movements`, `dispatched_with_root`); later also live, read-only, via `TRYBE_DB_CNF`.
   - Refuses any statement that is not `SELECT`/`SHOW`; writes only under `local/`.
@@ -213,6 +213,12 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
   - _Requirements: 7.4_
 
 ## Notes
+
+Progress (16 November): grouping confirmed with one change, two named dispatch departments are both end
+points (lead time stops on reaching either); the third dispatch department stays dispatch waiting. Calibration of factory A,
+October 2026, 30,522 dispatched pieces: lead median 17.0 days, 11.4 without parking; parking 47% of pieces
+and 39% of all lead time; routes vary widely within a packet type (the most common route covers 1–14% of
+pieces), so the demo uses each type's most common route.
 
 If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; keep numbers in docs),
 10 (backtest screen; keep numbers in docs), then the Halloween theme inside 13 (keep ghost futures).

@@ -32,3 +32,8 @@ Thumbs.db
 local/
 *.cnf
 *.calibration.json
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
