@@ -34,6 +34,9 @@ Real factory DB (MySQL, read-only, local only)
 | Packet splitting | Represented as yield in this release; individual pieces are not modelled |
 | Repairs after dispatch | Out of scope; documented as a limitation |
 
+Factory B is deferred: its database is reachable and October 2026 is extracted locally, but its department
+grouping is not confirmed, so this release calibrates on factory A alone and says so.
+
 Measured in factory A (rounded; used to shape, not copied): median lead time about 20 days with parking and
 15 without; about half of the rough parked, median about 9 days; finished stones wait about 5 days before
 dispatch; job work about 15% of manufacturing time; recut loses about 16% of weight; working time with a
@@ -43,8 +46,15 @@ worker is a small part of time in a working department.
 
 - `Route` (ordered stage ids) per packet type in the snapshot; a batch carries its packet type.
 - `StageKind`: `WORKING` (existing behaviour), `HOLDING` (delay, no capacity), `JOB_WORK` (delay, no
-  capacity, counted separately). Delays are drawn from a per-stage empirical distribution (quantile table)
-  with the run's deterministic random stream, so a run stays reproducible.
+  capacity, counted separately). The engine has no random stream and must not gain one: a delay is picked
+  from the stage's quantile table (deciles, in working seconds) by `hash(batchId) mod 10`, so the spread of
+  real delays is reproduced and the same input always gives the same output.
+- Progression today is `stageIndex + 1` (`SimulationEngine.java:199`); it becomes a lookup in the batch's
+  route. A snapshot with no routes gets one implicit route over all stages in sequence.
+- **Known modelling gap, decided by the offline backtest (task 4):** in factory A a packet spends about
+  1.5 days in the checking department but under an hour with a worker. Capacity queuing alone will not reproduce that, so
+  working stages may need a calibrated per-stage handling delay (deterministic, as above) on top of
+  processing. If the backtest without it is within tolerance, it is not added.
 - Metrics gain `holdingSeconds`, `jobWorkSeconds` and `manufacturingLeadTime` (excluding holding).
 - Algorithm version 2.0.0. A factory with one route and only working stages produces 1.0.0 output, checked
   by an equivalence property test.
