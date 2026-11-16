@@ -1,4 +1,6 @@
-# 11 Real-Factory Calibration and Kiroween Release — Tasks
+# Implementation Plan: Real-Factory Calibration and Kiroween Release
+
+## Overview
 
 Milestone: **M9 — Kiroween release**. Category **Frankenstein**. Code freeze **28 November 2026**; media
 and submission 29 November to 3 December; deadline 4 December, 2 PM PT.
@@ -9,12 +11,41 @@ grouping is unconfirmed; it is deferred and the docs say so.
 Each task names its files, its test, and what "done" means, so it can be picked up cold. Planned on Fable;
 executed on Opus. Order matters: a task lists what it depends on.
 
-If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; keep numbers in docs),
-10 (backtest screen; keep numbers in docs), then the Halloween theme inside 13 (keep ghost futures).
+## Task Dependency Graph
 
----
+```mermaid
+graph TD
+  T1[1 Hygiene] --> T2[2 Grouping]
+  T2 --> T3[3 Calibration tool]
+  T3 --> T4[4 Offline backtest check]
+  T3 --> T5[5 Publishable calibration]
+  T4 --> T5
+  T6[6 Routes] --> T7[7 Holding and job-work stages, 2.0.0]
+  T4 --> T8[8 Handling delay, if needed]
+  T7 --> T8
+  T5 --> T9[9 Demo generator]
+  T7 --> T9
+  T8 -.-> T9
+  T7 --> T10[10 Backtest service and screen]
+  T3 --> T11[11 Local import and private backtest]
+  T7 --> T11
+  T9 --> T11
+  T7 --> T12[12 Insights]
+  T12 --> T13[13 Frankenstein layer]
+  T12 -.-> T14[14 Insights AI, optional]
+  T9 --> T15[15 Public deployment]
+  T10 --> T16[16 Quality pass and freeze]
+  T11 --> T16
+  T13 --> T16
+  T15 --> T16
+  T16 --> T17[17 Submission]
+```
 
-## A. Setup (16 November)
+Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits for 7.
+
+## Tasks
+
+### A. Setup (16 November)
 
 - [x] 1. Release hygiene and data safety
   - MIT licence; `.gitignore` for `local/`, `*.cnf`, `*.calibration.json`; client-data rule in `tech.md`.
@@ -28,7 +59,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
   - Done when the owner has said yes to every row.
   - _Requirements: 1.2_
 
-## B. Measure (16–18 November)
+### B. Measure (16–18 November)
 
 - [ ] 3. Calibration tool `tools/calibration/` (Python)
   - Depends on 2. Reads the October extracts already on disk (`history`, `movements`, `worker_moves`,
@@ -62,7 +93,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
     appears in the file; in CI the names file is absent.
   - _Requirements: 1.4_
 
-## C. Engine (18–21 November)
+### C. Engine (18–21 November)
 
 - [ ] 6. Routes per packet type
   - Depends on nothing; can start in parallel with B.
@@ -96,7 +127,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
   - Test: as 7.
   - _Requirements: 2.2_
 
-## D. Demonstration (21–23 November)
+### D. Demonstration (21–23 November)
 
 - [ ] 9. Calibrated demo generator and new demo factory
   - Depends on 5 and 7 (and 8 if taken). `demo.CalibratedDemoGenerator` reads `demo/calibration.json`
@@ -114,7 +145,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
   - Docs: `docs/demo-data.md` rewritten.
   - _Requirements: 3.1, 3.2, 3.3_
 
-## E. Accuracy (22–25 November)
+### E. Accuracy (22–25 November)
 
 - [ ] 10. Backtest service, API and screen
   - Depends on 7. `simulation.backtest.BacktestService`: for each fork date, snapshot with no changes,
@@ -137,7 +168,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
     `local/names.txt` reaches the API when that file exists.
   - _Requirements: 1.1, 4.1, 4.4_
 
-## F. Value and theme (25–27 November)
+### F. Value and theme (25–27 November)
 
 - [ ] 12. Insights: where time goes
   - Depends on 7. `production.insights.InsightsService` over recorded events: lead time with/without
@@ -160,7 +191,7 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
   - Evidence keys `insight.*`; same validator; one insight type `TIME_LOSS_SUMMARY`.
   - _Requirements: 5.1_
 
-## G. Release (26–28 November)
+### G. Release (26–28 November)
 
 - [ ] 15. Public deployment
   - One small VPS, Docker Compose, Caddy for HTTPS, `REALITYCHECK_DEMO_RESET_ENABLED=false`, nightly cron
@@ -175,15 +206,22 @@ If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; ke
     write-up `docs/kiro.md`; spec notes.
   - _Requirements: 6.4, 7.1_
 
-## H. Submission (29 November – 3 December)
+### H. Submission (29 November – 3 December)
 
 - [ ] 17. Video under three minutes (script drafted by 27 November), screenshots, Devpost text, category,
   Kiro write-up; optional blog post and social post for the bonus prizes.
   - _Requirements: 7.4_
 
----
+## Notes
 
-## Owner actions and dates
+If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; keep numbers in docs),
+10 (backtest screen; keep numbers in docs), then the Halloween theme inside 13 (keep ghost futures).
+
+Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
+but nothing from it is used in this release.
+
+### Owner actions and dates
+
 
 | By | Action |
 |---|---|
