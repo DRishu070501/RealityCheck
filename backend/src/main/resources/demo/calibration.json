@@ -1,0 +1,347 @@
+{
+ "description": "Rounded production patterns measured in one real diamond factory over one month. Generic stage names; no names, identifiers or dates; capacity relative to inward volume.",
+ "leadDays": {
+  "median": 17.0,
+  "deciles": [
+   5.0,
+   6.0,
+   8.0,
+   10.5,
+   15.0,
+   19.0,
+   24.5,
+   33.0,
+   45.0,
+   68.0
+  ]
+ },
+ "manufacturingDays": {
+  "median": 11.5,
+  "deciles": [
+   5.0,
+   6.0,
+   7.0,
+   8.0,
+   10.0,
+   13.0,
+   16.5,
+   20.0,
+   25.0,
+   36.0
+  ]
+ },
+ "parking": {
+  "share": 0.45,
+  "daysDeciles": [
+   0.5,
+   1.0,
+   3.0,
+   4.0,
+   7.0,
+   13.0,
+   21.5,
+   31.0,
+   43.0,
+   65.5
+  ]
+ },
+ "routes": [
+  {
+   "code": "TOPS",
+   "name": "Tops",
+   "share": 0.55,
+   "stages": [
+    {
+     "stage": "INTAKE",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "IMAGING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "LAB",
+     "visitShare": 0.9
+    },
+    {
+     "stage": "INSPECTION",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "PLANNING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "SAWING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "JOB_WORK",
+     "visitShare": 0.5
+    },
+    {
+     "stage": "RECUT",
+     "visitShare": 1.0
+    }
+   ],
+   "leadMedianDays": 8.5,
+   "manufacturingMedianDays": 7.0
+  },
+  {
+   "code": "FULL",
+   "name": "Full manufacturing",
+   "share": 0.45,
+   "stages": [
+    {
+     "stage": "INTAKE",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "IMAGING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "LAB",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "INSPECTION",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "PLANNING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "PARKING",
+     "visitShare": 0.5
+    },
+    {
+     "stage": "SAWING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "JOB_WORK",
+     "visitShare": 0.7
+    },
+    {
+     "stage": "POLISHING",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "RECUT",
+     "visitShare": 1.0
+    },
+    {
+     "stage": "DISPATCH_WAIT",
+     "visitShare": 1.0
+    }
+   ],
+   "leadMedianDays": 26.5,
+   "manufacturingMedianDays": 20.0
+  }
+ ],
+ "stages": {
+  "INTAKE": {
+   "name": "Rough intake",
+   "kind": "INWARD",
+   "dwellHoursDeciles": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    3
+   ],
+   "caratYield": 1.0
+  },
+  "IMAGING": {
+   "name": "Imaging and scanning",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    6,
+    11,
+    21,
+    24,
+    27,
+    31,
+    37,
+    44,
+    49,
+    69
+   ],
+   "caratYield": 1.0,
+   "busyDayOutputPerInward": 3.1,
+   "typicalDayLoad": 0.6
+  },
+  "LAB": {
+   "name": "Lab grading",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    2,
+    6,
+    13,
+    15,
+    17,
+    20,
+    27,
+    39,
+    52,
+    76
+   ],
+   "caratYield": 1.0,
+   "busyDayOutputPerInward": 3.3,
+   "typicalDayLoad": 0.85
+  },
+  "INSPECTION": {
+   "name": "Inspection",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    3,
+    7,
+    19,
+    22,
+    24,
+    25,
+    31,
+    43,
+    49,
+    83
+   ],
+   "caratYield": 1.0,
+   "busyDayOutputPerInward": 2.1,
+   "typicalDayLoad": 0.7
+  },
+  "PLANNING": {
+   "name": "Planning",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    11,
+    26,
+    29,
+    37,
+    47,
+    51,
+    60,
+    72,
+    91,
+    139
+   ],
+   "caratYield": 1.0,
+   "busyDayOutputPerInward": 2.2,
+   "typicalDayLoad": 0.75
+  },
+  "PARKING": {
+   "name": "Rough store (parked)",
+   "kind": "HOLDING",
+   "dwellHoursDeciles": [
+    12,
+    28,
+    68,
+    97,
+    168,
+    313,
+    517,
+    743,
+    1032,
+    1577
+   ],
+   "caratYield": 1.0
+  },
+  "SAWING": {
+   "name": "Laser sawing",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    1,
+    3,
+    11,
+    15,
+    19,
+    25,
+    35,
+    44,
+    65,
+    132
+   ],
+   "caratYield": 0.98,
+   "busyDayOutputPerInward": 5.1,
+   "typicalDayLoad": 0.75
+  },
+  "JOB_WORK": {
+   "name": "Outside job work",
+   "kind": "JOB_WORK",
+   "dwellHoursDeciles": [
+    15,
+    17,
+    18,
+    20,
+    25,
+    39,
+    55,
+    139,
+    240,
+    424
+   ],
+   "caratYield": 0.99
+  },
+  "POLISHING": {
+   "name": "Polishing",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    1,
+    2,
+    22,
+    46,
+    67,
+    91,
+    119,
+    150,
+    202,
+    328
+   ],
+   "caratYield": 0.98,
+   "busyDayOutputPerInward": 3.8,
+   "typicalDayLoad": 0.85
+  },
+  "RECUT": {
+   "name": "Recut",
+   "kind": "WORKING",
+   "dwellHoursDeciles": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    13,
+    27,
+    77
+   ],
+   "caratYield": 0.89,
+   "busyDayOutputPerInward": 4.0,
+   "typicalDayLoad": 0.6
+  },
+  "DISPATCH_WAIT": {
+   "name": "Dispatch",
+   "kind": "HOLDING",
+   "dwellHoursDeciles": [
+    0,
+    0,
+    0,
+    1,
+    2,
+    3,
+    14,
+    18,
+    22,
+    47
+   ],
+   "caratYield": 1.0
+  }
+ }
+}

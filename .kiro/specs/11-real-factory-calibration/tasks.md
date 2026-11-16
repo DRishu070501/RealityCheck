@@ -84,7 +84,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
   - Output: rounded error table in `local/`; the decision in the repo.
   - _Requirements: 4.1, 4.2_
 
-- [ ] 5. Publishable calibration
+- [x] 5. Publishable calibration
   - Depends on 3 and 4. `tools/calibration/publish.py` merges and rounds (deciles to whole hours, rates to
     5%, counts to tens), replaces stage names with generic ones (Intake, Imaging, Planning, Sawing, Recut,
     Bruting, Polishing, Inspection, Lab, Dispatch), drops every identifier →

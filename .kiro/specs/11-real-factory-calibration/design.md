@@ -49,6 +49,8 @@ worker is a small part of time in a working department.
   capacity, counted separately). The engine has no random stream and must not gain one: a delay is picked
   from the stage's quantile table (deciles, in working seconds) by `hash(batchId) mod 10`, so the spread of
   real delays is reproduced and the same input always gives the same output.
+- Route steps carry a `visitShare` (published calibration): a batch visits an optional step (parking, job
+  work) when `hash(batchId, stage) mod 100 < visitShare × 100`, so the measured share of pieces takes it.
 - Progression today is `stageIndex + 1` (`SimulationEngine.java:199`); it becomes a lookup in the batch's
   route. A snapshot with no routes gets one implicit route over all stages in sequence.
 - **Known modelling gap, decided by the offline backtest (task 4):** in factory A a packet spends about

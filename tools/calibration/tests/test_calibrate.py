@@ -26,8 +26,9 @@ def write(tmp: Path):
         (6, 20, None, INWARD, t("2026-10-01 00:00"), None),
         (7, 20, INWARD, WORK, t("2026-10-01 00:00"), None),
     ]
-    pd.DataFrame(route, columns=["id", "packetId", "fromDept", "toDept", "createdDate", "receivedOn"]).assign(cts=1.0) \
-        .to_csv(tmp / "route_movements.csv", index=False)
+    moves = pd.DataFrame(route, columns=["id", "packetId", "fromDept", "toDept", "createdDate", "receivedOn"])
+    moves.assign(cts=1.0).to_csv(tmp / "route_movements.csv", index=False)
+    moves.to_csv(tmp / "movements.csv", index=False)
     pd.DataFrame([(10, 10, 1, t("2026-10-01")), (20, 20, 5, t("2026-10-01"))],
                  columns=["id", "root", "packetType", "lotCreation"]).to_csv(tmp / "dispatched_with_root.csv", index=False)
     pd.DataFrame([
@@ -55,3 +56,5 @@ def test_lead_time_ends_at_the_first_end_department_or_final_dispatch(tmp_path):
     assert c["stages"]["Cutting"]["caratYield"] == 0.9
     assert c["stages"]["Cutting"]["withWorkerHoursDeciles"][0] == 2.0
     assert c["byPacketType"]["1"]["leadMedianDays"] == 4.0
+    assert [s["stage"] for s in c["typicalRoutes"]["1"]["stages"]] == ["Parking", "Cutting", "Job work"]  # zero-time stages leave no interval
+    assert c["capacity"]["busyDayOutput"]["Parking"] == 1  # Sundays (4 Oct) are not counted

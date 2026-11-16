@@ -105,6 +105,44 @@ def lineage_intervals(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.D
     return intervals, lead
 
 
+def typical_routes(intervals: pd.DataFrame, min_share: float = 0.5) -> dict:
+    """Per packet type: stages visited by at least `min_share` of its pieces, in median first-visit order."""
+    out = {}
+    iv = intervals.copy()
+    iv["order"] = iv.groupby("piece").cumcount()
+    for ptype, grp in iv.groupby("packetType"):
+        pieces = grp.piece.nunique()
+        first = grp.groupby(["piece", "stage"]).order.min().reset_index()
+        stats = first.groupby("stage").agg(visits=("piece", "nunique"), order=("order", "median"))
+        stats = stats[stats.visits / pieces >= min_share].sort_values("order")
+        out[str(int(ptype))] = {"pieces": int(pieces),
+                                "stages": [{"stage": st, "share": round(float(r.visits / pieces), 2)}
+                                           for st, r in stats.iterrows()]}
+    return out
+
+
+def stage_capacity(extract: Path, grouping: pd.DataFrame) -> dict:
+    """Busy-day (90th percentile) packets leaving each stage per working day, and median packets inward per day."""
+    stage_of = grouping.set_index("dept")["stage"].to_dict()
+    m = pd.read_csv(extract / "movements.csv", parse_dates=["createdDate"],
+                    usecols=["packetId", "fromDept", "toDept", "createdDate"])
+    t = m[(m.fromDept != m.toDept) & m.fromDept.notna()].copy()
+    t["fromStage"] = t.fromDept.astype(int).map(stage_of)
+    t["toStage"] = t.toDept.map(lambda x: stage_of.get(int(x)) if pd.notna(x) else None)
+    t["day"] = t.createdDate.dt.normalize()
+    t = t[t.day.dt.dayofweek != 6]
+    leaving = t[t.fromStage != t.toStage].groupby(["fromStage", "day"]).packetId.nunique()
+    a = m[m.toDept.notna()].copy()
+    a["toStage"] = a.toDept.astype(int).map(stage_of)
+    a["fromStage"] = a.fromDept.map(lambda x: stage_of.get(int(x)) if pd.notna(x) else None)
+    a["day"] = a.createdDate.dt.normalize()
+    arrivals = a[(a.toStage == "Inward") & (a.fromStage != "Inward") & (a.day.dt.dayofweek != 6)]
+    inward_day = arrivals.groupby("day").packetId.nunique().median() if len(arrivals) else None
+    return {"inwardPerDayMedian": None if inward_day is None else round(float(inward_day)),
+            "busyDayOutput": {st: int(v.quantile(0.9)) for st, v in leaving.groupby(level=0)},
+            "typicalDayOutput": {st: int(v.median()) for st, v in leaving.groupby(level=0)}}
+
+
 def route_mix(intervals: pd.DataFrame) -> dict:
     """Most common stage sequences per packet type (consecutive repeats collapsed)."""
     out = {}
@@ -182,6 +220,8 @@ def calibrate(extract: Path, grouping: dict[int, dict]) -> dict:
                          for k, v in lead.groupby("packetType")},
         "stages": stages,
         "routes": route_mix(intervals),
+        "typicalRoutes": typical_routes(intervals),
+        "capacity": stage_capacity(extract, data["grouping"]),
     }
 
 
