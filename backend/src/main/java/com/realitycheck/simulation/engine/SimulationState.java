@@ -37,6 +37,8 @@ final class SimulationState {
     long parkingSeconds;
     long waitingStageSeconds;
     long jobWorkSeconds;
+    /** Calendar seconds, summed over batches, held at working stages after processing for handling. */
+    long handlingSeconds;
     final TreeMap<UUID, Long> orderCompletedAt = new TreeMap<>();
     final List<TraceEvent> trace = new ArrayList<>();
 
@@ -78,7 +80,11 @@ final class SimulationState {
         if (working > 0) {
             boolean[] hasRunningJob = new boolean[queues.size()];
             for (ProductionJob job : running.values()) {
-                hasRunningJob[job.stageIndex] = true;
+                // Only processing makes a stage active: not a batch held for handling after processing, nor
+                // one held at a parking, waiting or job-work stage (spec 11). Neither uses the stage's slots.
+                if (!job.handling && context.stage(job.stageIndex).kind() == SimulationInput.StageKind.WORKING) {
+                    hasRunningJob[job.stageIndex] = true;
+                }
             }
             for (int i = 0; i < queues.size(); i++) {
                 int waiting = queues.get(i).size();

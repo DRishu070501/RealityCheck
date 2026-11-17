@@ -92,15 +92,26 @@ public record SimulationInput(
      * @param kind                how the stage holds a batch; see {@link StageKind}
      * @param delayDeciles        for every kind but WORKING: ten calendar durations in seconds, ascending,
      *                            one of which each batch spends here (chosen by a fixed hash)
+     * @param handlingDeciles     WORKING only, optional: ten calendar durations in seconds, ascending, one of
+     *                            which each batch stays after processing, with its units already released
      */
     public record StageSpec(UUID id, String code, int sequence, BigDecimal stonesPerHourPerSlot, long setupSeconds,
             BigDecimal stoneYield, BigDecimal caratYield, BigDecimal fixedCostPerJob,
-            List<RequirementSpec> requirements, StageKind kind, List<Long> delayDeciles) {
+            List<RequirementSpec> requirements, StageKind kind, List<Long> delayDeciles, List<Long> handlingDeciles) {
 
         public StageSpec {
             requirements = List.copyOf(requirements);
             kind = kind == null ? StageKind.WORKING : kind;
             delayDeciles = delayDeciles == null ? List.of() : List.copyOf(delayDeciles);
+            handlingDeciles = handlingDeciles == null ? List.of() : List.copyOf(handlingDeciles);
+        }
+
+        /** A stage without handling delays. */
+        public StageSpec(UUID id, String code, int sequence, BigDecimal stonesPerHourPerSlot, long setupSeconds,
+                BigDecimal stoneYield, BigDecimal caratYield, BigDecimal fixedCostPerJob,
+                List<RequirementSpec> requirements, StageKind kind, List<Long> delayDeciles) {
+            this(id, code, sequence, stonesPerHourPerSlot, setupSeconds, stoneYield, caratYield, fixedCostPerJob,
+                    requirements, kind, delayDeciles, List.of());
         }
 
         /** A working stage: processing on slots of pool units, as before stage kinds existed. */

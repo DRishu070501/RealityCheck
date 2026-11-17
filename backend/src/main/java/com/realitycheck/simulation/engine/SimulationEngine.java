@@ -183,6 +183,12 @@ public final class SimulationEngine {
         if (job == null) {
             throw new IllegalStateException("A stage completed for a batch that is not running");
         }
+        if (job.handling) {
+            // The handling delay after processing is over: the batch leaves the stage now.
+            state.handlingSeconds += now - job.startTime;
+            advance(job.batch, job.stageIndex, job.inputStones, job.inputCarats, context, state, events, now);
+            return;
+        }
         for (ResourceAllocation allocation : job.allocations) {
             state.pools.get(allocation.poolId()).release(allocation.units());
         }
@@ -215,20 +221,38 @@ public final class SimulationEngine {
         }
         state.trace(now, TraceType.JOB_COMPLETED, job.batch, stage.id(), null, outputStones, outputCarats, null);
 
-        int next = job.batch.nextStageAfter(job.stageIndex);
+        long handling = stage.kind() == StageKind.WORKING ? context.handlingFor(job.batch.id(), stage) : 0;
+        if (handling > 0) {
+            // Processing is done and its units are free; the batch stays in the stage for its handling delay.
+            ProductionJob handoff = new ProductionJob(job.batch, job.stageIndex, outputStones, outputCarats, now);
+            handoff.handling = true;
+            handoff.startTime = now;
+            handoff.completionTime = now + handling;
+            state.running.put(job.batch.id(), handoff);
+            events.schedule(handoff.completionTime, SimulationEvent.Type.STAGE_COMPLETED, job.batch.id());
+            return;
+        }
+        advance(job.batch, job.stageIndex, outputStones, outputCarats, context, state, events, now);
+    }
+
+    /** The batch leaves a stage with these quantities: on to the next stage of its path, or finished. */
+    private static void advance(ProductionBatch batch, int stageIndex, BigDecimal outputStones,
+            BigDecimal outputCarats, SimulationContext context, SimulationState state, SimulationEventQueue events,
+            long now) {
+        int next = batch.nextStageAfter(stageIndex);
         if (next < 0) {
-            if (state.batchFinishedAt.put(job.batch.id(), now) != null) {
-                throw new IllegalStateException("Batch " + job.batch.id() + " finished twice");
+            if (state.batchFinishedAt.put(batch.id(), now) != null) {
+                throw new IllegalStateException("Batch " + batch.id() + " finished twice");
             }
             state.finishedStones = state.finishedStones.add(outputStones);
             state.finishedCarats = state.finishedCarats.add(outputCarats);
-            UUID orderId = job.batch.orderId();
+            UUID orderId = batch.orderId();
             if (context.batchIdsByOrder.get(orderId).stream().allMatch(state.batchFinishedAt::containsKey)) {
                 state.orderCompletedAt.put(orderId, now);
-                state.trace(now, TraceType.ORDER_COMPLETED, job.batch, null, null, null, null, null);
+                state.trace(now, TraceType.ORDER_COMPLETED, batch, null, null, null, null, null);
             }
         } else {
-            enqueue(new ProductionJob(job.batch, next, outputStones, outputCarats, now), context, state, events, now);
+            enqueue(new ProductionJob(batch, next, outputStones, outputCarats, now), context, state, events, now);
         }
     }
 

@@ -238,16 +238,23 @@ final class InputValidator {
      */
     private static void validateKind(StageSpec stage, List<Problem> problems) {
         List<Long> deciles = stage.delayDeciles();
+        List<Long> handling = stage.handlingDeciles();
         if (stage.kind() == SimulationInput.StageKind.WORKING) {
             if (!deciles.isEmpty()) {
                 problems.add(new Problem(INVALID_STAGE_KIND, "Working stage " + stage.code()
                         + " has delays; only parking, waiting and job-work stages do", stage.code()));
             }
+            if (!handling.isEmpty() && !isDeciles(handling)) {
+                problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code()
+                        + " needs ten ascending, non-negative handling delays, or none", stage.code()));
+            }
             return;
         }
-        boolean valid = deciles.size() == 10 && deciles.stream().allMatch(d -> d != null && d >= 0)
-                && deciles.stream().sorted().toList().equals(deciles);
-        if (!valid) {
+        if (!handling.isEmpty()) {
+            problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code() + " (" + stage.kind()
+                    + ") has handling delays; only working stages do", stage.code()));
+        }
+        if (!isDeciles(deciles)) {
             problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code() + " (" + stage.kind()
                     + ") needs ten ascending, non-negative delays", stage.code()));
         }
@@ -255,6 +262,11 @@ final class InputValidator {
             problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code() + " (" + stage.kind()
                     + ") holds batches without capacity, so it cannot require pools", stage.code()));
         }
+    }
+
+    private static boolean isDeciles(List<Long> values) {
+        return values.size() == 10 && values.stream().allMatch(d -> d != null && d >= 0)
+                && values.stream().sorted().toList().equals(values);
     }
 
     /**

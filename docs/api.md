@@ -551,9 +551,10 @@ with the algorithm version that produced them. Runs left pending or running by a
 
 **Algorithm 2.0.0** (spec 11) adds routes and stages that hold batches for a measured delay. Its summary adds
 `parkingSeconds`, `waitingStageSeconds` and `jobWorkSeconds` (calendar seconds batches were held at parking,
-waiting and job-work stages, summed over batches) and `batchLeadMedianSeconds` and
+waiting and job-work stages, summed over batches), `handlingSeconds` (the same after processing at working
+stages, before moving on) and `batchLeadMedianSeconds` and
 `batchManufacturingMedianSeconds` (median calendar seconds from a batch becoming active in the run, the fork or
-its arrival, to finishing its path; the second leaves out parking). All five are null for runs computed by
+its arrival, to finishing its path; the second leaves out parking). All six are null for runs computed by
 1.0.0, which are still served unchanged. The examples below were captured under 1.0.0.
 
 A real run of the seeded baseline scenario (`GET /api/simulations/{runId}`, 14 November 2026):

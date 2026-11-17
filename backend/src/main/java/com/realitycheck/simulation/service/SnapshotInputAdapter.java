@@ -76,7 +76,8 @@ public final class SnapshotInputAdapter {
         return new StageSpec(stage.id(), stage.code(), stage.sequence(), stage.stonesPerHour(), stage.setupSeconds(),
                 stage.stoneYield(), stage.caratYield(), stage.fixedCostPerJob(),
                 stage.requirements().stream().map(r -> new RequirementSpec(r.poolId(), r.unitsPerSlot())).toList(),
-                stage.kind() == null ? StageKind.WORKING : StageKind.valueOf(stage.kind()), stage.delayDeciles());
+                stage.kind() == null ? StageKind.WORKING : StageKind.valueOf(stage.kind()), stage.delayDeciles(),
+                stage.handlingDeciles());
     }
 
     private static PoolSpec toPool(PoolSnapshot pool) {

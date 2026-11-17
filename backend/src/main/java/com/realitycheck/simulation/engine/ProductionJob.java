@@ -34,6 +34,8 @@ final class ProductionJob {
     long workSeconds;
     long completionTime;
     boolean inProgressAtFork;
+    /** Processing is done; the batch is held at the stage for its handling delay (spec 11, task 8). */
+    boolean handling;
     List<ResourceAllocation> allocations = List.of();
 
     ProductionJob(ProductionBatch batch, int stageIndex, BigDecimal inputStones, BigDecimal inputCarats,

@@ -121,7 +121,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
     input gives 1.0.0 output; ArchUnit unchanged.
   - _Requirements: 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 8. Handling delay on working stages (only if task 4 says so)
+- [x] 8. Handling delay on working stages (only if task 4 says so)
   - Depends on 4 and 7. Same decile mechanism, applied after processing at a `WORKING` stage; stored as
     `handling_deciles` on the stage. Scenario changes to capacity do not change it; the docs say why.
   - Test: as 7.
@@ -243,6 +243,14 @@ medians (18 metrics). Algorithm 2.0.0. `WorkflowStage.holdFor` sets a holding ki
 9); the stage API does not edit kinds in this release. Differs from the design: kinds are four, not three,
 because parking (excluded from manufacturing lead time) and dispatch waiting (included) must be told apart.
 Tests: `HoldingStageTest` (7), a snapshot round trip for kinds; every earlier test passes unchanged.
+
+Task 8 (17 November): working stages may have ten handling durations (`V10__stage_handling.sql`, only for
+working stages). Implemented as a second phase of the same job rather than a new event type, so event
+ordering is untouched: processing completes (units released, output recorded, trace JOB_COMPLETED), then the
+batch is held for its handling delay and only then moves on or finishes. The stage counts as active for the
+bottleneck signals only while a job is processing; this also stops task 7's holding jobs from counting.
+Summary `handlingSeconds`. Tests: `HandlingDelayTest` (5), including that utilization and every stage signal
+are identical with and without handling.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

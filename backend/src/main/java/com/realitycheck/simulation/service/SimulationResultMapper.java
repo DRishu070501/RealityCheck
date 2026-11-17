@@ -80,6 +80,7 @@ public final class SimulationResultMapper {
                         s.cost().perOutputStone(), currencyCode),
                 s.ordersTotal(), s.ordersCompleted(), s.ordersDelayed(), s.ordersWithDueDate(),
                 s.onTimeDeliveryRate(), s.parkingSeconds(), s.waitingStageSeconds(), s.jobWorkSeconds(),
+                s.handlingSeconds(),
                 s.batchLeadMedianSeconds(), s.batchManufacturingMedianSeconds());
 
         return new SimulationResultResponse(factoryId, Instant.ofEpochSecond(result.forkTime()),

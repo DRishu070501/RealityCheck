@@ -18,10 +18,12 @@ public class WorkflowReader {
     /**
      * @param kind         WORKING, PARKING, WAITING or JOB_WORK
      * @param delayDeciles ten calendar durations in seconds for a holding kind; null for WORKING
+     * @param handlingDeciles ten calendar durations in seconds a batch stays after processing; null when none
      */
     public record StageView(UUID id, UUID workflowId, String code, String name, int sequence,
             BigDecimal stonesPerHour, long setupSeconds, BigDecimal stoneYield, BigDecimal caratYield,
-            BigDecimal fixedCostPerJob, List<RequirementView> requirements, String kind, List<Long> delayDeciles) {
+            BigDecimal fixedCostPerJob, List<RequirementView> requirements, String kind, List<Long> delayDeciles,
+            List<Long> handlingDeciles) {
     }
 
     public record RequirementView(UUID resourceId, int unitsPerSlot) {
@@ -45,7 +47,7 @@ public class WorkflowReader {
                                         .map(r -> new RequirementView(r.getResourceId(), r.getUnitsPerSlot()))
                                         .sorted(Comparator.comparing(RequirementView::resourceId))
                                         .toList(),
-                                stage.getKind(), stage.getDelayDeciles()))
+                                stage.getKind(), stage.getDelayDeciles(), stage.getHandlingDeciles()))
                         .toList())
                 .orElse(List.of());
     }

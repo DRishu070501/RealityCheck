@@ -66,6 +66,11 @@ polishers. The rate belongs to the slot, not to a machine or a person.
   scheduled. PARKING is deliberate storage and is left out of manufacturing lead time; WAITING (such as
   waiting for dispatch) and JOB_WORK (outside job workers) count. Holding stages cost nothing and cannot
   require pools.
+- **Handling delay (spec 11).** A working stage may have ten handling durations. After processing, its units
+  are released at once and the batch stays at the stage for one of them (calendar seconds, chosen by the
+  same kind of fixed hash), then moves on or finishes. Handling uses no capacity and does not make the stage
+  active for the bottleneck signals; it counts in manufacturing lead time. Changing a pool's capacity does
+  not change handling: more people help only where a stage is near capacity.
 - Allocation is **atomic**: a job starts only if every required pool has enough free units at that instant.
   All units are taken together or none are. A job never holds part of its requirements while waiting.
 - Processing is **non-preemptive**. Once started, a job keeps its units until it completes, including across

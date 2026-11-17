@@ -105,17 +105,21 @@ public record Snapshot(
      * @param kind          PARKING, WAITING or JOB_WORK for a stage that holds batches for a delay; null
      *                      (and absent from the JSON) for a working stage, so older snapshots hash unchanged
      * @param delayDeciles  ten calendar durations in seconds for a holding stage; empty (and absent) otherwise
+     * @param handlingDeciles ten calendar durations in seconds a batch stays at a working stage after
+     *                      processing; empty (and absent) when the stage has none
      */
     public record StageSnapshot(UUID id, String code, String name, int sequence, BigDecimal stonesPerHour,
             long setupSeconds, BigDecimal stoneYield, BigDecimal caratYield, BigDecimal fixedCostPerJob,
             List<RequirementSnapshot> requirements,
             @JsonInclude(JsonInclude.Include.NON_NULL) String kind,
-            @JsonInclude(JsonInclude.Include.NON_EMPTY) List<Long> delayDeciles) {
+            @JsonInclude(JsonInclude.Include.NON_EMPTY) List<Long> delayDeciles,
+            @JsonInclude(JsonInclude.Include.NON_EMPTY) List<Long> handlingDeciles) {
 
         public StageSnapshot {
             requirements = List.copyOf(requirements);
             kind = "WORKING".equals(kind) ? null : kind;
             delayDeciles = delayDeciles == null ? List.of() : List.copyOf(delayDeciles);
+            handlingDeciles = handlingDeciles == null ? List.of() : List.copyOf(handlingDeciles);
         }
     }
 

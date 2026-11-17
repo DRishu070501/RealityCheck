@@ -77,10 +77,10 @@ class SnapshotJsonTest {
         Snapshot.StageSnapshot cut = base.stages().get(0);
         Snapshot.StageSnapshot parked = new Snapshot.StageSnapshot(cut.id(), cut.code(), cut.name(), cut.sequence(),
                 cut.stonesPerHour(), cut.setupSeconds(), cut.stoneYield(), cut.caratYield(), cut.fixedCostPerJob(),
-                List.of(), "PARKING", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L));
+                List.of(), "PARKING", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L), null);
         Snapshot.StageSnapshot working = new Snapshot.StageSnapshot(cut.id(), cut.code(), cut.name(), cut.sequence(),
                 cut.stonesPerHour(), cut.setupSeconds(), cut.stoneYield(), cut.caratYield(), cut.fixedCostPerJob(),
-                cut.requirements(), "WORKING", null);
+                cut.requirements(), "WORKING", null, null);
 
         Snapshot.StageSnapshot read = SnapshotJson.read(SnapshotJson.write(
                 new Snapshot(base.schemaVersion(), base.factoryId(), base.timeZone(), base.currencyCode(),

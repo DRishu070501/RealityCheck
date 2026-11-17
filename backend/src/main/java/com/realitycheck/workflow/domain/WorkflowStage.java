@@ -69,6 +69,11 @@ public class WorkflowStage extends BaseEntity {
     @Column(name = "delay_deciles", columnDefinition = "jsonb")
     private List<Long> delayDeciles;
 
+    /** Working stages only, optional: ten calendar durations in seconds a batch stays after processing. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "handling_deciles", columnDefinition = "jsonb")
+    private List<Long> handlingDeciles;
+
     @Version
     private long version;
 
@@ -153,6 +158,27 @@ public class WorkflowStage extends BaseEntity {
 
     public List<Long> getDelayDeciles() {
         return delayDeciles == null ? null : List.copyOf(delayDeciles);
+    }
+
+    public List<Long> getHandlingDeciles() {
+        return handlingDeciles == null ? null : List.copyOf(handlingDeciles);
+    }
+
+    /**
+     * Sets how long a batch stays at this working stage after processing, with its units already released:
+     * time the work is done but the packet has not yet moved on (spec 11, task 8).
+     *
+     * @param deciles ten calendar durations in seconds, ascending, none negative
+     */
+    public void handleFor(List<Long> deciles) {
+        if (!"WORKING".equals(kind)) {
+            throw new IllegalStateException("Only a working stage has a handling delay");
+        }
+        if (deciles == null || deciles.size() != 10 || deciles.stream().anyMatch(d -> d == null || d < 0)
+                || !deciles.stream().sorted().toList().equals(deciles)) {
+            throw new IllegalArgumentException("A handling delay needs ten ascending, non-negative durations");
+        }
+        this.handlingDeciles = List.copyOf(deciles);
     }
 
     /**

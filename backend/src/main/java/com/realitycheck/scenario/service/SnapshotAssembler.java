@@ -158,7 +158,7 @@ public class SnapshotAssembler {
                         .map(r -> new RequirementSnapshot(r.resourceId(), r.unitsPerSlot()))
                         .sorted(Comparator.comparing(RequirementSnapshot::poolId))
                         .toList(),
-                stage.kind(), stage.delayDeciles());
+                stage.kind(), stage.delayDeciles(), stage.handlingDeciles());
     }
 
     private PoolSnapshot toPool(ResourceView pool, Instant from, Instant to) {

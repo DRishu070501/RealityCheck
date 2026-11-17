@@ -51,6 +51,8 @@ public record SimulationResult(
      * @param parkingSeconds          calendar seconds, summed over batches, held at PARKING stages in the run
      * @param waitingStageSeconds     the same at WAITING stages (such as waiting for dispatch)
      * @param jobWorkSeconds          the same at JOB_WORK stages (outside job workers)
+     * @param handlingSeconds         calendar seconds, summed over batches, held at working stages after
+     *                                processing (handling delay); counted in manufacturing lead time
      * @param batchLeadMedianSeconds  median calendar seconds from a batch becoming active in the run (the
      *                                fork, or its arrival) to finishing its path; null when none finished
      * @param batchManufacturingMedianSeconds the same with time parked left out
@@ -80,6 +82,7 @@ public record SimulationResult(
             long parkingSeconds,
             long waitingStageSeconds,
             long jobWorkSeconds,
+            long handlingSeconds,
             Long batchLeadMedianSeconds,
             Long batchManufacturingMedianSeconds) {
     }

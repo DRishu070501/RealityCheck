@@ -65,7 +65,7 @@ final class SimulationContext {
                     .toList();
             ordered.add(new StageSpec(stage.id(), stage.code(), stage.sequence(), stage.stonesPerHourPerSlot(),
                     stage.setupSeconds(), stage.stoneYield(), stage.caratYield(), stage.fixedCostPerJob(),
-                    requirements, stage.kind(), stage.delayDeciles()));
+                    requirements, stage.kind(), stage.delayDeciles(), stage.handlingDeciles()));
             IntervalSet unavailable = IntervalSet.EMPTY;
             for (RequirementSpec requirement : requirements) {
                 // Work in progress at the fork may have started before it, so look back as well.
@@ -132,6 +132,15 @@ final class SimulationContext {
     long delayFor(UUID batchId, StageSpec stage) {
         List<Long> deciles = stage.delayDeciles();
         return deciles.isEmpty() ? 0 : deciles.get(bucket(batchId, stage.sequence(), 1, deciles.size()));
+    }
+
+    /**
+     * The handling delay after processing at a working stage: one of its ten handling deciles, chosen like
+     * {@link #delayFor} with its own salt; zero when the stage has none.
+     */
+    long handlingFor(UUID batchId, StageSpec stage) {
+        List<Long> deciles = stage.handlingDeciles();
+        return deciles.isEmpty() ? 0 : deciles.get(bucket(batchId, stage.sequence(), 2, deciles.size()));
     }
 
     /**

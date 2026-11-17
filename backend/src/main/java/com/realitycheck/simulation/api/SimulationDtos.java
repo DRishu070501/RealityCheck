@@ -59,6 +59,7 @@ public final class SimulationDtos {
      *                                runs computed before algorithm 2.0.0
      * @param waitingStageSeconds     the same at waiting stages (such as waiting for dispatch)
      * @param jobWorkSeconds          the same at outside job workers
+     * @param handlingSeconds         the same after processing at working stages (handling delay)
      * @param batchLeadMedianSeconds  median calendar seconds from a batch becoming active in the run to
      *                                finishing its path; null when none finished or before 2.0.0
      * @param batchManufacturingMedianSeconds the same with time parked left out
@@ -88,6 +89,7 @@ public final class SimulationDtos {
             Long parkingSeconds,
             Long waitingStageSeconds,
             Long jobWorkSeconds,
+            Long handlingSeconds,
             Long batchLeadMedianSeconds,
             Long batchManufacturingMedianSeconds) {
     }

@@ -234,6 +234,7 @@ final class SimulationMetricsCalculator {
                 state.parkingSeconds,
                 state.waitingStageSeconds,
                 state.jobWorkSeconds,
+                state.handlingSeconds,
                 medianLead(state, false),
                 medianLead(state, true));
 

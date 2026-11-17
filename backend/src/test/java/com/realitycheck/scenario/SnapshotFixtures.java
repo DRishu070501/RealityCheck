@@ -52,10 +52,10 @@ public final class SnapshotFixtures {
         List<StageSnapshot> stages = List.of(
                 new StageSnapshot(CUTTING, "CUTTING", "Cutting", 1, new BigDecimal("12.0000"), 1200,
                         new BigDecimal("0.985000"), new BigDecimal("0.620000"), new BigDecimal("200.00"),
-                        List.of(new RequirementSnapshot(SAWS, 1)), null, null),
+                        List.of(new RequirementSnapshot(SAWS, 1)), null, null, null),
                 new StageSnapshot(POLISHING, "POLISHING", "Polishing", 2, new BigDecimal("6.0000"), 900,
                         new BigDecimal("0.990000"), new BigDecimal("0.820000"), new BigDecimal("150.00"),
-                        List.of(new RequirementSnapshot(WHEELS, 1), new RequirementSnapshot(POLISHERS, 2)), null, null));
+                        List.of(new RequirementSnapshot(WHEELS, 1), new RequirementSnapshot(POLISHERS, 2)), null, null, null));
         List<PoolSnapshot> pools = List.of(
                 new PoolSnapshot(SAWS, "MACHINE", "CUTTING_LASER", "Laser saws", 4, new BigDecimal("300.00"),
                         List.of()),

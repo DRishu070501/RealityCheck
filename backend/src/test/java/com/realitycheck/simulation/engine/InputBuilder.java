@@ -139,6 +139,20 @@ final class InputBuilder {
         return id;
     }
 
+    /** Gives an existing working stage ten handling delays after processing, in hours. */
+    InputBuilder handling(UUID stageId, long... hours) {
+        List<Long> deciles = java.util.Arrays.stream(hours).map(h -> h * HOUR).boxed().toList();
+        for (int i = 0; i < stages.size(); i++) {
+            StageSpec s = stages.get(i);
+            if (s.id().equals(stageId)) {
+                stages.set(i, new StageSpec(s.id(), s.code(), s.sequence(), s.stonesPerHourPerSlot(), s.setupSeconds(),
+                        s.stoneYield(), s.caratYield(), s.fixedCostPerJob(), s.requirements(), s.kind(),
+                        s.delayDeciles(), deciles));
+            }
+        }
+        return this;
+    }
+
     UUID order(String number) {
         return order(number, 3, null);
     }
