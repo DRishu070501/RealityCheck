@@ -1,6 +1,7 @@
 package com.realitycheck.production.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.realitycheck.production.domain.BatchStatus;
 import com.realitycheck.production.domain.EventType;
 import com.realitycheck.production.domain.OrderStatus;
@@ -48,10 +49,16 @@ public final class ProductionDtos {
             @NotEmpty @Size(max = 50) List<@NotNull @Valid CreateBatchRequest> batches) {
     }
 
+    /** @param routeCode a route of the active workflow (spec 11); omitted to visit every stage */
     public record CreateBatchRequest(
             @NotNull @Min(1) @Max(1_000_000) Integer stoneCount,
             @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 10, fraction = 4)
-            BigDecimal roughCarats) {
+            BigDecimal roughCarats,
+            @Size(max = 40) String routeCode) {
+
+        public CreateBatchRequest(Integer stoneCount, BigDecimal roughCarats) {
+            this(stoneCount, roughCarats, null);
+        }
     }
 
     /**
@@ -112,7 +119,9 @@ public final class ProductionDtos {
      *       one replacement of {@code stoneQuantity}, {@code caratQuantity}, {@code durationSeconds}.</li>
      * </ul>
      * {@code stageId} is optional; when given it must be the batch's current stage.
-     * {@code occurredAt} defaults to now and may not be in the future.
+     * {@code occurredAt} defaults to now and may not be in the future. {@code nextStageId}, for
+     * {@code STAGE_COMPLETED} only and optional: a later stage of the batch's route to queue it at,
+     * skipping optional steps; by default the route's next step.
      */
     public record AppendEventRequest(
             @NotNull EventType eventType,
@@ -125,7 +134,15 @@ public final class ProductionDtos {
             @Min(0) Long durationSeconds,
             UUID correctsEventId,
             Boolean voids,
-            @Size(max = 20) Map<@Size(max = 60) String, Object> payload) {
+            @Size(max = 20) Map<@Size(max = 60) String, Object> payload,
+            UUID nextStageId) {
+
+        public AppendEventRequest(EventType eventType, UUID batchId, UUID orderId, UUID stageId, Instant occurredAt,
+                BigDecimal stoneQuantity, BigDecimal caratQuantity, Long durationSeconds, UUID correctsEventId,
+                Boolean voids, Map<String, Object> payload) {
+            this(eventType, batchId, orderId, stageId, occurredAt, stoneQuantity, caratQuantity, durationSeconds,
+                    correctsEventId, voids, payload, null);
+        }
     }
 
     /**
@@ -207,6 +224,7 @@ public final class ProductionDtos {
     /**
      * @param inputStones what the batch holds on entering its current stage, or its final output when completed
      * @param waitingSince when it entered the current stage's queue; null once in progress or completed
+     * @param routeCode    the route it follows (spec 11); absent when it visits every stage
      */
     public record BatchState(
             UUID batchId,
@@ -222,7 +240,8 @@ public final class ProductionDtos {
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal inputCarats,
             Instant waitingSince,
             Instant startedAt,
-            Instant completedAt) {
+            Instant completedAt,
+            @JsonInclude(JsonInclude.Include.NON_NULL) String routeCode) {
     }
 
     /**

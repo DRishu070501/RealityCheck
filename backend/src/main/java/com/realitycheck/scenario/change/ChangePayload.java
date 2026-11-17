@@ -84,6 +84,18 @@ public sealed interface ChangePayload {
         }
     }
 
+    /**
+     * Scales a stage's measured waiting time by {@code percent} (spec 11): the hold of a parking, waiting
+     * or job-work stage, or the handling time after processing at a working stage.
+     */
+    record StageDelay(UUID stageId, BigDecimal percent) implements ChangePayload {
+
+        @Override
+        public ChangeType type() {
+            return ChangeType.STAGE_DELAY;
+        }
+    }
+
     /** Adds shifts to the calendar or replaces it. Shifts apply to the whole factory. */
     record WorkingSchedule(ScheduleMode mode, List<Shift> shifts) implements ChangePayload {
 

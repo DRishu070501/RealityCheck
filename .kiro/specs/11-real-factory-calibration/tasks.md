@@ -129,7 +129,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
 
 ### D. Demonstration (21–23 November)
 
-- [ ] 9. Calibrated demo generator and new demo factory
+- [x] 9. Calibrated demo generator and new demo factory
   - Depends on 5 and 7 (and 8 if taken). `demo.CalibratedDemoGenerator` reads `demo/calibration.json`
     and a fixed seed; replaces `WorkflowSeedSection`, `ResourceSeedSection`, `ProductionSeedSection` and
     `ScenarioSeedSection` content (keep the section mechanism and `DemoSeedContext` ids).
@@ -251,6 +251,24 @@ batch is held for its handling delay and only then moves on or finishes. The sta
 bottleneck signals only while a job is processing; this also stops task 7's holding jobs from counting.
 Summary `handlingSeconds`. Tests: `HandlingDelayTest` (5), including that utilization and every stage signal
 are identical with and without handling.
+
+Task 9 (17 November): `demo.CalibratedDemoGenerator` builds the factory from `calibration.json`: 11 stages
+(one job-work stage and two routes, as the calibration has, rather than the 2 and 3 first planned), 8 worker
+and 2 machine pools, rates set so each working stage runs at its measured typical load at ten packets a day,
+handling delays from the measured stays. Per-stage stays do not add up to route lead times (they pool every
+visit), so two factors were fitted (shared stages 0.55, polishing 3.0); Tops parks 41% so that 45% of all
+packets do. `DemoCalibrationTest` (engine only, sixty days of packets) and `DemoCalibrationIT` (seeded
+factory through the API) check the medians within 15%; measured 17.0 / 11.5 days, simulated 16.7 / 10.8.
+Routes are stored on the workflow (`V11__routes.sql`, jsonb) with `production_batch.route_code`; the batch
+history follows a batch's route (`BatchHistory.Stop`, optional steps may be skipped, `nextStageId` on a stage
+completion), and snapshots carry routes. New change type `STAGE_DELAY` scales a stage's parking, waiting,
+job-work or handling times, so the demo can ask "park half as long"; the stage API now returns `kind` and
+the delays. Scenarios: as planned, except "Dispatch twice a day" (not expressible honestly as a delay
+change) is replaced by the demand scenario, and "Cutting job worker" is "Job worker 30% slower". The seed
+clears the persistence context every 200 writes; it takes about 32 s on Docker Desktop for Windows with the
+machine otherwise idle (two to three times that under load). `BaselineSimulationIT` no longer expects
+polishing to be the bottleneck: in the calibrated factory packets wait mostly for measured handling and
+holding, so the test checks that the verdict and its evidence agree instead.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

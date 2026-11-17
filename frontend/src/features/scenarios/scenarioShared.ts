@@ -10,6 +10,7 @@ export const CHANGE_TYPE_LABELS: Record<ChangeType, string> = {
   DEMAND_VOLUME: 'Demand volume',
   PROCESSING_RATE: 'Processing rate',
   WORKING_SCHEDULE: 'Working schedule',
+  STAGE_DELAY: 'Waiting time at a stage',
 }
 
 export const CHANGE_TYPE_HINTS: Record<ChangeType, string> = {
@@ -19,6 +20,7 @@ export const CHANGE_TYPE_HINTS: Record<ChangeType, string> = {
   DEMAND_VOLUME: 'Scale the stones and carats of every batch not yet started.',
   PROCESSING_RATE: 'Make a stage faster or slower per processing slot.',
   WORKING_SCHEDULE: 'Add shifts to the factory calendar, or replace it.',
+  STAGE_DELAY: 'Make the measured time packets are held at a stage longer or shorter, for example parking.',
 }
 
 /** Wraps anything thrown by a request as an {@link ApiError}. */

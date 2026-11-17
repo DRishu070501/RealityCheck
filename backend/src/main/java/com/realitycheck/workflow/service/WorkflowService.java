@@ -18,6 +18,7 @@ import com.realitycheck.workflow.api.WorkflowDtos.WorkflowResponse;
 import com.realitycheck.workflow.api.WorkflowDtos.WorkflowSummaryResponse;
 import com.realitycheck.workflow.domain.StageRequirement;
 import com.realitycheck.workflow.domain.Workflow;
+import com.realitycheck.workflow.domain.WorkflowRoute;
 import com.realitycheck.workflow.domain.WorkflowStage;
 import com.realitycheck.workflow.domain.WorkflowStatus;
 import com.realitycheck.workflow.persistence.WorkflowRepository;
@@ -92,6 +93,48 @@ public class WorkflowService implements FactoryCountProvider {
         return toResponse(workflows.saveAndFlush(workflow), pools);
     }
 
+    /**
+     * How one stage behaves beyond its rate and pools (spec 11): its kind and measured delays.
+     *
+     * @param kind            WORKING, PARKING, WAITING or JOB_WORK
+     * @param delayDeciles    for a holding kind: ten ascending calendar durations in seconds; null for WORKING
+     * @param handlingDeciles for WORKING, optional: ten ascending durations a batch stays after processing
+     */
+    public record StageBehaviour(String kind, List<Long> delayDeciles, List<Long> handlingDeciles) {
+    }
+
+    /**
+     * Sets stage kinds, delays and the workflow's routes. Not exposed by the API in this release: the
+     * demonstration seed and imports configure them.
+     *
+     * @param behaviours by stage code; stages not named stay as they are
+     * @throws ValidationException when a stage or route does not fit the workflow
+     */
+    @Transactional
+    public void configure(UUID workflowId, Map<String, StageBehaviour> behaviours, List<WorkflowRoute> routes) {
+        Workflow workflow = workflows.findById(workflowId)
+                .orElseThrow(() -> ApiException.notFound("Workflow", workflowId));
+        try {
+            for (WorkflowStage stage : workflow.getStages()) {
+                StageBehaviour behaviour = behaviours.get(stage.getCode());
+                if (behaviour == null) {
+                    continue;
+                }
+                if ("WORKING".equals(behaviour.kind())) {
+                    if (behaviour.handlingDeciles() != null) {
+                        stage.handleFor(behaviour.handlingDeciles());
+                    }
+                } else {
+                    stage.holdFor(behaviour.kind(), behaviour.delayDeciles());
+                }
+            }
+            workflow.defineRoutes(routes);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            throw new ValidationException("routes", ex.getMessage());
+        }
+        workflows.saveAndFlush(workflow);
+    }
+
     @Transactional(readOnly = true)
     public WorkflowResponse get(UUID id) {
         Workflow workflow = workflows.findById(id).orElseThrow(() -> ApiException.notFound("Workflow", id));
@@ -153,7 +196,8 @@ public class WorkflowService implements FactoryCountProvider {
                 .toList());
         return new StageResponse(stage.getId(), stage.getCode(), stage.getName(), stage.getDescription(),
                 stage.getSequence(), stage.getStonesPerHour(), stage.getSetupSeconds(), stage.getStoneYield(),
-                stage.getCaratYield(), stage.getFixedCostPerJob(), requirements, maxSlots);
+                stage.getCaratYield(), stage.getFixedCostPerJob(), requirements, maxSlots, stage.getKind(),
+                stage.getDelayDeciles(), stage.getHandlingDeciles());
     }
 
     private static String blankToNull(String value) {

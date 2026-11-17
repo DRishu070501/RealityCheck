@@ -41,6 +41,10 @@ public class ProductionBatch extends BaseEntity {
     @Column(name = "current_stage_id")
     private UUID currentStageId;
 
+    /** The workflow route it follows (spec 11); null to visit every stage in sequence. */
+    @Column(name = "route_code", updatable = false, length = 40)
+    private String routeCode;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private BatchStatus status;
@@ -56,7 +60,13 @@ public class ProductionBatch extends BaseEntity {
 
     public ProductionBatch(UUID id, Instant recordedAt, UUID orderId, int batchNumber, int stoneCount,
             BigDecimal roughCarats, UUID firstStageId) {
+        this(id, recordedAt, orderId, batchNumber, stoneCount, roughCarats, firstStageId, null);
+    }
+
+    public ProductionBatch(UUID id, Instant recordedAt, UUID orderId, int batchNumber, int stoneCount,
+            BigDecimal roughCarats, UUID firstStageId, String routeCode) {
         super(id, recordedAt);
+        this.routeCode = routeCode;
         this.orderId = orderId;
         this.batchNumber = batchNumber;
         this.stoneCount = stoneCount;
@@ -113,5 +123,9 @@ public class ProductionBatch extends BaseEntity {
 
     public BatchStatus getStatus() {
         return status;
+    }
+
+    public String getRouteCode() {
+        return routeCode;
     }
 }

@@ -172,6 +172,12 @@ export const stageSchema = z.object({
   requirements: z.array(stageRequirementSchema),
   /** Jobs the stage can run at once at base capacity; null when it needs no resources. */
   maxSlots: z.number().int().nonnegative().nullable(),
+  /** WORKING stages use capacity; PARKING, WAITING and JOB_WORK hold batches for a measured time (spec 11). */
+  kind: z.enum(['WORKING', 'PARKING', 'WAITING', 'JOB_WORK']).default('WORKING'),
+  /** Ten calendar durations in seconds, for a holding stage. */
+  delayDeciles: z.array(z.number().int().nonnegative()).optional(),
+  /** Ten calendar durations in seconds a batch stays at a working stage after processing. */
+  handlingDeciles: z.array(z.number().int().nonnegative()).optional(),
 })
 export type Stage = z.infer<typeof stageSchema>
 

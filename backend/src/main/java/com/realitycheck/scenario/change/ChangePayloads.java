@@ -18,6 +18,7 @@ import com.realitycheck.scenario.change.ChangePayload.ResourceCapacity;
 import com.realitycheck.scenario.change.ChangePayload.ResourceDowntime;
 import com.realitycheck.scenario.change.ChangePayload.ResourceUnavailable;
 import com.realitycheck.scenario.change.ChangePayload.Shift;
+import com.realitycheck.scenario.change.ChangePayload.StageDelay;
 import com.realitycheck.scenario.change.ChangePayload.WorkingSchedule;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -157,6 +158,15 @@ public final class ChangePayloads {
                 if (r.mode() == RateMode.PERCENT && r.value() != null
                         && (r.value().compareTo(MINUS_100) <= 0 || r.value().signum() == 0)) {
                     errors.add(field("value", "must be a non-zero percentage greater than -100"));
+                }
+            }
+            case StageDelay d -> {
+                required(d.stageId(), "stageId", errors);
+                if (d.percent() == null) {
+                    errors.add(field("percent", "is required"));
+                } else if (d.percent().compareTo(MINUS_100) <= 0 || d.percent().signum() == 0
+                        || d.percent().compareTo(MAX_DEMAND_PERCENT) > 0) {
+                    errors.add(field("percent", "must be non-zero, greater than -100 and at most 500"));
                 }
             }
             case WorkingSchedule s -> {

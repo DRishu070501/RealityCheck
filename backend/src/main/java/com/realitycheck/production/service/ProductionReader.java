@@ -26,7 +26,8 @@ public class ProductionReader {
     }
 
     /** What a batch started with. */
-    public record BatchView(UUID id, int batchNumber, int stoneCount, BigDecimal roughCarats) {
+    /** @param routeCode the route it follows (spec 11); null to visit every stage */
+    public record BatchView(UUID id, int batchNumber, int stoneCount, BigDecimal roughCarats, String routeCode) {
     }
 
     private final ProductionOrderRepository orders;
@@ -74,7 +75,7 @@ public class ProductionReader {
                         order.getPlacedAt(), order.getDueAt(),
                         byOrder.getOrDefault(order.getId(), List.of()).stream()
                                 .map(batch -> new BatchView(batch.getId(), batch.getBatchNumber(),
-                                        batch.getStoneCount(), batch.getRoughCarats()))
+                                        batch.getStoneCount(), batch.getRoughCarats(), batch.getRouteCode()))
                                 .toList()))
                 .toList();
     }

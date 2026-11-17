@@ -8,6 +8,7 @@ import com.realitycheck.scenario.change.ChangePayload.ResourceDowntime;
 import com.realitycheck.scenario.change.ChangePayload.ResourceUnavailable;
 import com.realitycheck.scenario.change.ChangePayload.ScheduleMode;
 import com.realitycheck.scenario.change.ChangePayload.Shift;
+import com.realitycheck.scenario.change.ChangePayload.StageDelay;
 import com.realitycheck.scenario.change.ChangePayload.WorkingSchedule;
 import com.realitycheck.scenario.snapshot.Snapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.AppliedChange;
@@ -201,6 +202,29 @@ public final class ChangeApplier {
                         s.forkAt(), s.calendar(), stages, s.pools(), s.orders(), s.batches(), s.limits(),
                         s.bottleneck(), s.appliedChanges(), s.routes()), names.describe(r, before, after));
             }
+            case StageDelay d -> {
+                StageSnapshot stage = s.stages().stream().filter(st -> st.id().equals(d.stageId())).findFirst()
+                        .orElseThrow(() -> new ChangeApplicationException(ordinal, "payload.stageId",
+                                "is not a stage of the factory's active workflow"));
+                boolean holding = !stage.delayDeciles().isEmpty();
+                boolean handling = !holding && !stage.handlingDeciles().isEmpty();
+                if (!holding && !handling) {
+                    throw new ChangeApplicationException(ordinal, "payload.stageId",
+                            stage.name() + " has no measured waiting time to change");
+                }
+                BigDecimal factor = HUNDRED.add(d.percent());
+                List<Long> delays = holding ? scaled(stage.delayDeciles(), factor) : stage.delayDeciles();
+                List<Long> handlings = handling ? scaled(stage.handlingDeciles(), factor) : stage.handlingDeciles();
+                StageSnapshot changed = new StageSnapshot(stage.id(), stage.code(), stage.name(), stage.sequence(),
+                        stage.stonesPerHour(), stage.setupSeconds(), stage.stoneYield(), stage.caratYield(),
+                        stage.fixedCostPerJob(), stage.requirements(), stage.kind(), delays, handlings);
+                List<StageSnapshot> stages = s.stages().stream()
+                        .map(st -> st.id().equals(stage.id()) ? changed : st)
+                        .toList();
+                yield new Step(new Snapshot(s.schemaVersion(), s.factoryId(), s.timeZone(), s.currencyCode(),
+                        s.forkAt(), s.calendar(), stages, s.pools(), s.orders(), s.batches(), s.limits(),
+                        s.bottleneck(), s.appliedChanges(), s.routes()), names.describe(d, handling));
+            }
             case WorkingSchedule w -> {
                 List<Shift> combined = new ArrayList<>();
                 if (w.mode() == ScheduleMode.ADD) {
@@ -249,6 +273,14 @@ public final class ChangeApplier {
                 .map(route -> route.steps().isEmpty() ? 1 : route.steps().get(0).stageSequence())
                 .orElse(1);
         return BatchSnapshot.QUEUED.equals(batch.state()) && batch.stageSequence() == first;
+    }
+
+    /** Each duration times the factor, to whole seconds, half-even; ascending order is kept. */
+    private static List<Long> scaled(List<Long> seconds, BigDecimal percentFactor) {
+        return seconds.stream()
+                .map(v -> BigDecimal.valueOf(v).multiply(percentFactor).divide(HUNDRED, 0, RoundingMode.HALF_EVEN)
+                        .longValueExact())
+                .toList();
     }
 
     private static BigDecimal scale(BigDecimal value, BigDecimal percentFactor) {

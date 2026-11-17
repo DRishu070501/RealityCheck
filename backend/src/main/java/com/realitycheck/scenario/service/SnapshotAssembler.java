@@ -21,6 +21,8 @@ import com.realitycheck.scenario.snapshot.Snapshot.LimitsSnapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.OrderSnapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.PoolSnapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.RequirementSnapshot;
+import com.realitycheck.scenario.snapshot.Snapshot.RouteSnapshot;
+import com.realitycheck.scenario.snapshot.Snapshot.RouteStepSnapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.ShiftSnapshot;
 import com.realitycheck.scenario.snapshot.Snapshot.StageSnapshot;
 import com.realitycheck.workflow.service.WorkflowReader;
@@ -99,6 +101,12 @@ public class SnapshotAssembler {
                 .map(SnapshotAssembler::toStage)
                 .sorted(Comparator.comparingInt(StageSnapshot::sequence))
                 .toList();
+        List<RouteSnapshot> routes = workflowReader.activeRoutes(factoryId).stream()
+                .map(route -> new RouteSnapshot(route.code(), route.name(), route.steps().stream()
+                        .map(step -> new RouteStepSnapshot(step.sequence(), step.visitPercent()))
+                        .toList()))
+                .sorted(Comparator.comparing(RouteSnapshot::code))
+                .toList();
 
         // A job in progress at the fork may have started before it; windows from then on can matter.
         List<BatchState> stateBatches = withWork ? factoryStateService.stateAt(factoryId, fork).batches() : List.of();
@@ -132,15 +140,16 @@ public class SnapshotAssembler {
             batches.add(new BatchSnapshot(batch.batchId(), batch.orderId(), batch.batchNumber(),
                     inProgress ? BatchSnapshot.IN_PROGRESS : BatchSnapshot.QUEUED, batch.stageSequence(),
                     batch.inputStones(), batch.inputCarats(), inProgress ? null : batch.waitingSince(),
-                    inProgress ? batch.startedAt() : null, null, null));
+                    inProgress ? batch.startedAt() : null, null, batch.routeCode()));
         }
         if (includeFutureOrders) {
             for (OrderView later : productionReader.placedBetween(factoryId, fork, clock.instant())) {
                 orders.put(later.id(), toOrder(later));
                 for (ProductionReader.BatchView batch : later.batches()) {
                     batches.add(new BatchSnapshot(batch.id(), later.id(), batch.batchNumber(),
-                            BatchSnapshot.FUTURE_ARRIVAL, 1, BigDecimal.valueOf(batch.stoneCount()).setScale(4),
-                            batch.roughCarats().setScale(4), null, null, later.placedAt(), null));
+                            BatchSnapshot.FUTURE_ARRIVAL, firstSequence(routes, batch.routeCode()),
+                            BigDecimal.valueOf(batch.stoneCount()).setScale(4), batch.roughCarats().setScale(4), null,
+                            null, later.placedAt(), batch.routeCode()));
                 }
             }
         }
@@ -148,7 +157,14 @@ public class SnapshotAssembler {
 
         return new Snapshot(Snapshot.SCHEMA_VERSION, factoryId, factory.timeZone(), factory.currencyCode(), fork,
                 toCalendar(factoryService.calendar(factoryId)), stages, pools, List.copyOf(orders.values()), batches,
-                limits, engine.defaultBottleneck(), List.of(), List.of());
+                limits, engine.defaultBottleneck(), List.of(), routes);
+    }
+
+    /** Where a batch on the route starts: its first step, or stage 1 without a route. */
+    private static int firstSequence(List<RouteSnapshot> routes, String routeCode) {
+        return routes.stream().filter(route -> route.code().equals(routeCode)).findFirst()
+                .map(route -> route.steps().get(0).stageSequence())
+                .orElse(1);
     }
 
     private static StageSnapshot toStage(StageView stage) {

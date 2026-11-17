@@ -7,6 +7,7 @@ import com.realitycheck.scenario.change.ChangePayload.ResourceDowntime;
 import com.realitycheck.scenario.change.ChangePayload.ResourceUnavailable;
 import com.realitycheck.scenario.change.ChangePayload.ScheduleMode;
 import com.realitycheck.scenario.change.ChangePayload.Shift;
+import com.realitycheck.scenario.change.ChangePayload.StageDelay;
 import com.realitycheck.scenario.change.ChangePayload.WorkingSchedule;
 import com.realitycheck.scenario.snapshot.Snapshot;
 import java.math.BigDecimal;
@@ -72,6 +73,12 @@ public final class ChangeSummaries {
             case PERCENT -> "rate " + signed(r.value()) + "%";
         };
         return stage + ": " + what + ", " + plain(before) + " to " + plain(after);
+    }
+
+    String describe(StageDelay d, boolean handling) {
+        String stage = snapshot.stages().stream().filter(s -> s.id().equals(d.stageId()))
+                .map(Snapshot.StageSnapshot::name).findFirst().orElse("Unknown stage");
+        return stage + ": " + (handling ? "time held after processing " : "time held ") + signed(d.percent()) + "%";
     }
 
     String describe(WorkingSchedule w) {

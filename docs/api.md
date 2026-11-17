@@ -207,6 +207,14 @@ A workflow is an ordered list of stages. A factory has at most one `ACTIVE` work
 | `fixedCostPerJob` | Factory currency per job |
 | `unitsPerSlot` | Units of the pool one processing slot needs |
 | `maxSlots` | Jobs the stage can run at once at base capacity: the smallest `floor(poolCapacity / unitsPerSlot)`. `null` when the stage needs no resources. |
+| `kind` | `WORKING` (uses its pools), or `PARKING`, `WAITING` or `JOB_WORK`: holds batches for a measured time, without capacity (spec 11) |
+| `delayDeciles` | Holding kinds only: ten calendar durations in seconds, ascending; each batch is held for one of them |
+| `handlingDeciles` | Working stages, when set: ten calendar durations a batch stays after processing, its people already free |
+
+Kinds, delays and routes are set by the demonstration seed or an import; this release does not edit them
+through the API. A workflow may have **routes**: ordered subsets of its stages, with the share of batches
+that visit each optional step. A batch may follow one (`routeCode` when the order is created); without one
+it visits every stage in sequence.
 
 Decimals are strings so that no precision is lost in JavaScript; requests accept strings or numbers. Stage
 codes are upper-case letters, digits and underscores, unique in the workflow. Each requirement must name an
@@ -233,7 +241,8 @@ count and carat weight are separate quantities and are never combined.
 ```
 
 `priority` is 1 to 5; 5 is the most urgent. `placedAt` defaults to now and may not be in the future; `dueAt`
-is optional and must be after `placedAt`. The factory must have an active workflow (422 otherwise).
+is optional and must be after `placedAt`. The factory must have an active workflow (422 otherwise). A batch
+may name a route of the active workflow, `"routeCode": "TOPS"`; it is then queued at the route's first step.
 
 ```json
 { "id": "...", "factoryId": "...", "orderNumber": "SDW-0048", "customerRef": "Demo buyer A",
@@ -267,7 +276,7 @@ defaults to now and may not be in the future.
 | `eventType` | Send | Effect |
 |---|---|---|
 | `STAGE_STARTED` | `batchId` | The batch moves from queued to in progress at its current stage |
-| `STAGE_COMPLETED` | `batchId`, `stoneQuantity`, `caratQuantity`, optional `durationSeconds` | Records what left the stage. The system then records `STAGE_QUEUED` at the next stage, or finishes the batch; when the last batch finishes it records `ORDER_COMPLETED`. |
+| `STAGE_COMPLETED` | `batchId`, `stoneQuantity`, `caratQuantity`, optional `durationSeconds`, optional `nextStageId` | Records what left the stage. The system then records `STAGE_QUEUED` at the next stage of the batch's route (or at `nextStageId`, a later step reached by skipping only optional ones), or finishes the batch at its route's last step; when the last batch finishes it records `ORDER_COMPLETED`. |
 | `ORDER_DISPATCHED` | `orderId` | A completed order is handed over |
 | `CORRECTION` | `correctsEventId`, and either `voids: true` or replacement `stoneQuantity` / `caratQuantity` / `durationSeconds` | See below |
 
@@ -504,6 +513,7 @@ One example payload per change type:
 { "changeType": "DEMAND_VOLUME",        "payload": { "percent": 20 } }
 { "changeType": "PROCESSING_RATE",      "payload": { "stageId": "…", "mode": "PERCENT", "value": "-12.5" } }
 { "changeType": "WORKING_SCHEDULE",     "payload": { "mode": "ADD", "shifts": [ { "dayOfWeek": 1, "startTime": "18:00", "endTime": "22:00" } ] } }
+{ "changeType": "STAGE_DELAY",          "payload": { "stageId": "…", "percent": -50 } }
 ```
 
 Rules and rounding:
@@ -520,6 +530,10 @@ Rules and rounding:
 - `PROCESSING_RATE`: `ABSOLUTE` (above 0) or `PERCENT` (above -100), scale 4, half-even.
 - `WORKING_SCHEDULE`: `ADD` shifts to the calendar or `REPLACE` it; shifts may not overlap. Added shifts
   apply to the whole factory with every pool at its normal capacity.
+- `STAGE_DELAY`: multiplies a stage's measured times by `(100 + percent) / 100`, to whole seconds,
+  half-even: the hold of a parking, waiting or job-work stage, or the handling time of a working stage.
+  The stage must have such times (422 otherwise). Range: above -100, at most 500, not zero. Capacity is
+  unchanged, and capacity changes do not change these times.
 
 Warnings do not block a run: `NO_EFFECT` (for example a percentage that rounds to the same capacity, or
 demand when no batch is unstarted) and `EXCEEDS_CAPACITY` (more units made unavailable than the pool has).

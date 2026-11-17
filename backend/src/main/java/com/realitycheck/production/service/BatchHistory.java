@@ -108,7 +108,26 @@ public final class BatchHistory {
      */
     public static Projection replay(List<UUID> stageIds, BigDecimal initialStones, BigDecimal initialCarats,
             List<Event> effective) {
-        if (stageIds.isEmpty()) {
+        return replay(stageIds, linear(stageIds), initialStones, initialCarats, effective);
+    }
+
+    /** One step of a batch's path through the workflow; an optional step may be skipped (spec 11). */
+    public record Stop(UUID stageId, boolean optional) {
+    }
+
+    /** Every stage in sequence, none optional: the path of a batch without a route. */
+    public static List<Stop> linear(List<UUID> stageIds) {
+        return stageIds.stream().map(id -> new Stop(id, false)).toList();
+    }
+
+    /**
+     * As {@link #replay(List, BigDecimal, BigDecimal, List)} for a batch following {@code path}: after a
+     * stage it is queued at a later step of its path, skipping only optional steps, and it finishes at the
+     * last step. The projection's {@code stageIndex} is still the stage's position in {@code stageIds}.
+     */
+    public static Projection replay(List<UUID> stageIds, List<Stop> path, BigDecimal initialStones,
+            BigDecimal initialCarats, List<Event> effective) {
+        if (stageIds.isEmpty() || path.isEmpty()) {
             throw new InvalidHistoryException("The factory has no active workflow");
         }
         BatchStatus status = null;
@@ -134,8 +153,9 @@ public final class BatchHistory {
             }
             switch (event.type()) {
                 case STAGE_QUEUED -> {
-                    int expected = status == null ? 0 : index + 1;
-                    if ((status != null && !awaitingNextQueue) || !stageIds.get(expected).equals(event.stageId())) {
+                    int expected = status == null ? 0 : nextStop(path, index, event.stageId());
+                    if ((status != null && !awaitingNextQueue) || expected < 0
+                            || !path.get(expected).stageId().equals(event.stageId())) {
                         throw new InvalidHistoryException("The batch cannot be queued at that stage now");
                     }
                     status = BatchStatus.QUEUED;
@@ -146,7 +166,7 @@ public final class BatchHistory {
                 }
                 case STAGE_STARTED -> {
                     if (status != BatchStatus.QUEUED || awaitingNextQueue
-                            || !stageIds.get(index).equals(event.stageId())) {
+                            || !path.get(index).stageId().equals(event.stageId())) {
                         throw new InvalidHistoryException(status == BatchStatus.IN_PROGRESS
                                 ? "The batch is already in progress at its current stage"
                                 : "The batch is not queued at that stage");
@@ -155,7 +175,7 @@ public final class BatchHistory {
                     startedAt = event.occurredAt();
                 }
                 case STAGE_COMPLETED -> {
-                    if (status != BatchStatus.IN_PROGRESS || !stageIds.get(index).equals(event.stageId())) {
+                    if (status != BatchStatus.IN_PROGRESS || !path.get(index).stageId().equals(event.stageId())) {
                         throw new InvalidHistoryException("The batch is not in progress at that stage");
                     }
                     if (event.stones() == null || event.carats() == null) {
@@ -172,9 +192,9 @@ public final class BatchHistory {
                     stones = event.stones();
                     carats = event.carats();
                     startedAt = null;
-                    if (index == stageIds.size() - 1) {
+                    if (index == path.size() - 1) {
                         status = BatchStatus.COMPLETED;
-                        index = stageIds.size();
+                        index = path.size();
                         completedAt = event.occurredAt();
                         queuedAt = null;
                     } else {
@@ -192,7 +212,25 @@ public final class BatchHistory {
         if (awaitingNextQueue) {
             index = index + 1;
         }
-        UUID stageId = status == null || status == BatchStatus.COMPLETED ? null : stageIds.get(index);
-        return new Projection(status, stageId, index, stones, carats, queuedAt, startedAt, completedAt, last);
+        UUID stageId = status == null || status == BatchStatus.COMPLETED ? null : path.get(index).stageId();
+        int stageIndex = status == BatchStatus.COMPLETED ? stageIds.size()
+                : stageId == null ? -1 : stageIds.indexOf(stageId);
+        return new Projection(status, stageId, stageIndex, stones, carats, queuedAt, startedAt, completedAt, last);
+    }
+
+    /**
+     * The position on the path after {@code from} at which the batch may next be queued at {@code stageId}:
+     * the next step, or a later one when only optional steps lie between. -1 when it may not.
+     */
+    private static int nextStop(List<Stop> path, int from, UUID stageId) {
+        for (int i = from + 1; i < path.size(); i++) {
+            if (path.get(i).stageId().equals(stageId)) {
+                return i;
+            }
+            if (!path.get(i).optional()) {
+                return -1;
+            }
+        }
+        return -1;
     }
 }

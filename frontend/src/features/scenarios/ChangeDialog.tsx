@@ -446,6 +446,64 @@ function RateForm({ context }: { context: FormContext }) {
   )
 }
 
+/* ---- Stage delay -------------------------------------------------------------------------------- */
+
+const delaySchema = z
+  .object({
+    stageId: z.string().min(1, 'Choose a stage'),
+    percent: z.string().trim().min(1, 'Enter a percentage'),
+  })
+  .superRefine((values, context) => {
+    const percent = Number(values.percent)
+    if (!Number.isFinite(percent)) issue(context, 'percent', 'Enter a number')
+    else if (percent <= -100) issue(context, 'percent', 'A waiting time cannot fall by 100% or more')
+    else if (percent === 0) issue(context, 'percent', 'A change of 0% has no effect')
+    else if (percent > 500) issue(context, 'percent', 'At most +500%')
+  })
+
+const KIND_LABELS = { PARKING: 'parking', WAITING: 'waiting', JOB_WORK: 'outside job work', WORKING: 'after processing' }
+
+function DelayForm({ context }: { context: FormContext }) {
+  const initial = context.change?.payload
+  const form = useForm<z.infer<typeof delaySchema>>({
+    resolver: zodResolver(delaySchema),
+    defaultValues: { stageId: text(initial?.stageId), percent: text(initial?.percent) },
+  })
+  const { errors } = form.formState
+  const { save, saving, failure } = useSaveChange(context, form.setError, { stageId: 'stageId', percent: 'percent' })
+  const submit = form.handleSubmit((values) => {
+    save('STAGE_DELAY', { stageId: values.stageId, percent: Number(values.percent) })
+  })
+  const delayed = context.stages.filter((stage) => stage.kind !== 'WORKING' || (stage.handlingDeciles?.length ?? 0) > 0)
+  return (
+    <FormShell context={context} onSubmit={(event) => void submit(event)} saving={saving} failure={failure}>
+      <Field
+        htmlFor="change-stage"
+        label="Stage"
+        hint={delayed.length === 0 ? 'No stage of this workflow has a measured waiting time.' : undefined}
+        error={errors.stageId?.message}
+      >
+        <Select {...aria('change-stage', errors.stageId?.message)} {...form.register('stageId')}>
+          <option value="">Choose a stage</option>
+          {delayed.map((stage) => (
+            <option key={stage.id} value={stage.id}>
+              {stage.sequence}. {stage.name} ({KIND_LABELS[stage.kind]})
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field
+        htmlFor="change-percent"
+        label="Change in time held (%)"
+        hint="Scales every measured duration at the stage: -50 halves it, 30 makes it 30% longer. Capacity is unchanged."
+        error={errors.percent?.message}
+      >
+        <Input inputMode="decimal" autoComplete="off" {...aria('change-percent', errors.percent?.message, true)} {...form.register('percent')} />
+      </Field>
+    </FormShell>
+  )
+}
+
 /* ---- Working schedule --------------------------------------------------------------------------- */
 
 const scheduleSchema = z
@@ -677,5 +735,7 @@ function TypeForm({ type, context }: { type: ChangeType; context: FormContext })
       return <RateForm context={context} />
     case 'WORKING_SCHEDULE':
       return <ScheduleForm context={context} />
+    case 'STAGE_DELAY':
+      return <DelayForm context={context} />
   }
 }

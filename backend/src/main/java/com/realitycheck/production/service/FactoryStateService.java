@@ -93,6 +93,7 @@ public class FactoryStateService {
         Instant at = atOrNull == null ? clock.instant() : atOrNull;
         List<StageView> stages = workflowReader.activeStages(factoryId);
         List<UUID> stageIds = stages.stream().map(StageView::id).toList();
+        List<WorkflowReader.RouteView> routes = workflowReader.activeRoutes(factoryId);
 
         List<ProductionOrder> placed = orders.findByFactoryIdAndPlacedAtLessThanEqualOrderByPlacedAtAscIdAsc(
                 factoryId, at);
@@ -114,7 +115,7 @@ public class FactoryStateService {
         }
 
         List<BatchState> batchStates = new ArrayList<>();
-        Map<UUID, List<Projection>> projectionsByOrder = new HashMap<>();
+        Map<UUID, List<Placed>> projectionsByOrder = new HashMap<>();
         int[] queued = new int[stages.size()];
         int[] inProgress = new int[stages.size()];
         int[] completed = new int[stages.size()];
@@ -127,16 +128,22 @@ public class FactoryStateService {
                     .effective(historyByBatch.getOrDefault(batch.getId(), List.of())).stream()
                     .filter(event -> !event.occurredAt().isAfter(at))
                     .toList();
-            Projection projection = BatchHistory.replay(stageIds,
+            List<BatchHistory.Stop> path = BatchPaths.of(stages, routes, batch.getRouteCode());
+            Projection projection = BatchHistory.replay(stageIds, path,
                     new BigDecimal(batch.getStoneCount()).setScale(4), batch.getRoughCarats(), effective);
             if (projection.status() == null) {
                 continue;
             }
             ProductionOrder order = orderById.get(batch.getOrderId());
-            projectionsByOrder.computeIfAbsent(order.getId(), id -> new ArrayList<>()).add(projection);
+            projectionsByOrder.computeIfAbsent(order.getId(), id -> new ArrayList<>()).add(new Placed(
+                    projection.status(), projection.stageIndex(), stageIds.indexOf(path.get(0).stageId())));
             StageView stage = projection.stageId() == null ? null : stages.get(projection.stageIndex());
-            for (int i = 0; i < Math.min(projection.stageIndex(), stages.size()); i++) {
-                completed[i]++;
+            // Stages of its path it has moved past (an optional one it skipped included).
+            for (BatchHistory.Stop stop : path) {
+                int i = stageIds.indexOf(stop.stageId());
+                if (i < projection.stageIndex()) {
+                    completed[i]++;
+                }
             }
             if (projection.status() == BatchStatus.QUEUED) {
                 queued[projection.stageIndex()]++;
@@ -151,7 +158,7 @@ public class FactoryStateService {
                     stage == null ? null : stage.code(), stage == null ? null : stage.sequence(),
                     projection.stones(), projection.carats(),
                     projection.status() == BatchStatus.QUEUED ? projection.queuedAt() : null,
-                    projection.startedAt(), projection.completedAt()));
+                    projection.startedAt(), projection.completedAt(), batch.getRouteCode()));
         }
         batchStates.sort(Comparator
                 .comparing((BatchState state) -> state.stageSequence() == null ? Integer.MAX_VALUE
@@ -165,7 +172,7 @@ public class FactoryStateService {
         }
         for (ProductionOrder order : placed) {
             orderCounts.merge(statusOf(order, projectionsByOrder.getOrDefault(order.getId(), List.of()),
-                    dispatched, stageIds), 1L, Long::sum);
+                    dispatched), 1L, Long::sum);
         }
 
         List<StageState> stageStates = new ArrayList<>();
@@ -212,7 +219,13 @@ public class FactoryStateService {
         if (stages.isEmpty()) {
             return List.of();
         }
-        UUID lastStage = stages.get(stages.size() - 1).id();
+        // A batch's output is its completion at the last stage of its own path.
+        List<WorkflowReader.RouteView> routes = workflowReader.activeRoutes(factoryId);
+        Map<String, UUID> lastStageByRoute = new HashMap<>();
+        lastStageByRoute.put(null, stages.get(stages.size() - 1).id());
+        for (WorkflowReader.RouteView route : routes) {
+            lastStageByRoute.put(route.code(), route.steps().get(route.steps().size() - 1).stageId());
+        }
         ZoneId zone = factoryService.calendar(factoryId).zone();
         LocalDate today = now.atZone(zone).toLocalDate();
         LocalDate firstDay = today.minusDays(OVERVIEW_DAYS - 1L);
@@ -222,7 +235,15 @@ public class FactoryStateService {
                 .findByFactoryIdAndEventTypeAndOccurredAtGreaterThanEqualOrderBySeqAsc(factoryId,
                         EventType.STAGE_COMPLETED, from)
                 .stream()
-                .filter(event -> lastStage.equals(event.getStageId()) && !event.getOccurredAt().isAfter(now))
+                .filter(event -> !event.getOccurredAt().isAfter(now))
+                .toList();
+        Map<UUID, String> routeByBatch = new HashMap<>();
+        if (!routes.isEmpty() && !completions.isEmpty()) {
+            batches.findAllById(completions.stream().map(OperationalEvent::getBatchId).distinct().toList())
+                    .forEach(batch -> routeByBatch.put(batch.getId(), batch.getRouteCode()));
+        }
+        completions = completions.stream()
+                .filter(event -> event.getStageId().equals(lastStageByRoute.get(routeByBatch.get(event.getBatchId()))))
                 .toList();
         Map<LocalDate, List<ProductionDtos.EventResponse>> byDay = eventQueryService
                 .toResponses(factoryId, completions).stream()
@@ -242,8 +263,11 @@ public class FactoryStateService {
         return output;
     }
 
-    private static OrderStatus statusOf(ProductionOrder order, List<Projection> projections, Set<UUID> dispatched,
-            List<UUID> stageIds) {
+    /** A batch's projection and the stage its path starts at. */
+    private record Placed(BatchStatus status, int stageIndex, int firstStageIndex) {
+    }
+
+    private static OrderStatus statusOf(ProductionOrder order, List<Placed> projections, Set<UUID> dispatched) {
         if (dispatched.contains(order.getId())) {
             return OrderStatus.DISPATCHED;
         }
@@ -253,7 +277,7 @@ public class FactoryStateService {
             return OrderStatus.COMPLETED;
         }
         boolean anyStarted = projections.stream()
-                .anyMatch(p -> p.status() != BatchStatus.QUEUED || p.stageIndex() > 0);
+                .anyMatch(p -> p.status() != BatchStatus.QUEUED || p.stageIndex() != p.firstStageIndex());
         return anyStarted ? OrderStatus.IN_PROGRESS : OrderStatus.PENDING;
     }
 

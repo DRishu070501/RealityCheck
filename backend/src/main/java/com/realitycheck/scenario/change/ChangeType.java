@@ -8,7 +8,8 @@ public enum ChangeType {
     RESOURCE_DOWNTIME(ChangePayload.ResourceDowntime.class),
     DEMAND_VOLUME(ChangePayload.DemandVolume.class),
     PROCESSING_RATE(ChangePayload.ProcessingRate.class),
-    WORKING_SCHEDULE(ChangePayload.WorkingSchedule.class);
+    WORKING_SCHEDULE(ChangePayload.WorkingSchedule.class),
+    STAGE_DELAY(ChangePayload.StageDelay.class);
 
     private final Class<? extends ChangePayload> payloadClass;
 

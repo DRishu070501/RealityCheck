@@ -6,11 +6,13 @@ import com.realitycheck.scenario.api.ScenarioDtos.CreateScenarioRequest;
 import com.realitycheck.scenario.api.ScenarioDtos.ScenarioChangeRequest;
 import com.realitycheck.scenario.change.ChangeType;
 import com.realitycheck.scenario.service.ScenarioService;
+import com.realitycheck.workflow.service.WorkflowReader;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
- * The six ready-made scenarios, all forked at the same instant: five working days before the
- * seeding instant, so recorded history after the fork exists to compare against. They are created
+ * The six ready-made scenarios, chosen to show what the calibration found (spec 11), all forked at the same
+ * instant: five working days before the seeding instant, so recorded history after the fork exists to
+ * compare against. They are created
  * through the scenario service, so every change passes the same validation as user input. No
  * simulation result is pre-populated: every number shown for them is computed when they are run.
  */
@@ -33,10 +36,12 @@ class ScenarioSeedSection implements DemoSeedSection {
 
     private final ScenarioService scenarioService;
     private final ObjectMapper objectMapper;
+    private final WorkflowReader workflowReader;
 
-    ScenarioSeedSection(ScenarioService scenarioService, ObjectMapper objectMapper) {
+    ScenarioSeedSection(ScenarioService scenarioService, ObjectMapper objectMapper, WorkflowReader workflowReader) {
         this.scenarioService = scenarioService;
         this.objectMapper = objectMapper;
+        this.workflowReader = workflowReader;
     }
 
     @Override
@@ -60,27 +65,28 @@ class ScenarioSeedSection implements DemoSeedSection {
     @Override
     public void seed(DemoSeedContext context) {
         Instant fork = forkAt(context.seededAt());
-        UUID wheels = context.id(ResourceSeedSection.key("POLISHING_WHEEL"));
-        UUID polishers = context.id(ResourceSeedSection.key("POLISHER"));
-        UUID saws = context.id(ResourceSeedSection.key("CUTTING_LASER"));
+        UUID inspectors = context.id(ResourceSeedSection.key("INSPECTOR"));
+        Map<String, UUID> stages = new HashMap<>();
+        workflowReader.activeStages(context.factoryId()).forEach(stage -> stages.put(stage.code(), stage.id()));
 
         scenario(context, fork, 0, BASELINE,
                 "The factory as recorded, with nothing changed: the reference the other scenarios are compared with.",
                 List.of());
-        scenario(context, fork, 1, "Add two polishing machines",
-                "Two more polishing wheels. Each wheel is worked by two polishers and no polishers are added.",
+        scenario(context, fork, 1, "Park half as long",
+                "Packets set aside in the rough store are released twice as soon. Parking is about two fifths of "
+                        + "all lead time in the factory this demonstration is calibrated on.",
+                List.of(change(ChangeType.STAGE_DELAY, Map.of("stageId", stages.get("PARKING"), "percent", -50))));
+        scenario(context, fork, 2, "Three more inspectors",
+                "Three inspectors added to the three there are. Inspection runs below capacity, so this shows "
+                        + "what more people do where packets wait for other reasons.",
                 List.of(change(ChangeType.RESOURCE_CAPACITY,
-                        Map.of("resourceId", wheels, "mode", "DELTA", "value", 2))));
-        scenario(context, fork, 2, "Increase production demand by 20%",
-                "Every batch not yet started holds 20% more stones and carats.",
+                        Map.of("resourceId", inspectors, "mode", "DELTA", "value", 3))));
+        scenario(context, fork, 3, "Job worker 30% slower",
+                "The outside job worker keeps packets 30% longer than measured.",
+                List.of(change(ChangeType.STAGE_DELAY, Map.of("stageId", stages.get("JOB_WORK"), "percent", 30))));
+        scenario(context, fork, 4, "Increase production demand by 20%",
+                "Every packet not yet started holds 20% more stones and carats.",
                 List.of(change(ChangeType.DEMAND_VOLUME, Map.of("percent", 20))));
-        scenario(context, fork, 3, "Make five employees unavailable",
-                "Five polishers are away from the fork onwards.",
-                List.of(change(ChangeType.RESOURCE_UNAVAILABLE, Map.of("resourceId", polishers, "units", 5))));
-        scenario(context, fork, 4, "Reduce cutting capacity by 30%",
-                "Laser saw capacity cut by 30%, rounded down to whole machines.",
-                List.of(change(ChangeType.RESOURCE_CAPACITY,
-                        Map.of("resourceId", saws, "mode", "PERCENT", "value", -30))));
 
         List<Map<String, Object>> evening = new ArrayList<>();
         for (int day = 1; day <= 6; day++) {

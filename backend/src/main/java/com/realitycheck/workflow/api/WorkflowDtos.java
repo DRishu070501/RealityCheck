@@ -1,6 +1,7 @@
 package com.realitycheck.workflow.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.realitycheck.resource.domain.ResourceKind;
 import com.realitycheck.workflow.domain.WorkflowStatus;
 import jakarta.validation.Valid;
@@ -99,7 +100,10 @@ public final class WorkflowDtos {
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal caratYield,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal fixedCostPerJob,
             List<StageRequirementResponse> requirements,
-            Integer maxSlots) {
+            Integer maxSlots,
+            String kind,
+            @JsonInclude(JsonInclude.Include.NON_NULL) List<Long> delayDeciles,
+            @JsonInclude(JsonInclude.Include.NON_NULL) List<Long> handlingDeciles) {
     }
 
     public record StageRequirementResponse(UUID resourceId, String resourceName, ResourceKind kind,

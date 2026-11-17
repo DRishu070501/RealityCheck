@@ -39,8 +39,8 @@ class DemoScenariosIT extends ScenarioTestSupport {
         JsonNode list = get("/api/scenarios?factoryId=" + demoFactory).getBody();
 
         assertThat(texts(list.path("items"), "name")).containsExactly("Current factory operations",
-                "Add two polishing machines", "Increase production demand by 20%", "Make five employees unavailable",
-                "Reduce cutting capacity by 30%", "Introduce an additional shift");
+                "Park half as long", "Three more inspectors", "Job worker 30% slower",
+                "Increase production demand by 20%", "Introduce an additional shift");
         assertThat(texts(list.path("items"), "forkAt")).containsOnly(DEMO_FORK.toString());
         assertThat(texts(list.path("items"), "changeCount")).containsExactly("0", "1", "1", "1", "1", "1");
         assertThat(list.path("items").get(0).path("baseline").asBoolean()).isTrue();
@@ -56,22 +56,14 @@ class DemoScenariosIT extends ScenarioTestSupport {
         assertThat(validations.values().stream().map(v -> v.path("baseStateHash").asText()).distinct()).hasSize(1);
         assertThat(validations.values().stream().map(v -> v.path("inputHash").asText()).distinct()).hasSize(6);
 
-        JsonNode wheels = pool(validations.get("Add two polishing machines"), "Polishing wheels");
-        assertThat(wheels.path("capacityBefore").asInt()).isEqualTo(6);
-        assertThat(wheels.path("capacityAfter").asInt()).isEqualTo(8);
-        // Wheels go to 8, but 12 polishers at two per wheel still allow only 6 slots.
-        JsonNode polishingStage = stage(validations.get("Add two polishing machines"), "POLISHING");
-        assertThat(polishingStage.path("maxSlotsBefore").asInt()).isEqualTo(6);
-        assertThat(polishingStage.path("maxSlotsAfter").asInt()).isEqualTo(6);
+        JsonNode inspectors = pool(validations.get("Three more inspectors"), "Inspectors");
+        assertThat(inspectors.path("capacityBefore").asInt()).isEqualTo(3);
+        assertThat(inspectors.path("capacityAfter").asInt()).isEqualTo(6);
+        assertThat(stage(validations.get("Three more inspectors"), "INSPECTION").path("maxSlotsAfter").asInt())
+                .isEqualTo(6);
 
-        JsonNode saws = pool(validations.get("Reduce cutting capacity by 30%"), "Laser saws");
-        assertThat(saws.path("capacityAfter").asInt()).isEqualTo(2); // 4 * 0.7 = 2.8, rounded down
-        assertThat(stage(validations.get("Reduce cutting capacity by 30%"), "CUTTING").path("maxSlotsAfter").asInt())
-                .isEqualTo(2);
-
-        JsonNode polishers = pool(validations.get("Make five employees unavailable"), "Polishers");
-        assertThat(polishers.path("capacityAfter").asInt()).isEqualTo(12);
-        assertThat(polishers.path("windowsAdded").asInt()).isEqualTo(1);
+        assertThat(changeSummary(list, "Park half as long")).isEqualTo("Rough store (parked): time held -50%");
+        assertThat(changeSummary(list, "Job worker 30% slower")).isEqualTo("Outside job work: time held +30%");
 
         JsonNode demand = validations.get("Increase production demand by 20%").path("preview");
         assertThat(new BigDecimal(demand.path("unstartedStonesAfter").asText())).isEqualByComparingTo(
@@ -91,7 +83,7 @@ class DemoScenariosIT extends ScenarioTestSupport {
             ids.put(item.path("name").asText(), item.path("id").asText());
         }
         String baselineScenario = ids.get("Current factory operations");
-        String wheelsScenario = ids.get("Add two polishing machines");
+        String wheelsScenario = ids.get("Three more inspectors");
 
         String wheelsRun = runToCompletion(wheelsScenario);
         JsonNode missing = get("/api/scenarios/" + wheelsScenario + "/comparisons").getBody();
@@ -112,7 +104,7 @@ class DemoScenariosIT extends ScenarioTestSupport {
         assertThat(comparison.path("baseline").path("appliedChanges")).isEmpty();
         JsonNode alternative = comparison.path("alternatives").get(0);
         assertThat(alternative.path("run").path("appliedChanges").get(0).path("summary").asText())
-                .isEqualTo("Polishing wheels: capacity +2 units, 6 to 8 units");
+                .isEqualTo("Inspectors: capacity +3 units, 3 to 6 units");
 
         // Every value is the stored one: compare against each run's own results.
         JsonNode baselineResults = get("/api/simulations/" + baselineRun + "/results").getBody();
@@ -125,10 +117,10 @@ class DemoScenariosIT extends ScenarioTestSupport {
         assertThat(cost.path("alternative").asText()).isEqualTo(wheelsResults.path("summary").path("cost").path("total").asText());
         assertThat(new BigDecimal(cost.path("absolute").asText())).isEqualByComparingTo(
                 new BigDecimal(cost.path("alternative").asText()).subtract(new BigDecimal(cost.path("baseline").asText())));
-        JsonNode wheelPool = resource(alternative, "Polishing wheels");
-        assertThat(wheelPool.path("capacity").path("baseline").asText()).isEqualTo("6");
-        assertThat(wheelPool.path("capacity").path("alternative").asText()).isEqualTo("8");
-        assertThat(alternative.path("stages")).hasSize(8);
+        JsonNode wheelPool = resource(alternative, "Inspectors");
+        assertThat(wheelPool.path("capacity").path("baseline").asText()).isEqualTo("3");
+        assertThat(wheelPool.path("capacity").path("alternative").asText()).isEqualTo("6");
+        assertThat(alternative.path("stages")).hasSize(11);
         assertThat(alternative.path("orders").size()).isEqualTo(baselineResults.path("orders").size());
         assertThat(alternative.path("bottleneck").path("change").asText()).isIn("SAME", "MOVED", "RESOLVED");
 
@@ -142,12 +134,12 @@ class DemoScenariosIT extends ScenarioTestSupport {
         // Editing the scenario afterwards does not change what the comparison says was applied.
         String changeId = get("/api/scenarios/" + wheelsScenario).getBody().path("changes").get(0).path("id").asText();
         put("/api/scenarios/" + wheelsScenario + "/changes/" + changeId, """
-                {"payload": {"resourceId": "%s", "mode": "DELTA", "value": 3}}"""
+                {"payload": {"resourceId": "%s", "mode": "DELTA", "value": 4}}"""
                 .formatted(wheelPool.path("resourceId").asText()));
         JsonNode again = post("/api/simulations/compare", """
                 {"baselineRunId": "%s", "alternativeRunIds": ["%s"]}""".formatted(baselineRun, wheelsRun)).getBody();
         assertThat(again.path("alternatives").get(0).path("run").path("appliedChanges").get(0).path("summary").asText())
-                .isEqualTo("Polishing wheels: capacity +2 units, 6 to 8 units");
+                .isEqualTo("Inspectors: capacity +3 units, 3 to 6 units");
 
         // A run from another starting point needs explicit consent.
         ResponseEntity<JsonNode> later = post("/api/scenarios", """
@@ -226,14 +218,15 @@ class DemoScenariosIT extends ScenarioTestSupport {
         }
         assertThat(actual.path("ordersCompleted").asInt()).isEqualTo(completed).isPositive();
 
-        // Output: final-stage completions after the fork, by batches of those orders (no correction touches them).
+        // Output: completions after the fork at the last stage of each batch's route (Recut for Tops, Dispatch
+        // for Full), by batches of those orders (no correction touches them).
         String scope = """
                 from operational_event e
                 join production_batch b on b.id = e.batch_id
                 where e.event_type = 'STAGE_COMPLETED' and e.occurred_at > ?::timestamptz
                   and e.stage_id = (select s.id from workflow_stage s join workflow w on w.id = s.workflow_id
                                     where w.factory_id = ?::uuid and w.status = 'ACTIVE'
-                                    order by s.sequence desc limit 1)
+                                      and s.code = case b.route_code when 'TOPS' then 'RECUT' else 'DISPATCH_WAIT' end)
                   and b.order_id in (select (o ->> 'id')::uuid
                                      from simulation_run r, jsonb_array_elements(r.input_snapshot -> 'orders') o
                                      where r.id = ?::uuid)""";
@@ -247,6 +240,16 @@ class DemoScenariosIT extends ScenarioTestSupport {
         assertThat(new BigDecimal(actual.path("outputCarats").asText())).isEqualByComparingTo(carats);
 
         assertThat(fingerprint("operational_event", "production_order", "production_batch")).isEqualTo(history);
+    }
+
+    private String changeSummary(JsonNode list, String scenario) {
+        for (JsonNode item : list.path("items")) {
+            if (item.path("name").asText().equals(scenario)) {
+                return get("/api/scenarios/" + item.path("id").asText()).getBody()
+                        .path("changes").get(0).path("summary").asText();
+            }
+        }
+        throw new AssertionError("No scenario " + scenario);
     }
 
     private static JsonNode pool(JsonNode validation, String name) {

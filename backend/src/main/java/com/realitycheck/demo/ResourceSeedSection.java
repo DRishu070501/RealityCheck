@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
-/** Fourteen pools, one per machine type and skill, and one past downtime window on the polishing wheels. */
+/** The calibrated plan's worker and machine pools, and one past absence: two lab graders away for a day. */
 @Component
 class ResourceSeedSection implements DemoSeedSection {
 
@@ -29,20 +29,20 @@ class ResourceSeedSection implements DemoSeedSection {
 
     @Override
     public void seed(DemoSeedContext context) {
-        for (DemoData.Pool pool : DemoData.POOLS) {
+        for (CalibratedDemoGenerator.Pool pool : CalibratedDemoGenerator.plan().pools()) {
             resourceService.create(
                     new CreateResourceRequest(context.factoryId(), pool.kind(), pool.category(), pool.name(),
                             pool.capacity(), new BigDecimal(pool.hourlyCost())),
                     context.id(key(pool.category())), context.anchor());
         }
 
-        // Wednesday of the first week, the whole working day: two of six wheels out for maintenance.
-        UUID wheels = context.id(key("POLISHING_WHEEL"));
-        resourceService.addAvailability(wheels,
+        // Wednesday of the first week, the whole working day: two of the four lab graders away.
+        UUID graders = context.id(key("LAB_GRADER"));
+        resourceService.addAvailability(graders,
                 new CreateAvailabilityRequest(
                         context.anchorPlus(Duration.ofDays(2)),
                         context.anchorPlus(Duration.ofDays(2).plusHours(9)),
-                        -2, "Scheduled wheel maintenance (synthetic)"),
-                context.id("availability:POLISHING_WHEEL:maintenance-1"), context.anchor());
+                        -2, "Two graders on leave (synthetic)"),
+                context.id("availability:LAB_GRADER:leave-1"), context.anchor());
     }
 }

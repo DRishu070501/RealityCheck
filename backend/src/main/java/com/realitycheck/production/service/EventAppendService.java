@@ -71,7 +71,7 @@ public class EventAppendService {
             case STAGE_COMPLETED -> stageCompleted(required(request.batchId(), "batchId"), request.stageId(),
                     occurredAt, required(request.stoneQuantity(), "stoneQuantity"),
                     required(request.caratQuantity(), "caratQuantity"), request.durationSeconds(),
-                    request.payload(), id, now);
+                    request.nextStageId(), request.payload(), id, now);
             case ORDER_DISPATCHED -> orderDispatched(required(request.orderId(), "orderId"), occurredAt,
                     request.payload(), id, now);
             case CORRECTION -> correct(required(request.correctsEventId(), "correctsEventId"),
@@ -84,8 +84,7 @@ public class EventAppendService {
 
     /** Records the placing of an order and queues each of its batches at the first stage. */
     @Transactional
-    public void orderCreated(ProductionOrder order, List<ProductionBatch> orderBatches, UUID firstStageId,
-            Instant recordedAt) {
+    public void orderCreated(ProductionOrder order, List<ProductionBatch> orderBatches, Instant recordedAt) {
         BigDecimal stones = BigDecimal.ZERO;
         BigDecimal carats = BigDecimal.ZERO;
         for (ProductionBatch batch : orderBatches) {
@@ -104,7 +103,7 @@ public class EventAppendService {
                             EventType.STAGE_QUEUED, order.getPlacedAt())
                     .order(order.getId())
                     .batch(batch.getId())
-                    .stage(firstStageId)
+                    .stage(batch.getCurrentStageId())
                     .build());
         }
     }
@@ -131,6 +130,18 @@ public class EventAppendService {
     @Transactional
     public OperationalEvent stageCompleted(UUID batchId, UUID stageIdOrNull, Instant occurredAt, BigDecimal stones,
             BigDecimal carats, Long durationSeconds, Map<String, Object> payload, UUID id, Instant recordedAt) {
+        return stageCompleted(batchId, stageIdOrNull, occurredAt, stones, carats, durationSeconds, null, payload, id,
+                recordedAt);
+    }
+
+    /**
+     * @param nextStageIdOrNull where the batch is queued next: a later stage of its route, skipping only
+     *                          optional steps (spec 11); null for the route's next step
+     */
+    @Transactional
+    public OperationalEvent stageCompleted(UUID batchId, UUID stageIdOrNull, Instant occurredAt, BigDecimal stones,
+            BigDecimal carats, Long durationSeconds, UUID nextStageIdOrNull, Map<String, Object> payload, UUID id,
+            Instant recordedAt) {
         BatchContext context = lockBatch(batchId, stageIdOrNull);
         UUID stageId = context.batch.getCurrentStageId();
         List<OperationalEvent> added = new ArrayList<>();
@@ -144,15 +155,22 @@ public class EventAppendService {
                 .payload(payload)
                 .build();
         added.add(event);
-        int index = context.stageIds.indexOf(stageId);
-        if (index >= 0 && index < context.stageIds.size() - 1) {
+        int position = -1;
+        for (int i = 0; i < context.path.size(); i++) {
+            if (context.path.get(i).stageId().equals(stageId)) {
+                position = i;
+            }
+        }
+        if (position >= 0 && position < context.path.size() - 1) {
             added.add(OperationalEvent
                     .builder(Ids.child(id, FOLLOW_ON_QUEUE), recordedAt, context.order.getFactoryId(),
                             EventType.STAGE_QUEUED, occurredAt)
                     .order(context.order.getId())
                     .batch(batchId)
-                    .stage(context.stageIds.get(index + 1))
+                    .stage(nextStageIdOrNull != null ? nextStageIdOrNull : context.path.get(position + 1).stageId())
                     .build());
+        } else if (nextStageIdOrNull != null) {
+            throw new ValidationException("nextStageId", "the batch finishes at this stage");
         }
         apply(context, added, occurredAt, recordedAt);
         return event;
@@ -251,7 +269,8 @@ public class EventAppendService {
                 .build());
     }
 
-    private record BatchContext(ProductionBatch batch, ProductionOrder order, List<UUID> stageIds) {
+    private record BatchContext(ProductionBatch batch, ProductionOrder order, List<UUID> stageIds,
+            List<BatchHistory.Stop> path, List<StageView> stages, List<WorkflowReader.RouteView> routes) {
     }
 
     private BatchContext lockBatch(UUID batchId, UUID stageIdOrNull) {
@@ -262,14 +281,19 @@ public class EventAppendService {
         ProductionBatch batch = batches.findForUpdate(batchId)
                 .orElseThrow(() -> new ValidationException("batchId", "does not exist"));
         ProductionOrder order = orders.findById(batch.getOrderId()).orElseThrow();
-        List<UUID> stageIds = workflowReader.activeStages(order.getFactoryId()).stream().map(StageView::id).toList();
+        WorkflowReader.ActiveWorkflow workflow = workflowReader.activeWorkflow(order.getFactoryId());
+        List<StageView> stages = workflow.stages();
+        List<UUID> stageIds = stages.stream().map(StageView::id).toList();
+        List<WorkflowReader.RouteView> routes = workflow.routes();
+        List<BatchHistory.Stop> path = stages.isEmpty() ? List.of()
+                : BatchPaths.of(stages, routes, batch.getRouteCode());
         if (!allowCompleted && batch.getStatus() == BatchStatus.COMPLETED) {
             throw ApiException.unprocessable("The batch has already finished the last stage");
         }
         if (stageIdOrNull != null && !stageIdOrNull.equals(batch.getCurrentStageId())) {
             throw ApiException.unprocessable("The batch is not at that stage");
         }
-        return new BatchContext(batch, order, stageIds);
+        return new BatchContext(batch, order, stageIds, path, stages, routes);
     }
 
     /**
@@ -288,7 +312,7 @@ public class EventAppendService {
         Projection projection;
         try {
             if (stepOccurredAt != null) {
-                Projection before = BatchHistory.replay(context.stageIds, initialStones, batch.getRoughCarats(),
+                Projection before = BatchHistory.replay(context.stageIds, context.path, initialStones, batch.getRoughCarats(),
                         BatchHistory.effective(history));
                 if (before.lastEventAt() != null && stepOccurredAt.isBefore(before.lastEventAt())) {
                     throw new InvalidHistoryException(
@@ -299,7 +323,7 @@ public class EventAppendService {
             for (OperationalEvent event : added) {
                 history.add(toHistory(event, pendingSeq++));
             }
-            projection = BatchHistory.replay(context.stageIds, initialStones, batch.getRoughCarats(),
+            projection = BatchHistory.replay(context.stageIds, context.path, initialStones, batch.getRoughCarats(),
                     BatchHistory.effective(history));
         } catch (InvalidHistoryException ex) {
             throw ApiException.unprocessable(ex.getMessage());
@@ -320,14 +344,14 @@ public class EventAppendService {
             return;
         }
         List<ProductionBatch> siblings = batches.findByOrderIdOrderByBatchNumberAsc(order.getId());
-        UUID firstStage = context.stageIds.get(0);
-        UUID lastStage = context.stageIds.get(context.stageIds.size() - 1);
         boolean allCompleted = siblings.stream().allMatch(b -> b.getStatus() == BatchStatus.COMPLETED);
         boolean anyStarted = siblings.stream().anyMatch(b -> b.getStatus() != BatchStatus.QUEUED
-                || !firstStage.equals(b.getCurrentStageId()));
+                || !BatchPaths.firstStage(context.stages, context.routes, b.getRouteCode())
+                        .equals(b.getCurrentStageId()));
 
         if (allCompleted) {
-            Instant completedAt = events.findLatestOccurrence(order.getId(), EventType.STAGE_COMPLETED, lastStage);
+            // Each batch's last completion is its final one, so the latest of them all finishes the order.
+            Instant completedAt = events.findLatestOccurrence(order.getId(), EventType.STAGE_COMPLETED);
             if (order.getStatus() != OrderStatus.COMPLETED) {
                 events.saveAndFlush(OperationalEvent
                         .builder(Ids.child(order.getId(), "completed"), recordedAt, order.getFactoryId(),

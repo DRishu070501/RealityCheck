@@ -45,6 +45,12 @@ public interface OperationalEventRepository
             where e.orderId = :orderId and e.eventType = :type and e.stageId = :stageId""")
     Instant findLatestOccurrence(UUID orderId, EventType type, UUID stageId);
 
+    /** When the latest event of a type occurred for an order, at any stage; null if there is none. */
+    @Query("""
+            select max(e.occurredAt) from OperationalEvent e
+            where e.orderId = :orderId and e.eventType = :type""")
+    Instant findLatestOccurrence(UUID orderId, EventType type);
+
     @Query("select min(e.occurredAt) from OperationalEvent e where e.factoryId = :factoryId")
     Instant findFirstOccurrence(UUID factoryId);
 

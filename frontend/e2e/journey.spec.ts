@@ -25,15 +25,16 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await expect(page.getByRole('heading', { level: 1, name: 'Overview' })).toBeVisible()
     const factory = page.getByRole('region', { name: 'Surat Diamond Works' })
     await expect(factory).toBeVisible()
-    await expect(factory.getByRole('definition').first()).toHaveText('8')
+    await expect(factory.getByRole('definition').first()).toHaveText('11')
   })
 
-  await test.step('2. View its eight production stages', async () => {
+  await test.step('2. View its eleven production stages', async () => {
     await openFromNavigation(page, 'Workflow')
     const stages = page.getByRole('list', { name: 'Production stages in sequence' }).getByRole('listitem')
-    await expect(stages).toHaveCount(8)
-    await expect(stages.first()).toContainText('Rough Intake')
-    await expect(stages.nth(5)).toContainText('Polishing')
+    await expect(stages).toHaveCount(11)
+    await expect(stages.first()).toContainText('Rough intake')
+    await expect(stages.nth(5)).toContainText('Rough store')
+    await expect(stages.nth(8)).toContainText('Polishing')
     await expect(stages.last()).toContainText('Dispatch')
   })
 
@@ -67,7 +68,7 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await expect(page).toHaveURL(/\/timeline\?.*\bat=/)
     const inspector = page.getByRole('region', { name: 'Factory at a point in time' })
     await expect(inspector.getByLabel('Orders by status at that moment')).toBeVisible()
-    await expect(inspector.getByRole('list', { name: 'Stages at that moment' }).getByRole('listitem')).toHaveCount(8)
+    await expect(inspector.getByRole('list', { name: 'Stages at that moment' }).getByRole('listitem')).toHaveCount(11)
   })
 
   await test.step('6. Create an alternative scenario from that moment', async () => {
@@ -85,7 +86,7 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await page.getByRole('button', { name: 'Add change' }).click()
     const dialog = page.getByRole('dialog', { name: 'Add a change' })
     await dialog.getByLabel('Kind of change').selectOption('RESOURCE_CAPACITY')
-    await dialog.getByLabel('Pool').selectOption({ label: 'Polishing wheels (6)' })
+    await dialog.getByLabel('Pool').selectOption({ label: 'Polishing wheels (4)' })
     await dialog.getByLabel('Units to add (negative removes)').fill('2')
     await dialog.getByRole('button', { name: 'Add change' }).click()
     await expect(dialog).toBeHidden()
@@ -124,7 +125,7 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     const bottleneck = page.getByRole('region', { name: 'Bottleneck' })
     await expect(bottleneck).toBeVisible()
     await expect(bottleneck).toContainText(/bottleneck/i)
-    await expect(bottleneck.getByRole('table')).toContainText(/Polishing|Cutting|Quality Inspection|Bruting/)
+    await expect(bottleneck.getByRole('table')).toContainText(/Rough intake|Imaging|Lab grading|Inspection|Planning|Laser sawing|Polishing|Recut/)
   })
 
   await test.step('11. Ask AI to explain the results', async () => {

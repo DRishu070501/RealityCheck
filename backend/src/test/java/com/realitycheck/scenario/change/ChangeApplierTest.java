@@ -200,6 +200,33 @@ class ChangeApplierTest {
         assertThat(SnapshotJson.hash(same)).isEqualTo(SnapshotJson.hash(original));
     }
 
+    @Test
+    void aStageDelayScalesTheMeasuredTimesToWholeSecondsAndNeedsAStageThatHasThem() {
+        List<Long> deciles = List.of(10L, 20L, 30L, 40L, 50L, 60L, 70L, 80L, 90L, 101L);
+        Snapshot original = base();
+        List<Snapshot.StageSnapshot> stages = original.stages().stream()
+                .map(s -> !s.id().equals(CUTTING) ? s : new Snapshot.StageSnapshot(s.id(), s.code(), s.name(),
+                        s.sequence(), s.stonesPerHour(), s.setupSeconds(), s.stoneYield(), s.caratYield(),
+                        s.fixedCostPerJob(), s.requirements(), s.kind(), s.delayDeciles(), deciles))
+                .toList();
+        Snapshot withHandling = new Snapshot(original.schemaVersion(), original.factoryId(), original.timeZone(),
+                original.currencyCode(), original.forkAt(), original.calendar(), stages, original.pools(),
+                original.orders(), original.batches(), original.limits(), original.bottleneck(),
+                original.appliedChanges(), original.routes());
+
+        Result halved = ChangeApplier.apply(withHandling,
+                List.of(new Change(1, new ChangePayload.StageDelay(CUTTING, new BigDecimal("-50")))));
+
+        // 101 / 2 = 50.5, half-even to 50.
+        assertThat(stage(halved.snapshot(), CUTTING).handlingDeciles())
+                .containsExactly(5L, 10L, 15L, 20L, 25L, 30L, 35L, 40L, 45L, 50L);
+        assertThat(halved.snapshot().appliedChanges().get(0).summary())
+                .isEqualTo("Cutting: time held after processing -50%");
+        assertThatThrownBy(() -> apply(new ChangePayload.StageDelay(CUTTING, new BigDecimal("-50"))))
+                .isInstanceOf(ChangeApplicationException.class)
+                .hasMessage("Cutting has no measured waiting time to change");
+    }
+
     private static int capacityAfter(java.util.UUID poolId, CapacityMode mode, String value) {
         return pool(apply(new ResourceCapacity(poolId, mode, new BigDecimal(value))).snapshot(), poolId).baseCapacity();
     }

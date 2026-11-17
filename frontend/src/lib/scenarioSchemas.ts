@@ -20,6 +20,7 @@ export const changeTypeSchema = z.enum([
   'DEMAND_VOLUME',
   'PROCESSING_RATE',
   'WORKING_SCHEDULE',
+  'STAGE_DELAY',
 ])
 export type ChangeType = z.infer<typeof changeTypeSchema>
 

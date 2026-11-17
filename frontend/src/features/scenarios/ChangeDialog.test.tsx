@@ -195,6 +195,22 @@ describe('ChangeDialog other change types', () => {
     expect(backend.sent('POST', CHANGES)).toHaveLength(0)
   })
 
+  it('offers only stages with a measured waiting time for a stage delay', async () => {
+    // The fixture workflow's stages are all working stages without handling delays.
+    const { backend, user } = setup()
+    const dialog = await chooseType(user, 'STAGE_DELAY')
+
+    expect(within(dialog).getByText('No stage of this workflow has a measured waiting time.')).toBeInTheDocument()
+    expect(within(within(dialog).getByLabelText('Stage')).getAllByRole('option')).toHaveLength(1)
+    await user.type(within(dialog).getByLabelText('Change in time held (%)'), '0')
+    await submit(user, dialog)
+
+    expect(await within(dialog).findByText('A change of 0% has no effect')).toBeInTheDocument()
+    // "Choose a stage" is both the error and the empty option, so check the field itself.
+    expect(within(dialog).getByLabelText('Stage')).toHaveAttribute('aria-invalid', 'true')
+    expect(backend.sent('POST', CHANGES)).toHaveLength(0)
+  })
+
   it('needs at least one day for a schedule, then posts one shift per chosen day', async () => {
     const { backend, user } = setup()
     const dialog = await chooseType(user, 'WORKING_SCHEDULE')

@@ -71,6 +71,13 @@ polishers. The rate belongs to the slot, not to a machine or a person.
   same kind of fixed hash), then moves on or finishes. Handling uses no capacity and does not make the stage
   active for the bottleneck signals; it counts in manufacturing lead time. Changing a pool's capacity does
   not change handling: more people help only where a stage is near capacity.
+- **Routes in recorded history (spec 11).** Routes are stored on the workflow; a batch's `routeCode` is fixed
+  when its order is created. Its recorded history follows the route: after a stage it is queued at a later
+  step, skipping only optional ones, and it finishes at the route's last step. Snapshots carry the routes
+  and each batch's route, so the engine continues each batch on the route it was recorded on.
+- **Stage delay changes (spec 11).** `STAGE_DELAY` scales a stage's measured times (holding delays, or
+  handling at a working stage) by a percentage, to whole seconds. It is the only change that alters
+  measured times; capacity changes never do.
 - Allocation is **atomic**: a job starts only if every required pool has enough free units at that instant.
   All units are taken together or none are. A job never holds part of its requirements while waiting.
 - Processing is **non-preemptive**. Once started, a job keeps its units until it completes, including across

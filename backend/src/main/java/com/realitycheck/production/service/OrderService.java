@@ -94,15 +94,22 @@ public class OrderService implements FactoryCountProvider {
 
         ProductionOrder order = orders.saveAndFlush(new ProductionOrder(id, recordedAt, factoryId, orderNumber,
                 blankToNull(request.customerRef()), request.priority(), request.dueAt(), placedAt));
+        List<WorkflowReader.RouteView> routes = workflowReader.activeRoutes(factoryId);
         List<ProductionBatch> created = new ArrayList<>();
         int number = 1;
         for (CreateBatchRequest batch : request.batches()) {
+            UUID firstStage;
+            try {
+                firstStage = BatchPaths.firstStage(stages, routes, batch.routeCode());
+            } catch (IllegalArgumentException ex) {
+                throw new ValidationException("batches[" + (number - 1) + "].routeCode", ex.getMessage());
+            }
             created.add(batches.saveAndFlush(new ProductionBatch(Ids.child(id, "batch:" + number), recordedAt, id,
                     number, batch.stoneCount(), batch.roughCarats().setScale(4, RoundingMode.UNNECESSARY),
-                    stages.get(0).id())));
+                    firstStage, batch.routeCode())));
             number++;
         }
-        eventAppendService.orderCreated(order, created, stages.get(0).id(), recordedAt);
+        eventAppendService.orderCreated(order, created, recordedAt);
         return toResponse(order, created, recordedAt);
     }
 
