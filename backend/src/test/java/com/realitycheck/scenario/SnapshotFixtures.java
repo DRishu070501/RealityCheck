@@ -65,20 +65,20 @@ public final class SnapshotFixtures {
                         List.of()));
         List<BatchSnapshot> batches = List.of(
                 new BatchSnapshot(IN_PROGRESS, ORDER, 1, BatchSnapshot.IN_PROGRESS, 1, new BigDecimal("40.0000"),
-                        new BigDecimal("52.0000"), null, FORK.minusSeconds(1800), null),
+                        new BigDecimal("52.0000"), null, FORK.minusSeconds(1800), null, null),
                 new BatchSnapshot(QUEUED_FIRST, ORDER, 2, BatchSnapshot.QUEUED, 1, new BigDecimal("30.0000"),
-                        new BigDecimal("39.0000"), FORK.minusSeconds(600), null, null),
+                        new BigDecimal("39.0000"), FORK.minusSeconds(600), null, null, null),
                 new BatchSnapshot(QUEUED_SECOND, ORDER, 3, BatchSnapshot.QUEUED, 2, new BigDecimal("19.7000"),
-                        new BigDecimal("16.1200"), FORK.minusSeconds(300), null, null),
+                        new BigDecimal("16.1200"), FORK.minusSeconds(300), null, null, null),
                 new BatchSnapshot(ARRIVING, ORDER, 4, BatchSnapshot.FUTURE_ARRIVAL, 1, new BigDecimal("25.0000"),
-                        new BigDecimal("33.3333"), null, null, FORK.plusSeconds(86_400)));
+                        new BigDecimal("33.3333"), null, null, FORK.plusSeconds(86_400), null));
         return new Snapshot(Snapshot.SCHEMA_VERSION, FACTORY, "Asia/Kolkata", "INR", FORK, new CalendarSnapshot(shifts),
                 stages, pools, List.of(new OrderSnapshot(ORDER, "ORD-1", 3, FORK.plusSeconds(5 * 86_400),
                         FORK.minusSeconds(7200))),
                 batches, new LimitsSnapshot(180L * 24 * 3600, 1_000_000),
                 new BottleneckConfigSnapshot(new BigDecimal("0.35"), new BigDecimal("0.30"), new BigDecimal("0.20"),
                         new BigDecimal("0.15"), new BigDecimal("0.50"), new BigDecimal("0.50")),
-                List.of());
+                List.of(), List.of());
     }
 
     public static PoolSnapshot pool(Snapshot snapshot, UUID id) {

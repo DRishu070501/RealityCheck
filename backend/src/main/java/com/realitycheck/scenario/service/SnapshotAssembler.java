@@ -132,7 +132,7 @@ public class SnapshotAssembler {
             batches.add(new BatchSnapshot(batch.batchId(), batch.orderId(), batch.batchNumber(),
                     inProgress ? BatchSnapshot.IN_PROGRESS : BatchSnapshot.QUEUED, batch.stageSequence(),
                     batch.inputStones(), batch.inputCarats(), inProgress ? null : batch.waitingSince(),
-                    inProgress ? batch.startedAt() : null, null));
+                    inProgress ? batch.startedAt() : null, null, null));
         }
         if (includeFutureOrders) {
             for (OrderView later : productionReader.placedBetween(factoryId, fork, clock.instant())) {
@@ -140,7 +140,7 @@ public class SnapshotAssembler {
                 for (ProductionReader.BatchView batch : later.batches()) {
                     batches.add(new BatchSnapshot(batch.id(), later.id(), batch.batchNumber(),
                             BatchSnapshot.FUTURE_ARRIVAL, 1, BigDecimal.valueOf(batch.stoneCount()).setScale(4),
-                            batch.roughCarats().setScale(4), null, null, later.placedAt()));
+                            batch.roughCarats().setScale(4), null, null, later.placedAt(), null));
                 }
             }
         }
@@ -148,7 +148,7 @@ public class SnapshotAssembler {
 
         return new Snapshot(Snapshot.SCHEMA_VERSION, factoryId, factory.timeZone(), factory.currencyCode(), fork,
                 toCalendar(factoryService.calendar(factoryId)), stages, pools, List.copyOf(orders.values()), batches,
-                limits, engine.defaultBottleneck(), List.of());
+                limits, engine.defaultBottleneck(), List.of(), List.of());
     }
 
     private static StageSnapshot toStage(StageView stage) {

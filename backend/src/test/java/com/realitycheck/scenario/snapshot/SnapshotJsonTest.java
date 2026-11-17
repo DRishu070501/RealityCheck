@@ -31,6 +31,43 @@ class SnapshotJsonTest {
     }
 
     @Test
+    void aSnapshotWithoutRoutesSerialisesExactlyAsBeforeRoutesExisted() {
+        String json = SnapshotJson.write(SnapshotFixtures.base());
+
+        // No new keys: the bytes, and so the starting-state and input hashes of stored runs, are unchanged.
+        assertThat(json).doesNotContain("\"routes\"").doesNotContain("\"routeCode\"");
+        // JSON written before routes existed reads back with no routes.
+        Snapshot read = SnapshotJson.read(json);
+        assertThat(read.routes()).isEmpty();
+        assertThat(read.batches()).allSatisfy(b -> assertThat(b.routeCode()).isNull());
+    }
+
+    @Test
+    void routesSurviveARoundTripAndEveryScenarioChange() {
+        Snapshot base = SnapshotFixtures.base();
+        Snapshot.BatchSnapshot first = base.batches().get(0);
+        java.util.List<Snapshot.BatchSnapshot> batches = new java.util.ArrayList<>(base.batches());
+        batches.set(0, new Snapshot.BatchSnapshot(first.id(), first.orderId(), first.batchNumber(), first.state(),
+                first.stageSequence(), first.stones(), first.carats(), first.queuedAt(), first.startedAt(),
+                first.arrivalAt(), "TOPS"));
+        Snapshot routed = new Snapshot(base.schemaVersion(), base.factoryId(), base.timeZone(), base.currencyCode(),
+                base.forkAt(), base.calendar(), base.stages(), base.pools(), base.orders(), batches, base.limits(),
+                base.bottleneck(), base.appliedChanges(),
+                List.of(new Snapshot.RouteSnapshot("TOPS", "Tops", List.of(new Snapshot.RouteStepSnapshot(1, 100),
+                        new Snapshot.RouteStepSnapshot(2, 50)))));
+
+        Snapshot read = SnapshotJson.read(SnapshotJson.write(routed));
+        assertThat(read.routes()).isEqualTo(routed.routes());
+        assertThat(read.batches().get(0).routeCode()).isEqualTo("TOPS");
+        assertThat(SnapshotJson.hash(read)).isEqualTo(SnapshotJson.hash(routed)).isNotEqualTo(SnapshotJson.hash(base));
+
+        Snapshot changed = ChangeApplier.apply(routed,
+                List.of(new Change(1, new DemandVolume(new BigDecimal("20"))))).snapshot();
+        assertThat(changed.routes()).isEqualTo(routed.routes());
+        assertThat(changed.batches().get(0).routeCode()).isEqualTo("TOPS");
+    }
+
+    @Test
     void theHashIsSixtyFourHexCharactersAndStableAcrossInstances() {
         String first = SnapshotJson.hash(SnapshotFixtures.base());
 

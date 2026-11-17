@@ -1,6 +1,7 @@
 package com.realitycheck.scenario.snapshot;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,6 +22,9 @@ import java.util.UUID;
  * @param orders         orders with work left at the fork or arriving after it, sorted by id
  * @param batches        sorted by id
  * @param appliedChanges in ordinal order; empty in a base snapshot
+ * @param routes         paths batches follow, sorted by code; empty when every batch visits every
+ *                       stage in sequence. Left out of the JSON when empty, so snapshots without
+ *                       routes serialise and hash exactly as before routes existed.
  */
 public record Snapshot(
         int schemaVersion,
@@ -35,7 +39,8 @@ public record Snapshot(
         List<BatchSnapshot> batches,
         LimitsSnapshot limits,
         BottleneckConfigSnapshot bottleneck,
-        List<AppliedChange> appliedChanges) {
+        List<AppliedChange> appliedChanges,
+        @JsonInclude(JsonInclude.Include.NON_EMPTY) List<RouteSnapshot> routes) {
 
     public static final int SCHEMA_VERSION = 1;
 
@@ -45,6 +50,25 @@ public record Snapshot(
         orders = List.copyOf(orders);
         batches = List.copyOf(batches);
         appliedChanges = List.copyOf(appliedChanges);
+        routes = routes == null ? List.of() : List.copyOf(routes);
+    }
+
+    /** A copy with other batches; everything else, routes included, is kept. */
+    public Snapshot withBatches(List<BatchSnapshot> newBatches) {
+        return new Snapshot(schemaVersion, factoryId, timeZone, currencyCode, forkAt, calendar, stages, pools, orders,
+                newBatches, limits, bottleneck, appliedChanges, routes);
+    }
+
+    /** @param steps in visiting order */
+    public record RouteSnapshot(String code, String name, List<RouteStepSnapshot> steps) {
+
+        public RouteSnapshot {
+            steps = List.copyOf(steps);
+        }
+    }
+
+    /** @param visitPercent 1 to 100: the share of the route's batches that visit this stage */
+    public record RouteStepSnapshot(int stageSequence, int visitPercent) {
     }
 
     /** Shifts sorted by day, then start. */
@@ -119,9 +143,11 @@ public record Snapshot(
      * @param queuedAt      when it joined the queue (QUEUED)
      * @param startedAt     when work began (IN_PROGRESS)
      * @param arrivalAt     when it arrives (FUTURE_ARRIVAL)
+     * @param routeCode     the route it follows; null (and absent from the JSON) for every stage in sequence
      */
     public record BatchSnapshot(UUID id, UUID orderId, int batchNumber, String state, int stageSequence,
-            BigDecimal stones, BigDecimal carats, Instant queuedAt, Instant startedAt, Instant arrivalAt) {
+            BigDecimal stones, BigDecimal carats, Instant queuedAt, Instant startedAt, Instant arrivalAt,
+            @JsonInclude(JsonInclude.Include.NON_NULL) String routeCode) {
 
         public static final String QUEUED = "QUEUED";
         public static final String IN_PROGRESS = "IN_PROGRESS";
@@ -129,7 +155,7 @@ public record Snapshot(
 
         public BatchSnapshot withQuantities(BigDecimal newStones, BigDecimal newCarats) {
             return new BatchSnapshot(id, orderId, batchNumber, state, stageSequence, newStones, newCarats, queuedAt,
-                    startedAt, arrivalAt);
+                    startedAt, arrivalAt, routeCode);
         }
     }
 

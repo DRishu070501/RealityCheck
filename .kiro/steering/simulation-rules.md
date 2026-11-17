@@ -54,6 +54,11 @@ polishers. The rate belongs to the slot, not to a machine or a person.
 - The unit of work is a **job**: one batch at one stage. A job occupies exactly one slot. Batches are not
   split or merged. More slots let more jobs run at once; they do not make a single job faster.
 - A stage with no requirements has unlimited slots.
+- **Routes (spec 11).** A batch with a route visits only its route's stages, in the route's order, and finishes
+  at the route's last stage; a batch without one visits every stage in sequence. A route step below 100%
+  is visited by the batches whose fixed hash of (batch id, stage) falls below that share; no randomness. A
+  batch already at a stage when the run starts always stays on that stage. The run's output is what each
+  finished batch produced at the end of its own path.
 - Allocation is **atomic**: a job starts only if every required pool has enough free units at that instant.
   All units are taken together or none are. A job never holds part of its requirements while waiting.
 - Processing is **non-preemptive**. Once started, a job keeps its units until it completes, including across
@@ -182,7 +187,8 @@ completion time and throughput.
 1. Identical input gives identical output.
 2. No orders gives zero processing, zero waiting and zero cost from machines.
 3. A stage whose pool has zero capacity processes nothing.
-4. No batch completes the same stage twice; stages are completed in sequence order.
+4. No batch completes the same stage twice; stages are completed in the order of its path (sequence order
+   without a route). A route over every stage at 100% gives exactly the result of no route.
 5. Free units never go below zero and allocated never exceeds what was granted; all units are released at the end.
 6. Stone and carat conservation holds at every stage.
 7. Utilization is in `[0, 1]` or `null`.

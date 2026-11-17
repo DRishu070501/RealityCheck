@@ -123,7 +123,8 @@ public final class SimulationEngine {
 
         for (BatchSpec spec : context.batches) {
             OrderSpec order = context.orders.get(spec.orderId());
-            ProductionBatch batch = new ProductionBatch(spec.id(), spec.orderId(), order.priority(), order.dueTime());
+            ProductionBatch batch = new ProductionBatch(spec.id(), spec.orderId(), order.priority(), order.dueTime(),
+                    context.pathFor(spec));
             state.batches.put(batch.id(), batch);
             int stageIndex = spec.stageSequence() - 1;
             switch (spec.state()) {
@@ -186,18 +187,20 @@ public final class SimulationEngine {
         state.lastCompletionTime = now;
         state.trace(now, TraceType.JOB_COMPLETED, job.batch, stage.id(), null, outputStones, outputCarats, null);
 
-        if (context.isLastStage(job.stageIndex)) {
+        int next = job.batch.nextStageAfter(job.stageIndex);
+        if (next < 0) {
             if (state.batchFinishedAt.put(job.batch.id(), now) != null) {
                 throw new IllegalStateException("Batch " + job.batch.id() + " finished twice");
             }
+            state.finishedStones = state.finishedStones.add(outputStones);
+            state.finishedCarats = state.finishedCarats.add(outputCarats);
             UUID orderId = job.batch.orderId();
             if (context.batchIdsByOrder.get(orderId).stream().allMatch(state.batchFinishedAt::containsKey)) {
                 state.orderCompletedAt.put(orderId, now);
                 state.trace(now, TraceType.ORDER_COMPLETED, job.batch, null, null, null, null, null);
             }
         } else {
-            enqueue(new ProductionJob(job.batch, job.stageIndex + 1, outputStones, outputCarats, now), context,
-                    state, now);
+            enqueue(new ProductionJob(job.batch, next, outputStones, outputCarats, now), context, state, now);
         }
     }
 

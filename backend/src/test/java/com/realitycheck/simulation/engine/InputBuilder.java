@@ -37,6 +37,8 @@ final class InputBuilder {
     private final List<StageSpec> stages = new ArrayList<>();
     private final List<OrderSpec> orders = new ArrayList<>();
     private final List<BatchSpec> batches = new ArrayList<>();
+    private final List<SimulationInput.RouteSpec> routes = new ArrayList<>();
+    private final Map<UUID, String> routeOf = new LinkedHashMap<>();
     private long nextId = 1;
 
     private InputBuilder(long forkTime, CalendarSpec calendar) {
@@ -169,9 +171,28 @@ final class InputBuilder {
         return id;
     }
 
+    /** @param steps pairs of stage sequence and visit percent */
+    InputBuilder route(String code, int... steps) {
+        List<SimulationInput.RouteStep> list = new ArrayList<>();
+        for (int i = 0; i < steps.length; i += 2) {
+            list.add(new SimulationInput.RouteStep(steps[i], steps[i + 1]));
+        }
+        routes.add(new SimulationInput.RouteSpec(code, list));
+        return this;
+    }
+
+    InputBuilder onRoute(UUID batchId, String code) {
+        routeOf.put(batchId, code);
+        return this;
+    }
+
     SimulationInput build() {
-        return new SimulationInput(forkTime, calendar, stages, List.copyOf(pools.values()), orders, batches,
-                limits, bottleneck);
+        List<BatchSpec> withRoutes = batches.stream()
+                .map(b -> new BatchSpec(b.id(), b.orderId(), b.state(), b.stageSequence(), b.stones(), b.carats(),
+                        b.queueEntryTime(), b.startTime(), b.arrivalTime(), routeOf.get(b.id())))
+                .toList();
+        return new SimulationInput(forkTime, calendar, stages, List.copyOf(pools.values()), orders, withRoutes,
+                limits, bottleneck, routes);
     }
 
     SimulationResult run() {

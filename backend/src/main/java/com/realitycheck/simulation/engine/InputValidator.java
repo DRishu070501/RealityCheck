@@ -8,6 +8,8 @@ import com.realitycheck.simulation.engine.SimulationInput.CapacityWindow;
 import com.realitycheck.simulation.engine.SimulationInput.OrderSpec;
 import com.realitycheck.simulation.engine.SimulationInput.PoolSpec;
 import com.realitycheck.simulation.engine.SimulationInput.RequirementSpec;
+import com.realitycheck.simulation.engine.SimulationInput.RouteSpec;
+import com.realitycheck.simulation.engine.SimulationInput.RouteStep;
 import com.realitycheck.simulation.engine.SimulationInput.ShiftSpec;
 import com.realitycheck.simulation.engine.SimulationInput.StageSpec;
 import java.math.BigDecimal;
@@ -43,6 +45,7 @@ final class InputValidator {
     static final String UNKNOWN_ORDER = "UNKNOWN_ORDER";
     static final String ORDER_WITHOUT_BATCHES = "ORDER_WITHOUT_BATCHES";
     static final String INVALID_BATCH = "INVALID_BATCH";
+    static final String INVALID_ROUTE = "INVALID_ROUTE";
 
     private static final int SECONDS_PER_DAY = 86_400;
 
@@ -88,6 +91,7 @@ final class InputValidator {
 
         validateStages(input, pools, forkTime, horizonEnd, problems);
         validateOrdersAndBatches(input, forkTime, problems);
+        validateRoutes(input, problems);
 
         if (!problems.isEmpty()) {
             throw new InvalidSimulationInputException(problems);
@@ -222,6 +226,56 @@ final class InputValidator {
             if (batchesPerOrder.getOrDefault(order.id(), 0) == 0) {
                 problems.add(new Problem(ORDER_WITHOUT_BATCHES, "Order " + order.orderNumber()
                         + " has no batch left to process and should not be in the input", order.orderNumber()));
+            }
+        }
+    }
+
+    /**
+     * Routes name existing stages, each at most once, with a visit share of 1 to 100 percent. A batch's
+     * route must exist and include the stage the batch is at when the run starts.
+     */
+    private static void validateRoutes(SimulationInput input, List<Problem> problems) {
+        int stageCount = input.stages().size();
+        TreeMap<String, RouteSpec> routes = new TreeMap<>();
+        for (RouteSpec route : input.routes()) {
+            if (route.code() == null || route.code().isBlank()) {
+                problems.add(new Problem(INVALID_ROUTE, "A route needs a code", null));
+                continue;
+            }
+            if (routes.put(route.code(), route) != null) {
+                problems.add(new Problem(DUPLICATE_ID, "Route " + route.code() + " appears more than once",
+                        route.code()));
+            }
+            if (route.steps().isEmpty()) {
+                problems.add(new Problem(INVALID_ROUTE, "Route " + route.code() + " has no steps", route.code()));
+            }
+            TreeSet<Integer> seen = new TreeSet<>();
+            for (RouteStep step : route.steps()) {
+                if (step.stageSequence() < 1 || step.stageSequence() > stageCount) {
+                    problems.add(new Problem(INVALID_ROUTE, "Route " + route.code() + " names stage "
+                            + step.stageSequence() + ", which is not in the workflow", route.code()));
+                } else if (!seen.add(step.stageSequence())) {
+                    problems.add(new Problem(INVALID_ROUTE, "Route " + route.code() + " visits stage "
+                            + step.stageSequence() + " more than once", route.code()));
+                }
+                if (step.visitPercent() < 1 || step.visitPercent() > 100) {
+                    problems.add(new Problem(INVALID_ROUTE, "Route " + route.code() + " gives stage "
+                            + step.stageSequence() + " a visit share outside 1 to 100 percent", route.code()));
+                }
+            }
+        }
+        for (BatchSpec batch : input.batches()) {
+            if (batch.routeCode() == null) {
+                continue;
+            }
+            RouteSpec route = routes.get(batch.routeCode());
+            String subject = String.valueOf(batch.id());
+            if (route == null) {
+                problems.add(new Problem(INVALID_ROUTE, "Batch " + subject + " follows route " + batch.routeCode()
+                        + ", which is not in the input", subject));
+            } else if (route.steps().stream().noneMatch(step -> step.stageSequence() == batch.stageSequence())) {
+                problems.add(new Problem(INVALID_ROUTE, "Batch " + subject + " is at stage " + batch.stageSequence()
+                        + ", which route " + batch.routeCode() + " does not visit", subject));
             }
         }
     }

@@ -50,7 +50,7 @@ class ChangeApplierProperties {
         Snapshot changed = ChangeApplier.apply(base, numbered(payloads)).snapshot();
 
         for (BatchSnapshot batch : base.batches()) {
-            if (!ChangeApplier.unstarted(batch)) {
+            if (!ChangeApplier.unstarted(batch, base)) {
                 assertThat(SnapshotFixtures.batch(changed, batch.id())).isEqualTo(batch);
             }
         }

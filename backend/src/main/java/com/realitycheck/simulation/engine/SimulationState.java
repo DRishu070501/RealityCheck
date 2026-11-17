@@ -24,8 +24,11 @@ final class SimulationState {
     final TreeMap<UUID, BatchSpec> notArrived = new TreeMap<>();
     final TreeMap<UUID, ProductionBatch> batches = new TreeMap<>();
     final List<StageExecution> executions = new ArrayList<>();
-    /** When each batch finished the last stage. */
+    /** When each batch finished the last stage of its path. */
     final TreeMap<UUID, Long> batchFinishedAt = new TreeMap<>();
+    /** What finished batches left their last stage with: the run's output. */
+    BigDecimal finishedStones = BigDecimal.ZERO.setScale(4);
+    BigDecimal finishedCarats = BigDecimal.ZERO.setScale(4);
     final TreeMap<UUID, Long> orderCompletedAt = new TreeMap<>();
     final List<TraceEvent> trace = new ArrayList<>();
 

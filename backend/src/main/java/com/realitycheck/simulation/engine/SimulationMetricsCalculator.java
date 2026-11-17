@@ -195,8 +195,10 @@ final class SimulationMetricsCalculator {
             inputStones = inputStones.add(batch.stones().setScale(QUANTITY_SCALE, RoundingMode.HALF_EVEN));
             inputCarats = inputCarats.add(batch.carats().setScale(QUANTITY_SCALE, RoundingMode.HALF_EVEN));
         }
-        BigDecimal outputStones = stageCount == 0 ? zero(QUANTITY_SCALE) : outStones[stageCount - 1];
-        BigDecimal outputCarats = stageCount == 0 ? zero(QUANTITY_SCALE) : outCarats[stageCount - 1];
+        // What finished batches produced at the end of their own paths. Without routes every path
+        // ends at the last stage, so this equals that stage's output.
+        BigDecimal outputStones = state.finishedStones;
+        BigDecimal outputCarats = state.finishedCarats;
         BigDecimal totalCost = employeeCost.add(machineCost).add(fixedCost);
         CostBreakdown cost = new CostBreakdown(employeeCost.setScale(MONEY_SCALE, RoundingMode.HALF_EVEN),
                 machineCost.setScale(MONEY_SCALE, RoundingMode.HALF_EVEN),

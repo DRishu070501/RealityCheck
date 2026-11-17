@@ -51,6 +51,26 @@ class SimulationEngineProperties {
         assertThat(new SimulationEngine().run(shuffled)).isEqualTo(first);
     }
 
+    /** Spec 11, task 6: routes are a pure addition; a route over every stage at full share changes nothing. */
+    @Property
+    void aFullRouteOverEveryStageGivesExactlyTheResultOfNoRoute(
+            @ForAll @Size(60) List<@IntRange(min = 0, max = 999) Integer> genes) {
+        SimulationInput plain = factory(genes, false).build();
+        List<SimulationInput.RouteStep> everyStage = plain.stages().stream()
+                .map(stage -> new SimulationInput.RouteStep(stage.sequence(), 100))
+                .sorted(java.util.Comparator.comparingInt(SimulationInput.RouteStep::stageSequence))
+                .toList();
+        SimulationInput routed = new SimulationInput(plain.forkTime(), plain.calendar(), plain.stages(), plain.pools(),
+                plain.orders(),
+                plain.batches().stream()
+                        .map(b -> new SimulationInput.BatchSpec(b.id(), b.orderId(), b.state(), b.stageSequence(),
+                                b.stones(), b.carats(), b.queueEntryTime(), b.startTime(), b.arrivalTime(), "ALL"))
+                        .toList(),
+                plain.limits(), plain.bottleneck(), List.of(new SimulationInput.RouteSpec("ALL", everyStage)));
+
+        assertThat(new SimulationEngine().run(routed)).isEqualTo(new SimulationEngine().run(plain));
+    }
+
     @Property
     void everyRunTerminatesWithAllWorkDoneAndAllUnitsReleased(
             @ForAll @Size(60) List<@IntRange(min = 0, max = 999) Integer> genes) {

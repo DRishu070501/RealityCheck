@@ -184,7 +184,7 @@ public class ScenarioSnapshotService {
 
     private static BigDecimal unstartedStones(Snapshot snapshot) {
         return snapshot.batches().stream()
-                .filter(ChangeApplier::unstarted)
+                .filter(batch -> ChangeApplier.unstarted(batch, snapshot))
                 .map(BatchSnapshot::stones)
                 .reduce(BigDecimal.ZERO.setScale(4), BigDecimal::add);
     }

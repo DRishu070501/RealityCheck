@@ -5,6 +5,8 @@ import com.realitycheck.simulation.engine.SimulationInput.CapacityWindow;
 import com.realitycheck.simulation.engine.SimulationInput.OrderSpec;
 import com.realitycheck.simulation.engine.SimulationInput.PoolSpec;
 import com.realitycheck.simulation.engine.SimulationInput.RequirementSpec;
+import com.realitycheck.simulation.engine.SimulationInput.RouteSpec;
+import com.realitycheck.simulation.engine.SimulationInput.RouteStep;
 import com.realitycheck.simulation.engine.SimulationInput.StageSpec;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +32,7 @@ final class SimulationContext {
     /** Batches in id order. */
     final List<BatchSpec> batches;
     final TreeMap<UUID, List<UUID>> batchIdsByOrder = new TreeMap<>();
+    final TreeMap<String, RouteSpec> routes = new TreeMap<>();
     /** The factory calendar. */
     final WorkingCalendar calendar;
     /**
@@ -78,6 +81,9 @@ final class SimulationContext {
             orders.put(order.id(), order);
             batchIdsByOrder.put(order.id(), new ArrayList<>());
         }
+        for (RouteSpec route : input.routes()) {
+            routes.put(route.code(), route);
+        }
         this.batches = input.batches().stream().sorted(Comparator.comparing(BatchSpec::id)).toList();
         for (BatchSpec batch : batches) {
             batchIdsByOrder.get(batch.orderId()).add(batch.id());
@@ -88,8 +94,43 @@ final class SimulationContext {
         return stages.get(index);
     }
 
-    boolean isLastStage(int index) {
-        return index == stages.size() - 1;
+    /**
+     * The zero-based stage indexes a batch visits, in order. Without a route: every stage in
+     * sequence order. With one: the route's steps, keeping a step below 100% only for the batches
+     * {@link #visits} selects, and always keeping the stage the batch is at when the run starts.
+     */
+    List<Integer> pathFor(BatchSpec batch) {
+        List<Integer> path = new ArrayList<>();
+        if (batch.routeCode() == null) {
+            for (int i = 0; i < stages.size(); i++) {
+                path.add(i);
+            }
+            return path;
+        }
+        for (RouteStep step : routes.get(batch.routeCode()).steps()) {
+            if (step.stageSequence() == batch.stageSequence() || visits(batch.id(), step)) {
+                path.add(step.stageSequence() - 1);
+            }
+        }
+        return path;
+    }
+
+    /**
+     * Whether a batch visits an optional step. A fixed mix of the batch id and the stage gives each
+     * pair a bucket from 0 to 99; the step is visited when the bucket is below its percentage. No
+     * randomness: the same pair always gets the same answer.
+     */
+    static boolean visits(UUID batchId, RouteStep step) {
+        if (step.visitPercent() >= 100) {
+            return true;
+        }
+        long x = batchId.getMostSignificantBits() ^ Long.rotateLeft(batchId.getLeastSignificantBits(), 17)
+                ^ (step.stageSequence() * 0x9E3779B97F4A7C15L);
+        // SplitMix64 finaliser: spreads every input bit over the result.
+        x = (x ^ (x >>> 30)) * 0xBF58476D1CE4E5B9L;
+        x = (x ^ (x >>> 27)) * 0x94D049BB133111EBL;
+        x = x ^ (x >>> 31);
+        return Math.floorMod(x, 100) < step.visitPercent();
     }
 
     private static long earliestStart(SimulationInput input) {

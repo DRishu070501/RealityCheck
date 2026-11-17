@@ -12,6 +12,8 @@ import java.util.UUID;
  *
  * @param forkTime the instant the simulation starts from (T0)
  * @param batches  every batch that still has work to do at the fork, or arrives after it
+ * @param routes   the paths batches may follow; a batch without a route visits every stage in
+ *                 sequence order, which is the only behaviour when this list is empty
  */
 public record SimulationInput(
         long forkTime,
@@ -21,13 +23,41 @@ public record SimulationInput(
         List<OrderSpec> orders,
         List<BatchSpec> batches,
         SimulationLimits limits,
-        BottleneckConfig bottleneck) {
+        BottleneckConfig bottleneck,
+        List<RouteSpec> routes) {
 
     public SimulationInput {
         stages = List.copyOf(stages);
         pools = List.copyOf(pools);
         orders = List.copyOf(orders);
         batches = List.copyOf(batches);
+        routes = routes == null ? List.of() : List.copyOf(routes);
+    }
+
+    /** An input without routes: every batch visits every stage in sequence order. */
+    public SimulationInput(long forkTime, CalendarSpec calendar, List<StageSpec> stages, List<PoolSpec> pools,
+            List<OrderSpec> orders, List<BatchSpec> batches, SimulationLimits limits, BottleneckConfig bottleneck) {
+        this(forkTime, calendar, stages, pools, orders, batches, limits, bottleneck, List.of());
+    }
+
+    /**
+     * A path through the workflow, such as the one a packet type follows. Steps are in the order
+     * they are visited and each stage appears at most once.
+     */
+    public record RouteSpec(String code, List<RouteStep> steps) {
+
+        public RouteSpec {
+            steps = List.copyOf(steps);
+        }
+    }
+
+    /**
+     * @param stageSequence the stage visited
+     * @param visitPercent  1 to 100: the share of batches on the route that visit this stage. Which
+     *                      batches do is decided by a fixed hash of the batch id and the stage, so
+     *                      the same input always takes the same paths.
+     */
+    public record RouteStep(int stageSequence, int visitPercent) {
     }
 
     /** Weekly working pattern in a time zone. Days without a shift are closed. */
@@ -114,9 +144,16 @@ public record SimulationInput(
      * @param queueEntryTime when it joined the queue (QUEUED); may be before the fork
      * @param startTime      when work began (IN_PROGRESS); at or before the fork
      * @param arrivalTime    when it arrives (FUTURE_ARRIVAL)
+     * @param routeCode      the route it follows; null for every stage in sequence order
      */
     public record BatchSpec(UUID id, UUID orderId, BatchEntryState state, int stageSequence, BigDecimal stones,
-            BigDecimal carats, Long queueEntryTime, Long startTime, Long arrivalTime) {
+            BigDecimal carats, Long queueEntryTime, Long startTime, Long arrivalTime, String routeCode) {
+
+        /** A batch that visits every stage in sequence order. */
+        public BatchSpec(UUID id, UUID orderId, BatchEntryState state, int stageSequence, BigDecimal stones,
+                BigDecimal carats, Long queueEntryTime, Long startTime, Long arrivalTime) {
+            this(id, orderId, state, stageSequence, stones, carats, queueEntryTime, startTime, arrivalTime, null);
+        }
     }
 
     /** The run stops at whichever comes first. Reaching a limit is a result, not an error. */

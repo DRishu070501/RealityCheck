@@ -15,6 +15,8 @@ import com.realitycheck.simulation.engine.SimulationInput.OrderSpec;
 import com.realitycheck.simulation.engine.SimulationInput.PoolSpec;
 import com.realitycheck.simulation.engine.SimulationInput.RequirementSpec;
 import com.realitycheck.simulation.engine.SimulationInput.ResourceKind;
+import com.realitycheck.simulation.engine.SimulationInput.RouteSpec;
+import com.realitycheck.simulation.engine.SimulationInput.RouteStep;
 import com.realitycheck.simulation.engine.SimulationInput.ShiftSpec;
 import com.realitycheck.simulation.engine.SimulationInput.SimulationLimits;
 import com.realitycheck.simulation.engine.SimulationInput.StageSpec;
@@ -52,7 +54,11 @@ public final class SnapshotInputAdapter {
                 new SimulationLimits(s.limits().maxSimulatedSeconds(), s.limits().maxEvents()),
                 new BottleneckConfig(s.bottleneck().utilizationWeight(), s.bottleneck().waitWeight(),
                         s.bottleneck().queueWeight(), s.bottleneck().saturationWeight(),
-                        s.bottleneck().scoreThreshold(), s.bottleneck().saturationThreshold()));
+                        s.bottleneck().scoreThreshold(), s.bottleneck().saturationThreshold()),
+                s.routes().stream()
+                        .map(r -> new RouteSpec(r.code(), r.steps().stream()
+                                .map(step -> new RouteStep(step.stageSequence(), step.visitPercent())).toList()))
+                        .toList());
     }
 
     /** Stage display names by id, copied into results so they stay readable after configuration edits. */
@@ -81,7 +87,7 @@ public final class SnapshotInputAdapter {
     private static BatchSpec toBatch(BatchSnapshot batch) {
         BatchEntryState state = BatchEntryState.valueOf(batch.state());
         return new BatchSpec(batch.id(), batch.orderId(), state, batch.stageSequence(), batch.stones(), batch.carats(),
-                epoch(batch.queuedAt()), epoch(batch.startedAt()), epoch(batch.arrivalAt()));
+                epoch(batch.queuedAt()), epoch(batch.startedAt()), epoch(batch.arrivalAt()), batch.routeCode());
     }
 
     private static Long epoch(Instant instant) {

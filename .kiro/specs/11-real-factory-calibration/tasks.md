@@ -95,7 +95,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
 
 ### C. Engine (18–21 November)
 
-- [ ] 6. Routes per packet type
+- [x] 6. Routes per packet type
   - Depends on nothing; can start in parallel with B.
   - Snapshot: `RouteSnapshot(code, List<UUID> stageIds)` in `Snapshot`; `BatchSnapshot` gains `routeCode`
     (nullable: implicit route over all stages). `SnapshotJson` canonical form updated; schemaVersion 2.
@@ -222,6 +222,16 @@ pieces), so the demo uses each type's most common route.
 
 If time runs short, cut in this order: 14 (Insights AI), 12 (Insights screen; keep numbers in docs),
 10 (backtest screen; keep numbers in docs), then the Halloween theme inside 13 (keep ghost futures).
+
+Task 6 (17 November): routes are a pure addition. `SimulationInput.routes` and `BatchSpec.routeCode`
+(convenience constructors keep every existing caller); each batch gets a path at the start (optional steps by
+a SplitMix64 hash of batch id and stage); output is summed per finished batch at the end of its own path.
+Snapshots: `routes` and `routeCode` are omitted from JSON when empty, so stored snapshots and their hashes are
+unchanged and `SCHEMA_VERSION` stays 1; `Snapshot` and `BatchSnapshot` have no shortcut constructors, so the
+scenario-change code carries routes explicitly. The demand change's "not yet started" uses the route's first
+stage. Routes are not stored in the database yet: the assembler builds snapshots without them until task 9.
+Tests: `RouteTest` (6), `SnapshotJsonTest` (2 new), a jqwik property over 1,000 random factories that a full
+route over every stage equals no route.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

@@ -95,7 +95,8 @@ public final class ChangeApplier {
         }
         Snapshot result = new Snapshot(current.schemaVersion(), current.factoryId(), current.timeZone(),
                 current.currencyCode(), current.forkAt(), current.calendar(), current.stages(), current.pools(),
-                current.orders(), current.batches(), current.limits(), current.bottleneck(), applied);
+                current.orders(), current.batches(), current.limits(), current.bottleneck(), applied,
+                current.routes());
         return new Result(result, List.copyOf(warnings));
     }
 
@@ -158,7 +159,7 @@ public final class ChangeApplier {
                 int scaled = 0;
                 List<BatchSnapshot> batches = new ArrayList<>();
                 for (BatchSnapshot batch : s.batches()) {
-                    if (unstarted(batch)) {
+                    if (unstarted(batch, s)) {
                         batches.add(batch.withQuantities(scale(batch.stones(), factor), scale(batch.carats(), factor)));
                         scaled++;
                     } else {
@@ -171,7 +172,7 @@ public final class ChangeApplier {
                 }
                 yield new Step(new Snapshot(s.schemaVersion(), s.factoryId(), s.timeZone(), s.currencyCode(),
                         s.forkAt(), s.calendar(), s.stages(), s.pools(), s.orders(), batches, s.limits(),
-                        s.bottleneck(), s.appliedChanges()), names.describe(d));
+                        s.bottleneck(), s.appliedChanges(), s.routes()), names.describe(d));
             }
             case ProcessingRate r -> {
                 StageSnapshot stage = s.stages().stream().filter(st -> st.id().equals(r.stageId())).findFirst()
@@ -198,7 +199,7 @@ public final class ChangeApplier {
                         .toList();
                 yield new Step(new Snapshot(s.schemaVersion(), s.factoryId(), s.timeZone(), s.currencyCode(),
                         s.forkAt(), s.calendar(), stages, s.pools(), s.orders(), s.batches(), s.limits(),
-                        s.bottleneck(), s.appliedChanges()), names.describe(r, before, after));
+                        s.bottleneck(), s.appliedChanges(), s.routes()), names.describe(r, before, after));
             }
             case WorkingSchedule w -> {
                 List<Shift> combined = new ArrayList<>();
@@ -229,15 +230,25 @@ public final class ChangeApplier {
                 }
                 yield new Step(new Snapshot(s.schemaVersion(), s.factoryId(), s.timeZone(), s.currencyCode(),
                         s.forkAt(), calendar, s.stages(), s.pools(), s.orders(), s.batches(), s.limits(),
-                        s.bottleneck(), s.appliedChanges()), names.describe(w));
+                        s.bottleneck(), s.appliedChanges(), s.routes()), names.describe(w));
             }
         };
     }
 
-    /** Batches not yet started on their first stage: queued there, or arriving later. */
-    public static boolean unstarted(BatchSnapshot batch) {
-        return BatchSnapshot.FUTURE_ARRIVAL.equals(batch.state())
-                || (BatchSnapshot.QUEUED.equals(batch.state()) && batch.stageSequence() == 1);
+    /**
+     * Batches not yet started on their first stage: queued there, or arriving later. The first stage
+     * is the first step of the batch's route, or stage 1 for a batch without one.
+     */
+    public static boolean unstarted(BatchSnapshot batch, Snapshot snapshot) {
+        if (BatchSnapshot.FUTURE_ARRIVAL.equals(batch.state())) {
+            return true;
+        }
+        int first = batch.routeCode() == null ? 1 : snapshot.routes().stream()
+                .filter(route -> route.code().equals(batch.routeCode()))
+                .findFirst()
+                .map(route -> route.steps().isEmpty() ? 1 : route.steps().get(0).stageSequence())
+                .orElse(1);
+        return BatchSnapshot.QUEUED.equals(batch.state()) && batch.stageSequence() == first;
     }
 
     private static BigDecimal scale(BigDecimal value, BigDecimal percentFactor) {
@@ -268,6 +279,6 @@ public final class ChangeApplier {
         List<PoolSnapshot> pools = s.pools().stream().map(p -> p.id().equals(changed.id()) ? changed : p).toList();
         return new Snapshot(s.schemaVersion(), s.factoryId(), s.timeZone(), s.currencyCode(), s.forkAt(),
                 s.calendar(), s.stages(), pools, s.orders(), s.batches(), s.limits(), s.bottleneck(),
-                s.appliedChanges());
+                s.appliedChanges(), s.routes());
     }
 }
