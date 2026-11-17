@@ -15,9 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkflowReader {
 
     /** Units as in {@code WorkflowStage}: rate per processing slot, setup per job, yields as fractions. */
+    /**
+     * @param kind         WORKING, PARKING, WAITING or JOB_WORK
+     * @param delayDeciles ten calendar durations in seconds for a holding kind; null for WORKING
+     */
     public record StageView(UUID id, UUID workflowId, String code, String name, int sequence,
             BigDecimal stonesPerHour, long setupSeconds, BigDecimal stoneYield, BigDecimal caratYield,
-            BigDecimal fixedCostPerJob, List<RequirementView> requirements) {
+            BigDecimal fixedCostPerJob, List<RequirementView> requirements, String kind, List<Long> delayDeciles) {
     }
 
     public record RequirementView(UUID resourceId, int unitsPerSlot) {
@@ -40,7 +44,8 @@ public class WorkflowReader {
                                 stage.getRequirements().stream()
                                         .map(r -> new RequirementView(r.getResourceId(), r.getUnitsPerSlot()))
                                         .sorted(Comparator.comparing(RequirementView::resourceId))
-                                        .toList()))
+                                        .toList(),
+                                stage.getKind(), stage.getDelayDeciles()))
                         .toList())
                 .orElse(List.of());
     }

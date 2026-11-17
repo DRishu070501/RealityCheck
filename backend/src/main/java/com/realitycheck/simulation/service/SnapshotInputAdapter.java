@@ -19,6 +19,7 @@ import com.realitycheck.simulation.engine.SimulationInput.RouteSpec;
 import com.realitycheck.simulation.engine.SimulationInput.RouteStep;
 import com.realitycheck.simulation.engine.SimulationInput.ShiftSpec;
 import com.realitycheck.simulation.engine.SimulationInput.SimulationLimits;
+import com.realitycheck.simulation.engine.SimulationInput.StageKind;
 import com.realitycheck.simulation.engine.SimulationInput.StageSpec;
 import java.time.Instant;
 import java.util.Map;
@@ -74,7 +75,8 @@ public final class SnapshotInputAdapter {
     private static StageSpec toStage(StageSnapshot stage) {
         return new StageSpec(stage.id(), stage.code(), stage.sequence(), stage.stonesPerHour(), stage.setupSeconds(),
                 stage.stoneYield(), stage.caratYield(), stage.fixedCostPerJob(),
-                stage.requirements().stream().map(r -> new RequirementSpec(r.poolId(), r.unitsPerSlot())).toList());
+                stage.requirements().stream().map(r -> new RequirementSpec(r.poolId(), r.unitsPerSlot())).toList(),
+                stage.kind() == null ? StageKind.WORKING : StageKind.valueOf(stage.kind()), stage.delayDeciles());
     }
 
     private static PoolSpec toPool(PoolSnapshot pool) {

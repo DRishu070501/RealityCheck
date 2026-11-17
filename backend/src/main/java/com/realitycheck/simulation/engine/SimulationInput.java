@@ -89,14 +89,42 @@ public record SimulationInput(
      * @param setupSeconds        added once per job
      * @param stoneYield          fraction of stones that leaves the stage, in (0, 1]
      * @param requirements        what one processing slot needs; empty means unlimited slots
+     * @param kind                how the stage holds a batch; see {@link StageKind}
+     * @param delayDeciles        for every kind but WORKING: ten calendar durations in seconds, ascending,
+     *                            one of which each batch spends here (chosen by a fixed hash)
      */
     public record StageSpec(UUID id, String code, int sequence, BigDecimal stonesPerHourPerSlot, long setupSeconds,
             BigDecimal stoneYield, BigDecimal caratYield, BigDecimal fixedCostPerJob,
-            List<RequirementSpec> requirements) {
+            List<RequirementSpec> requirements, StageKind kind, List<Long> delayDeciles) {
 
         public StageSpec {
             requirements = List.copyOf(requirements);
+            kind = kind == null ? StageKind.WORKING : kind;
+            delayDeciles = delayDeciles == null ? List.of() : List.copyOf(delayDeciles);
         }
+
+        /** A working stage: processing on slots of pool units, as before stage kinds existed. */
+        public StageSpec(UUID id, String code, int sequence, BigDecimal stonesPerHourPerSlot, long setupSeconds,
+                BigDecimal stoneYield, BigDecimal caratYield, BigDecimal fixedCostPerJob,
+                List<RequirementSpec> requirements) {
+            this(id, code, sequence, stonesPerHourPerSlot, setupSeconds, stoneYield, caratYield, fixedCostPerJob,
+                    requirements, StageKind.WORKING, List.of());
+        }
+    }
+
+    /**
+     * How a stage holds a batch. Only WORKING uses capacity; the others hold a batch for a delay drawn
+     * from the stage's measured durations, with no limit on how many batches they hold at once.
+     */
+    public enum StageKind {
+        /** Setup and processing on slots of pool units. */
+        WORKING,
+        /** Material deliberately parked until it is wanted; excluded from manufacturing lead time. */
+        PARKING,
+        /** Waiting that is part of manufacturing, such as waiting for dispatch. */
+        WAITING,
+        /** Sent to an outside job worker; the factory's capacity is not used. */
+        JOB_WORK
     }
 
     public record RequirementSpec(UUID poolId, int unitsPerSlot) {

@@ -65,7 +65,7 @@ final class SimulationContext {
                     .toList();
             ordered.add(new StageSpec(stage.id(), stage.code(), stage.sequence(), stage.stonesPerHourPerSlot(),
                     stage.setupSeconds(), stage.stoneYield(), stage.caratYield(), stage.fixedCostPerJob(),
-                    requirements));
+                    requirements, stage.kind(), stage.delayDeciles()));
             IntervalSet unavailable = IntervalSet.EMPTY;
             for (RequirementSpec requirement : requirements) {
                 // Work in progress at the fork may have started before it, so look back as well.
@@ -121,16 +121,30 @@ final class SimulationContext {
      * randomness: the same pair always gets the same answer.
      */
     static boolean visits(UUID batchId, RouteStep step) {
-        if (step.visitPercent() >= 100) {
-            return true;
-        }
+        return step.visitPercent() >= 100 || bucket(batchId, step.stageSequence(), 0, 100) < step.visitPercent();
+    }
+
+    /**
+     * The delay a batch spends at a stage that holds it (any kind but WORKING): one of the stage's ten
+     * measured deciles, chosen by a fixed hash of batch and stage, so batches spread over the measured
+     * durations and the same batch always gets the same one.
+     */
+    long delayFor(UUID batchId, StageSpec stage) {
+        List<Long> deciles = stage.delayDeciles();
+        return deciles.isEmpty() ? 0 : deciles.get(bucket(batchId, stage.sequence(), 1, deciles.size()));
+    }
+
+    /**
+     * A fixed bucket in [0, buckets) for a batch, a stage and a purpose. SplitMix64's finaliser spreads
+     * every input bit over the result; no randomness is involved.
+     */
+    private static int bucket(UUID batchId, int stageSequence, int purpose, int buckets) {
         long x = batchId.getMostSignificantBits() ^ Long.rotateLeft(batchId.getLeastSignificantBits(), 17)
-                ^ (step.stageSequence() * 0x9E3779B97F4A7C15L);
-        // SplitMix64 finaliser: spreads every input bit over the result.
+                ^ (stageSequence * 0x9E3779B97F4A7C15L) ^ (purpose * 0xD1B54A32D192ED03L);
         x = (x ^ (x >>> 30)) * 0xBF58476D1CE4E5B9L;
         x = (x ^ (x >>> 27)) * 0x94D049BB133111EBL;
         x = x ^ (x >>> 31);
-        return Math.floorMod(x, 100) < step.visitPercent();
+        return (int) Math.floorMod(x, (long) buckets);
     }
 
     private static long earliestStart(SimulationInput input) {

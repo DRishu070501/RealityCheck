@@ -48,6 +48,12 @@ public record SimulationResult(
      * @param throughputStonesPerHour output per working hour; null when there was no working time
      * @param machineUtilization      capacity-weighted over machine pools; null when none was available
      * @param onTimeDeliveryRate      on-time orders over orders with a due date; null when there are none
+     * @param parkingSeconds          calendar seconds, summed over batches, held at PARKING stages in the run
+     * @param waitingStageSeconds     the same at WAITING stages (such as waiting for dispatch)
+     * @param jobWorkSeconds          the same at JOB_WORK stages (outside job workers)
+     * @param batchLeadMedianSeconds  median calendar seconds from a batch becoming active in the run (the
+     *                                fork, or its arrival) to finishing its path; null when none finished
+     * @param batchManufacturingMedianSeconds the same with time parked left out
      */
     public record SummaryMetrics(
             long elapsedSeconds,
@@ -70,7 +76,12 @@ public record SimulationResult(
             int ordersCompleted,
             int ordersDelayed,
             int ordersWithDueDate,
-            BigDecimal onTimeDeliveryRate) {
+            BigDecimal onTimeDeliveryRate,
+            long parkingSeconds,
+            long waitingStageSeconds,
+            long jobWorkSeconds,
+            Long batchLeadMedianSeconds,
+            Long batchManufacturingMedianSeconds) {
     }
 
     /**

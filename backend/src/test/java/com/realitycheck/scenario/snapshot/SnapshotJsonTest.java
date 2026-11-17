@@ -35,7 +35,11 @@ class SnapshotJsonTest {
         String json = SnapshotJson.write(SnapshotFixtures.base());
 
         // No new keys: the bytes, and so the starting-state and input hashes of stored runs, are unchanged.
-        assertThat(json).doesNotContain("\"routes\"").doesNotContain("\"routeCode\"");
+        assertThat(json).doesNotContain("\"routes\"").doesNotContain("\"routeCode\"")
+                .doesNotContain("\"delayDeciles\"");
+        // Pools have a kind (machine or employee); working stages do not.
+        assertThat(SnapshotJson.read(json).stages()).allSatisfy(stage -> assertThat(stage.kind()).isNull());
+        assertThat(json.split("\"pools\"")[0]).doesNotContain("\"kind\"");
         // JSON written before routes existed reads back with no routes.
         Snapshot read = SnapshotJson.read(json);
         assertThat(read.routes()).isEmpty();
@@ -65,6 +69,28 @@ class SnapshotJsonTest {
                 List.of(new Change(1, new DemandVolume(new BigDecimal("20"))))).snapshot();
         assertThat(changed.routes()).isEqualTo(routed.routes());
         assertThat(changed.batches().get(0).routeCode()).isEqualTo("TOPS");
+    }
+
+    @Test
+    void aHoldingStageKeepsItsKindAndDelaysThroughARoundTrip() {
+        Snapshot base = SnapshotFixtures.base();
+        Snapshot.StageSnapshot cut = base.stages().get(0);
+        Snapshot.StageSnapshot parked = new Snapshot.StageSnapshot(cut.id(), cut.code(), cut.name(), cut.sequence(),
+                cut.stonesPerHour(), cut.setupSeconds(), cut.stoneYield(), cut.caratYield(), cut.fixedCostPerJob(),
+                List.of(), "PARKING", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L));
+        Snapshot.StageSnapshot working = new Snapshot.StageSnapshot(cut.id(), cut.code(), cut.name(), cut.sequence(),
+                cut.stonesPerHour(), cut.setupSeconds(), cut.stoneYield(), cut.caratYield(), cut.fixedCostPerJob(),
+                cut.requirements(), "WORKING", null);
+
+        Snapshot.StageSnapshot read = SnapshotJson.read(SnapshotJson.write(
+                new Snapshot(base.schemaVersion(), base.factoryId(), base.timeZone(), base.currencyCode(),
+                        base.forkAt(), base.calendar(), List.of(parked, base.stages().get(1)), base.pools(),
+                        base.orders(), base.batches(), base.limits(), base.bottleneck(), base.appliedChanges(),
+                        base.routes()))).stages().get(0);
+
+        assertThat(read).isEqualTo(parked);
+        // WORKING is stored as absent, so it equals a stage written before kinds existed.
+        assertThat(working).isEqualTo(cut);
     }
 
     @Test

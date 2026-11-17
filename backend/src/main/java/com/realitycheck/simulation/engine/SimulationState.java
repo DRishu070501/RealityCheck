@@ -29,6 +29,14 @@ final class SimulationState {
     /** What finished batches left their last stage with: the run's output. */
     BigDecimal finishedStones = BigDecimal.ZERO.setScale(4);
     BigDecimal finishedCarats = BigDecimal.ZERO.setScale(4);
+    /** When each batch became active in the run: the fork, or its arrival. */
+    final TreeMap<UUID, Long> batchEnteredAt = new TreeMap<>();
+    /** Calendar seconds each batch spent at PARKING stages within the run. */
+    final TreeMap<UUID, Long> batchParkedSeconds = new TreeMap<>();
+    /** Calendar seconds, summed over batches, held at stages of each non-working kind within the run. */
+    long parkingSeconds;
+    long waitingStageSeconds;
+    long jobWorkSeconds;
     final TreeMap<UUID, Long> orderCompletedAt = new TreeMap<>();
     final List<TraceEvent> trace = new ArrayList<>();
 

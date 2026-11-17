@@ -67,7 +67,7 @@ What the backend is connected to. If the database is unreachable the call still 
   "serverTime": "2026-11-14T05:54:59Z",
   "database": { "status": "UP", "product": "PostgreSQL", "version": "17.2" },
   "migrations": { "appliedCount": 1, "currentVersion": "1" },
-  "simulation": { "algorithmVersion": "1.0.0" },
+  "simulation": { "algorithmVersion": "2.0.0" },
   "ai": { "enabled": false, "provider": "template", "model": null, "available": true },
   "demo": { "resetEnabled": true }
 }
@@ -549,6 +549,13 @@ with the algorithm version that produced them. Runs left pending or running by a
 `FAILED` ("Interrupted by restart") at start-up. Workers: `realitycheck.simulation.threads` (2) and
 `queue-capacity` (8).
 
+**Algorithm 2.0.0** (spec 11) adds routes and stages that hold batches for a measured delay. Its summary adds
+`parkingSeconds`, `waitingStageSeconds` and `jobWorkSeconds` (calendar seconds batches were held at parking,
+waiting and job-work stages, summed over batches) and `batchLeadMedianSeconds` and
+`batchManufacturingMedianSeconds` (median calendar seconds from a batch becoming active in the run, the fork or
+its arrival, to finishing its path; the second leaves out parking). All five are null for runs computed by
+1.0.0, which are still served unchanged. The examples below were captured under 1.0.0.
+
 A real run of the seeded baseline scenario (`GET /api/simulations/{runId}`, 14 November 2026):
 
 ```json
@@ -593,7 +600,7 @@ five working days before seeding; 18 of the 29 orders omitted):
                         { "orderId": "97e608c9-…", "orderNumber": "SDW-0045", "completedAt": null } ] }
 ```
 
-For each alternative: 16 summary `metrics` (each with `baseline`, `alternative`, `absolute`, `percent`,
+For each alternative: 18 summary `metrics` (the last two, the batch lead-time medians, are null for 1.0.0 runs) (each with `baseline`, `alternative`, `absolute`, `percent`,
 `unit`, `betterWhen` and `direction`), the `bottleneck` change (`SAME`, `MOVED`, `RESOLVED`, `EMERGED`,
 `NONE`) with both stages' scores in both runs, and per-stage, per-pool and per-order differences. Applied
 changes come from each run's stored snapshot, so editing a scenario later does not rewrite a comparison.

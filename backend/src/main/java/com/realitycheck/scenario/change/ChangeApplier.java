@@ -193,7 +193,7 @@ public final class ChangeApplier {
                 }
                 StageSnapshot changed = new StageSnapshot(stage.id(), stage.code(), stage.name(), stage.sequence(),
                         after, stage.setupSeconds(), stage.stoneYield(), stage.caratYield(), stage.fixedCostPerJob(),
-                        stage.requirements());
+                        stage.requirements(), stage.kind(), stage.delayDeciles());
                 List<StageSnapshot> stages = s.stages().stream()
                         .map(st -> st.id().equals(stage.id()) ? changed : st)
                         .toList();

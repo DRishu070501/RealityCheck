@@ -1,8 +1,10 @@
 package com.realitycheck.simulation.engine;
 
+import com.realitycheck.simulation.engine.SimulationInput.BatchEntryState;
 import com.realitycheck.simulation.engine.SimulationInput.BatchSpec;
 import com.realitycheck.simulation.engine.SimulationInput.OrderSpec;
 import com.realitycheck.simulation.engine.SimulationInput.RequirementSpec;
+import com.realitycheck.simulation.engine.SimulationInput.StageKind;
 import com.realitycheck.simulation.engine.SimulationInput.StageSpec;
 import com.realitycheck.simulation.engine.SimulationResult.TerminationReason;
 import com.realitycheck.simulation.engine.SimulationResult.TraceType;
@@ -23,7 +25,12 @@ import java.util.UUID;
  */
 public final class SimulationEngine {
 
-    public static final String ALGORITHM_VERSION = "1.0.0";
+    /**
+     * 2.0.0 (spec 11): routes, and stages that hold a batch for a measured delay (parking, waiting,
+     * job work), with their times and batch lead times in the summary. An input with no routes and only
+     * working stages gives the same values as 1.0.0 for every measure 1.0.0 had.
+     */
+    public static final String ALGORITHM_VERSION = "2.0.0";
 
     private static final int QUANTITY_SCALE = 4;
 
@@ -81,7 +88,7 @@ public final class SimulationEngine {
                     requestDispatch(state, events, now);
                 }
                 case STAGE_COMPLETED -> {
-                    complete(state.running.remove(event.subjectId()), context, state, now);
+                    complete(state.running.remove(event.subjectId()), context, state, events, now);
                     requestDispatch(state, events, now);
                 }
                 case SHIFT_START -> {
@@ -91,7 +98,7 @@ public final class SimulationEngine {
                 case JOB_ARRIVAL -> {
                     BatchSpec arriving = state.notArrived.remove(event.subjectId());
                     enqueue(new ProductionJob(state.batches.get(arriving.id()), arriving.stageSequence() - 1,
-                            scaled(arriving.stones()), scaled(arriving.carats()), now), context, state, now);
+                            scaled(arriving.stones()), scaled(arriving.carats()), now), context, state, events, now);
                     requestDispatch(state, events, now);
                 }
                 case DISPATCH_ATTEMPT -> {
@@ -126,7 +133,15 @@ public final class SimulationEngine {
             ProductionBatch batch = new ProductionBatch(spec.id(), spec.orderId(), order.priority(), order.dueTime(),
                     context.pathFor(spec));
             state.batches.put(batch.id(), batch);
+            state.batchEnteredAt.put(batch.id(), spec.state() == BatchEntryState.FUTURE_ARRIVAL
+                    ? Math.max(spec.arrivalTime(), forkTime) : forkTime);
             int stageIndex = spec.stageSequence() - 1;
+            if (spec.state() == BatchEntryState.IN_PROGRESS && context.stage(stageIndex).kind() != StageKind.WORKING) {
+                // Held at a parking, waiting or job-work stage at the fork: its delay counts from when it began.
+                hold(new ProductionJob(batch, stageIndex, scaled(spec.stones()), scaled(spec.carats()),
+                        spec.startTime()), context, state, events, forkTime);
+                continue;
+            }
             switch (spec.state()) {
                 case IN_PROGRESS -> {
                     StageSpec stage = context.stage(stageIndex);
@@ -150,7 +165,7 @@ public final class SimulationEngine {
                     events.schedule(job.completionTime, SimulationEvent.Type.STAGE_COMPLETED, batch.id());
                 }
                 case QUEUED -> enqueue(new ProductionJob(batch, stageIndex, scaled(spec.stones()),
-                        scaled(spec.carats()), spec.queueEntryTime()), context, state, forkTime);
+                        scaled(spec.carats()), spec.queueEntryTime()), context, state, events, forkTime);
                 case FUTURE_ARRIVAL -> {
                     state.notArrived.put(batch.id(), spec);
                     events.schedule(Math.max(spec.arrivalTime(), forkTime), SimulationEvent.Type.JOB_ARRIVAL,
@@ -163,7 +178,8 @@ public final class SimulationEngine {
         scheduleNextShiftStart(context, state, events, forkTime);
     }
 
-    private static void complete(ProductionJob job, SimulationContext context, SimulationState state, long now) {
+    private static void complete(ProductionJob job, SimulationContext context, SimulationState state,
+            SimulationEventQueue events, long now) {
         if (job == null) {
             throw new IllegalStateException("A stage completed for a batch that is not running");
         }
@@ -185,6 +201,18 @@ public final class SimulationEngine {
                 context.calendar.workingSecondsBetween(waitFrom, now),
                 job.inputStones, outputStones, job.inputCarats, outputCarats, job.allocations));
         state.lastCompletionTime = now;
+        if (stage.kind() != StageKind.WORKING) {
+            long held = now - job.startTime;
+            switch (stage.kind()) {
+                case PARKING -> {
+                    state.parkingSeconds += held;
+                    state.batchParkedSeconds.merge(job.batch.id(), held, Long::sum);
+                }
+                case WAITING -> state.waitingStageSeconds += held;
+                case JOB_WORK -> state.jobWorkSeconds += held;
+                default -> throw new IllegalStateException("Unknown stage kind " + stage.kind());
+            }
+        }
         state.trace(now, TraceType.JOB_COMPLETED, job.batch, stage.id(), null, outputStones, outputCarats, null);
 
         int next = job.batch.nextStageAfter(job.stageIndex);
@@ -200,16 +228,38 @@ public final class SimulationEngine {
                 state.trace(now, TraceType.ORDER_COMPLETED, job.batch, null, null, null, null, null);
             }
         } else {
-            enqueue(new ProductionJob(job.batch, next, outputStones, outputCarats, now), context, state, now);
+            enqueue(new ProductionJob(job.batch, next, outputStones, outputCarats, now), context, state, events, now);
         }
     }
 
-    private static void enqueue(ProductionJob job, SimulationContext context, SimulationState state, long now) {
+    private static void enqueue(ProductionJob job, SimulationContext context, SimulationState state,
+            SimulationEventQueue events, long now) {
+        if (context.stage(job.stageIndex).kind() != StageKind.WORKING) {
+            hold(job, context, state, events, now);
+            return;
+        }
         if (!state.queues.get(job.stageIndex).add(job)) {
             throw new IllegalStateException("Batch " + job.batch.id() + " is already queued at that stage");
         }
         state.trace(now, TraceType.JOB_QUEUED, job.batch, context.stage(job.stageIndex).id(), null,
                 job.inputStones, job.inputCarats, null);
+    }
+
+    /**
+     * Holds a batch at a parking, waiting or job-work stage for its measured delay, counted from when it
+     * entered the stage (which may be before the fork) and never ending before now. No capacity is used
+     * and no queue is joined; the time held is recorded by kind when it completes.
+     */
+    private static void hold(ProductionJob job, SimulationContext context, SimulationState state,
+            SimulationEventQueue events, long now) {
+        StageSpec stage = context.stage(job.stageIndex);
+        long entered = job.queueEntryTime;
+        job.startTime = Math.max(entered, context.forkTime);
+        job.workSeconds = 0;
+        job.completionTime = Math.max(now, entered + context.delayFor(job.batch.id(), stage));
+        state.running.put(job.batch.id(), job);
+        state.trace(now, TraceType.JOB_STARTED, job.batch, stage.id(), null, job.inputStones, job.inputCarats, null);
+        events.schedule(job.completionTime, SimulationEvent.Type.STAGE_COMPLETED, job.batch.id());
     }
 
     /** At most one dispatch per instant, after everything else that happens then. */

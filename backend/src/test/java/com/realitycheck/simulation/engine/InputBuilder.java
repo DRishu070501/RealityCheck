@@ -130,6 +130,15 @@ final class InputBuilder {
         return id;
     }
 
+    /** A stage that holds batches for one of ten delays, in hours, with no capacity. */
+    UUID holding(String code, SimulationInput.StageKind kind, long... hours) {
+        UUID id = id(2);
+        List<Long> deciles = java.util.Arrays.stream(hours).map(h -> h * HOUR).boxed().toList();
+        stages.add(new StageSpec(id, code, stages.size() + 1, BigDecimal.ONE, 0, BigDecimal.ONE, BigDecimal.ONE,
+                BigDecimal.ZERO, List.of(), kind, deciles));
+        return id;
+    }
+
     UUID order(String number) {
         return order(number, 3, null);
     }

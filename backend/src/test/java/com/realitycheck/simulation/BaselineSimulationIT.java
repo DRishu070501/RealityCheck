@@ -31,7 +31,8 @@ class BaselineSimulationIT extends IntegrationTest {
         JsonNode result = simulate(factoryId, SEEDED_AT).getBody();
 
         assertThat(result.path("source").asText()).isEqualTo("SIMULATED");
-        assertThat(result.path("algorithmVersion").asText()).isEqualTo("1.0.0");
+        assertThat(result.path("algorithmVersion").asText())
+                .isEqualTo(com.realitycheck.simulation.engine.SimulationEngine.ALGORITHM_VERSION);
         assertThat(result.path("forkAt").asText()).isEqualTo(SEEDED_AT.toString());
         assertThat(result.path("terminationReason").asText()).isEqualTo("COMPLETED");
         assertThat(result.path("unfinished")).isEmpty();

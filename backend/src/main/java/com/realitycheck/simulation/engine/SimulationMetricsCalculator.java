@@ -230,7 +230,12 @@ final class SimulationMetricsCalculator {
                 completed,
                 delayed,
                 withDueDate,
-                withDueDate == 0 ? null : ratio(onTime, withDueDate));
+                withDueDate == 0 ? null : ratio(onTime, withDueDate),
+                state.parkingSeconds,
+                state.waitingStageSeconds,
+                state.jobWorkSeconds,
+                medianLead(state, false),
+                medianLead(state, true));
 
         return new SimulationResult(SimulationEngine.ALGORITHM_VERSION, t0, t1, reason, state.eventsProcessed,
                 summary, List.copyOf(stageResults), List.copyOf(poolResults), List.copyOf(orderResults),
@@ -294,5 +299,23 @@ final class SimulationMetricsCalculator {
             total += value;
         }
         return total;
+    }
+
+    /**
+     * Median calendar seconds from a batch becoming active in the run (the fork, or its arrival) to
+     * finishing its path, over finished batches; optionally without time parked. The lower middle value
+     * for an even count, so it is always a time some batch actually took. Null when none finished.
+     */
+    private static Long medianLead(SimulationState state, boolean withoutParking) {
+        List<Long> leads = new ArrayList<>();
+        state.batchFinishedAt.forEach((batchId, finished) -> {
+            long lead = finished - state.batchEnteredAt.get(batchId);
+            leads.add(withoutParking ? lead - state.batchParkedSeconds.getOrDefault(batchId, 0L) : lead);
+        });
+        if (leads.isEmpty()) {
+            return null;
+        }
+        leads.sort(null);
+        return leads.get((leads.size() - 1) / 2);
     }
 }

@@ -55,6 +55,13 @@ public final class SimulationDtos {
      * @param throughputStonesPerHour output per working hour; null when there was no working time
      * @param machineUtilization      busy over available, capacity-weighted; null when nothing was available
      * @param onTimeDeliveryRate      on-time orders over orders with a due date; null when there are none
+     * @param parkingSeconds          calendar seconds batches were held at parking stages, summed; null for
+     *                                runs computed before algorithm 2.0.0
+     * @param waitingStageSeconds     the same at waiting stages (such as waiting for dispatch)
+     * @param jobWorkSeconds          the same at outside job workers
+     * @param batchLeadMedianSeconds  median calendar seconds from a batch becoming active in the run to
+     *                                finishing its path; null when none finished or before 2.0.0
+     * @param batchManufacturingMedianSeconds the same with time parked left out
      */
     public record Summary(
             long elapsedSeconds,
@@ -77,7 +84,12 @@ public final class SimulationDtos {
             int ordersCompleted,
             int ordersDelayed,
             int ordersWithDueDate,
-            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal onTimeDeliveryRate) {
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal onTimeDeliveryRate,
+            Long parkingSeconds,
+            Long waitingStageSeconds,
+            Long jobWorkSeconds,
+            Long batchLeadMedianSeconds,
+            Long batchManufacturingMedianSeconds) {
     }
 
     /**

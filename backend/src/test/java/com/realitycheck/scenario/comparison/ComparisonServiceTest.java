@@ -206,7 +206,8 @@ class ComparisonServiceTest {
         return new SummaryView(elapsed, 50, 10, new BigDecimal("4.0000"), new BigDecimal("100.0000"),
                 new BigDecimal("50.0000"), new BigDecimal("1000.00"), new BigDecimal("10.0000"),
                 new BigDecimal("600.00"), new BigDecimal("300.00"), new BigDecimal("100.00"),
-                new BigDecimal("0.500000"), new BigDecimal("0.400000"), 1, 0, new BigDecimal("1.000000"));
+                new BigDecimal("0.500000"), new BigDecimal("0.400000"), 1, 0, new BigDecimal("1.000000"),
+                elapsed / 2, elapsed / 3);
     }
 
     private static StageView stage(UUID id, String code, int sequence, String score) {

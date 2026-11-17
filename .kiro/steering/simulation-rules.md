@@ -59,6 +59,13 @@ polishers. The rate belongs to the slot, not to a machine or a person.
   is visited by the batches whose fixed hash of (batch id, stage) falls below that share; no randomness. A
   batch already at a stage when the run starts always stays on that stage. The run's output is what each
   finished batch produced at the end of its own path.
+- **Holding stages (spec 11).** A stage of kind PARKING, WAITING or JOB_WORK uses no capacity and has no
+  queue: a batch arriving there is held for one of the stage's ten measured delays (calendar seconds,
+  nights and closed days included), chosen by a fixed hash of batch and stage, counted from when it
+  entered the stage (before the fork for work already there) and never ending before the moment it is
+  scheduled. PARKING is deliberate storage and is left out of manufacturing lead time; WAITING (such as
+  waiting for dispatch) and JOB_WORK (outside job workers) count. Holding stages cost nothing and cannot
+  require pools.
 - Allocation is **atomic**: a job starts only if every required pool has enough free units at that instant.
   All units are taken together or none are. A job never holds part of its requirements while waiting.
 - Processing is **non-preemptive**. Once started, a job keeps its units until it completes, including across

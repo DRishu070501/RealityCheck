@@ -46,6 +46,7 @@ final class InputValidator {
     static final String ORDER_WITHOUT_BATCHES = "ORDER_WITHOUT_BATCHES";
     static final String INVALID_BATCH = "INVALID_BATCH";
     static final String INVALID_ROUTE = "INVALID_ROUTE";
+    static final String INVALID_STAGE_KIND = "INVALID_STAGE_KIND";
 
     private static final int SECONDS_PER_DAY = 86_400;
 
@@ -136,6 +137,7 @@ final class InputValidator {
         TreeSet<Integer> sequences = new TreeSet<>();
         TreeSet<UUID> stageIds = new TreeSet<>();
         for (StageSpec stage : input.stages()) {
+            validateKind(stage, problems);
             sequences.add(stage.sequence());
             if (!stageIds.add(stage.id())) {
                 problems.add(new Problem(DUPLICATE_ID, "Stage " + stage.code() + " appears more than once",
@@ -227,6 +229,31 @@ final class InputValidator {
                 problems.add(new Problem(ORDER_WITHOUT_BATCHES, "Order " + order.orderNumber()
                         + " has no batch left to process and should not be in the input", order.orderNumber()));
             }
+        }
+    }
+
+    /**
+     * A working stage has no delays; a holding stage (parking, waiting, job work) has ten ascending,
+     * non-negative delays and no capacity requirements, because it never uses capacity.
+     */
+    private static void validateKind(StageSpec stage, List<Problem> problems) {
+        List<Long> deciles = stage.delayDeciles();
+        if (stage.kind() == SimulationInput.StageKind.WORKING) {
+            if (!deciles.isEmpty()) {
+                problems.add(new Problem(INVALID_STAGE_KIND, "Working stage " + stage.code()
+                        + " has delays; only parking, waiting and job-work stages do", stage.code()));
+            }
+            return;
+        }
+        boolean valid = deciles.size() == 10 && deciles.stream().allMatch(d -> d != null && d >= 0)
+                && deciles.stream().sorted().toList().equals(deciles);
+        if (!valid) {
+            problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code() + " (" + stage.kind()
+                    + ") needs ten ascending, non-negative delays", stage.code()));
+        }
+        if (!stage.requirements().isEmpty()) {
+            problems.add(new Problem(INVALID_STAGE_KIND, "Stage " + stage.code() + " (" + stage.kind()
+                    + ") holds batches without capacity, so it cannot require pools", stage.code()));
         }
     }
 

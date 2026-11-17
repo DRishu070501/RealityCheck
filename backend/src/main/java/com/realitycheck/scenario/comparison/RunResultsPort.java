@@ -32,12 +32,16 @@ public interface RunResultsPort {
             List<AppliedChange> appliedChanges) {
     }
 
-    /** The headline figures, exactly as stored. Durations in seconds; ratios as fractions. */
+    /**
+     * The headline figures, exactly as stored. Durations in seconds; ratios as fractions. The batch lead
+     * medians are null for runs computed before algorithm 2.0.0 and when no batch finished.
+     */
     record SummaryView(long elapsedSeconds, long processingSeconds, long waitingWorkingSeconds,
             BigDecimal throughputStonesPerHour, BigDecimal outputStones, BigDecimal outputCarats,
             BigDecimal costTotal, BigDecimal costPerOutputStone, BigDecimal costEmployee, BigDecimal costMachine,
             BigDecimal costFixed, BigDecimal machineUtilization, BigDecimal employeeUtilization, int ordersCompleted,
-            int ordersDelayed, BigDecimal onTimeDeliveryRate) {
+            int ordersDelayed, BigDecimal onTimeDeliveryRate, Long batchLeadMedianSeconds,
+            Long batchManufacturingMedianSeconds) {
     }
 
     record StageView(UUID stageId, String code, String name, int sequence, BigDecimal meanWaitWorkingSeconds,

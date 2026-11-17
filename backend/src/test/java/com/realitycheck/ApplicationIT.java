@@ -54,7 +54,8 @@ class ApplicationIT extends IntegrationTest {
         assertThat(body.path("database").path("version").asText()).startsWith("17");
         assertThat(body.path("migrations").path("appliedCount").asInt()).isGreaterThanOrEqualTo(1);
         assertThat(body.path("migrations").path("currentVersion").asText()).isNotBlank();
-        assertThat(body.path("simulation").path("algorithmVersion").asText()).isEqualTo("1.0.0");
+        assertThat(body.path("simulation").path("algorithmVersion").asText())
+                .isEqualTo(com.realitycheck.simulation.engine.SimulationEngine.ALGORITHM_VERSION);
         assertThat(body.path("ai").path("enabled").asBoolean()).isFalse();
         assertThat(body.path("ai").path("provider").asText()).isEqualTo("template");
         assertThat(body.path("ai").path("available").asBoolean()).isTrue();

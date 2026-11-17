@@ -79,7 +79,8 @@ public final class SimulationResultMapper {
                 new Cost(s.cost().employee(), s.cost().machine(), s.cost().fixed(), s.cost().total(),
                         s.cost().perOutputStone(), currencyCode),
                 s.ordersTotal(), s.ordersCompleted(), s.ordersDelayed(), s.ordersWithDueDate(),
-                s.onTimeDeliveryRate());
+                s.onTimeDeliveryRate(), s.parkingSeconds(), s.waitingStageSeconds(), s.jobWorkSeconds(),
+                s.batchLeadMedianSeconds(), s.batchManufacturingMedianSeconds());
 
         return new SimulationResultResponse(factoryId, Instant.ofEpochSecond(result.forkTime()),
                 Instant.ofEpochSecond(result.endTime()), result.algorithmVersion(),

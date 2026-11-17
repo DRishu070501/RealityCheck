@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * One step of a workflow. Units, per .kiro/steering/simulation-rules.md:
@@ -57,6 +59,15 @@ public class WorkflowStage extends BaseEntity {
 
     @Column(name = "fixed_cost_per_job", nullable = false, precision = 14, scale = 2)
     private BigDecimal fixedCostPerJob;
+
+    /** WORKING, PARKING, WAITING or JOB_WORK (spec 11). */
+    @Column(nullable = false, length = 16)
+    private String kind = "WORKING";
+
+    /** For every kind but WORKING: ten calendar durations in seconds, ascending; null for WORKING. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "delay_deciles", columnDefinition = "jsonb")
+    private List<Long> delayDeciles;
 
     @Version
     private long version;
@@ -134,5 +145,31 @@ public class WorkflowStage extends BaseEntity {
 
     public List<StageRequirement> getRequirements() {
         return Collections.unmodifiableList(requirements);
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public List<Long> getDelayDeciles() {
+        return delayDeciles == null ? null : List.copyOf(delayDeciles);
+    }
+
+    /**
+     * Makes the stage hold batches for a measured delay instead of working them on capacity.
+     *
+     * @param holdingKind PARKING, WAITING or JOB_WORK
+     * @param deciles     ten calendar durations in seconds, ascending, none negative
+     */
+    public void holdFor(String holdingKind, List<Long> deciles) {
+        if (!List.of("PARKING", "WAITING", "JOB_WORK").contains(holdingKind)) {
+            throw new IllegalArgumentException("Not a holding kind: " + holdingKind);
+        }
+        if (deciles == null || deciles.size() != 10 || deciles.stream().anyMatch(d -> d == null || d < 0)
+                || !deciles.stream().sorted().toList().equals(deciles)) {
+            throw new IllegalArgumentException("A holding stage needs ten ascending, non-negative durations");
+        }
+        this.kind = holdingKind;
+        this.delayDeciles = List.copyOf(deciles);
     }
 }

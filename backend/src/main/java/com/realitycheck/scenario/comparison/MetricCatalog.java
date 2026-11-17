@@ -43,7 +43,16 @@ public final class MetricCatalog {
             new Metric("ordersDelayed", "Orders delayed", "orders", BetterWhen.LOWER,
                     s -> BigDecimal.valueOf(s.ordersDelayed())),
             new Metric("onTimeDeliveryRate", "On-time delivery rate", "fraction", BetterWhen.HIGHER,
-                    SummaryView::onTimeDeliveryRate));
+                    SummaryView::onTimeDeliveryRate),
+            // Algorithm 2.0.0 (spec 11): null for older runs, so their difference is null too.
+            new Metric("batchLeadMedianSeconds", "Median batch lead time", "seconds", BetterWhen.LOWER,
+                    s -> seconds(s.batchLeadMedianSeconds())),
+            new Metric("batchManufacturingMedianSeconds", "Median lead time without parking", "seconds",
+                    BetterWhen.LOWER, s -> seconds(s.batchManufacturingMedianSeconds())));
+
+    private static BigDecimal seconds(Long value) {
+        return value == null ? null : BigDecimal.valueOf(value);
+    }
 
     private MetricCatalog() {
     }

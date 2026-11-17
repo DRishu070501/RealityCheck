@@ -173,7 +173,7 @@ public class SimulationQueryService implements ScenarioRunLookup, RunResultsPort
                 s.throughputStonesPerHour(), s.outputStones(), s.outputCarats(), s.cost().total(),
                 s.cost().perOutputStone(), s.cost().employee(), s.cost().machine(), s.cost().fixed(),
                 s.machineUtilization(), s.employeeUtilization(), s.ordersCompleted(), s.ordersDelayed(),
-                s.onTimeDeliveryRate());
+                s.onTimeDeliveryRate(), s.batchLeadMedianSeconds(), s.batchManufacturingMedianSeconds());
         List<StageView> stages = stageRows(run.getId()).stream()
                 .map(st -> new StageView(st.stageId(), st.code(), st.name(), st.sequence(),
                         st.meanWaitWorkingSeconds(), st.meanQueueLength(), st.maxQueueLength(),

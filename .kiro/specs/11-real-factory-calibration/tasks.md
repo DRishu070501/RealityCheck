@@ -108,7 +108,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
     identical to the current engine (golden file from 1.0.0).
   - _Requirements: 2.1, 2.5_
 
-- [ ] 7. Holding and job-work stages; algorithm 2.0.0
+- [x] 7. Holding and job-work stages; algorithm 2.0.0
   - Depends on 6. Migration `V9__stage_kind.sql`: `workflow_stage.kind` (`WORKING` default, `HOLDING`,
     `JOB_WORK`) and `delay_deciles` jsonb (nullable). `StageSnapshot` gains both.
   - Engine: a `HOLDING`/`JOB_WORK` job skips scheduling and completes at `arrival + decile[hash(batchId) % 10]`
@@ -232,6 +232,17 @@ scenario-change code carries routes explicitly. The demand change's "not yet sta
 stage. Routes are not stored in the database yet: the assembler builds snapshots without them until task 9.
 Tests: `RouteTest` (6), `SnapshotJsonTest` (2 new), a jqwik property over 1,000 random factories that a full
 route over every stage equals no route.
+
+Task 7 (17 November): stage kinds `WORKING`, `PARKING`, `WAITING`, `JOB_WORK` (`V9__stage_kind.sql`, with a
+check that only holding kinds have delays). A holding stage holds each batch for one of its ten measured
+delays in calendar time (measured that way: parking spans nights), chosen by the same SplitMix64 hash with a
+different salt, so task 6's route choices are unchanged. Summary: `parkingSeconds`, `waitingStageSeconds`,
+`jobWorkSeconds`, `batchLeadMedianSeconds`, `batchManufacturingMedianSeconds` (the lower middle value, so it
+is a time some batch took); stored in the summary JSON, null for 1.0.0 runs. The comparison gains the two
+medians (18 metrics). Algorithm 2.0.0. `WorkflowStage.holdFor` sets a holding kind (used by the seed in task
+9); the stage API does not edit kinds in this release. Differs from the design: kinds are four, not three,
+because parking (excluded from manufacturing lead time) and dispatch waiting (included) must be told apart.
+Tests: `HoldingStageTest` (7), a snapshot round trip for kinds; every earlier test passes unchanged.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

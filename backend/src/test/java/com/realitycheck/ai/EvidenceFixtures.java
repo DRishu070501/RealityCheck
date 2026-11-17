@@ -140,7 +140,8 @@ public final class EvidenceFixtures {
                     new BigDecimal("0.66"), new Cost(new BigDecimal("800000.00"), new BigDecimal("300000.00"),
                     new BigDecimal("12000.00"), new BigDecimal(costTotal), new BigDecimal(perStone), "INR"),
                     10, 10 - lateOrders, lateOrders, 10,
-                    BigDecimal.valueOf(10 - lateOrders).divide(BigDecimal.TEN, 4, RoundingMode.HALF_UP));
+                    BigDecimal.valueOf(10 - lateOrders).divide(BigDecimal.TEN, 4, RoundingMode.HALF_UP),
+                    null, null, null, null, null);
             List<StageResult> stages = List.of(
                     stage(CUTTING, "CUTTING", "Cutting", 1, SAWS, "Saws", new BigDecimal("0.71"),
                             new BigDecimal("1800"), new BigDecimal("0.40")),
