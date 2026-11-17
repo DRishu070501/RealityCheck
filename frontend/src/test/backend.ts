@@ -22,6 +22,7 @@ import orderDetail from '@/test/fixtures/orderDetail.json'
 import orders from '@/test/fixtures/orders.json'
 import overview from '@/test/fixtures/overview.json'
 import resources from '@/test/fixtures/resources.json'
+import insights from '@/test/fixtures/insights.json'
 import state from '@/test/fixtures/state.json'
 import systemInfo from '@/test/fixtures/systemInfo.json'
 import timeline from '@/test/fixtures/timeline.json'
@@ -41,6 +42,7 @@ export const fixtures = {
   aiInsight,
   availability,
   baselineResults,
+  insights,
   comparison,
   results,
   run,
@@ -163,6 +165,7 @@ export function demoRoutes(): Routes {
     [`GET /api/factories/${FACTORY_ID}`]: () => jsonResponse(factory),
     [`GET /api/factories/${FACTORY_ID}/state`]: () => jsonResponse(state),
     [`GET /api/factories/${FACTORY_ID}/overview`]: () => jsonResponse(overview),
+    [`GET /api/factories/${FACTORY_ID}/insights`]: () => jsonResponse(insights),
     'GET /api/workflows': () => jsonResponse(workflows),
     [`GET /api/workflows/${WORKFLOW_ID}`]: () => jsonResponse(workflow),
     'GET /api/resources': ({ query }) => {

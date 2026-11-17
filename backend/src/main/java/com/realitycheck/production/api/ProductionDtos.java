@@ -289,4 +289,29 @@ public final class ProductionDtos {
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal stonesCompleted,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal caratsCompleted) {
     }
+
+    /**
+     * Where time goes, from recorded history (spec 11). Seconds are calendar seconds summed over every visit.
+     *
+     * @param from          the first recorded event; null when there is none
+     * @param totalSeconds  all packet time at every stage
+     */
+    public record InsightsResponse(UUID factoryId, Instant from, Instant until, long totalSeconds,
+            List<StageTime> stages, String source) {
+    }
+
+    /**
+     * @param waitingSeconds queued, not yet started
+     * @param activeSeconds  worked (working stage) or held (parking, waiting or job-work stage)
+     * @param share          of all packet time; null when there is none
+     * @param idleShare      waiting, plus holding at a non-working stage, as a share of all packet time
+     * @param hauntedRank    1 to 3 for the stages where packets lose the most time without being worked on
+     *                       (at least 5% of all time each); null otherwise
+     */
+    public record StageTime(UUID stageId, String code, String name, int sequence, String kind, long visits,
+            long waitingSeconds, long activeSeconds,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal share,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal idleShare,
+            Integer hauntedRank) {
+    }
 }

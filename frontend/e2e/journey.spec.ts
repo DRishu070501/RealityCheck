@@ -36,6 +36,10 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await expect(stages.nth(5)).toContainText('Rough store')
     await expect(stages.nth(8)).toContainText('Polishing')
     await expect(stages.last()).toContainText('Dispatch')
+    // Where recorded packets lose the most time without work (spec 11).
+    const haunted = page.getByRole('region', { name: 'Haunted stages' })
+    await expect(haunted.getByRole('listitem')).not.toHaveCount(0)
+    await expect(stages.filter({ hasText: 'Haunted #1' })).toHaveCount(1)
   })
 
   await test.step('3. Inspect machines, employees and capacity', async () => {
@@ -119,6 +123,8 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await expect(page.getByRole('region', { name: 'What differs' })).toContainText('Polishing wheels: capacity +2 units')
     // What really happened after the fork, beside the simulation.
     await expect(page.getByRole('region', { name: 'What actually happened after the fork' })).toBeVisible()
+    // Each order's ghost future under the change, beside its baseline completion.
+    await expect(page.getByTestId('ghost-futures')).toBeVisible()
   })
 
   await test.step('10. Identify production bottlenecks', async () => {

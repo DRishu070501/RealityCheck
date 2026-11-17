@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Info } from 'lucide-react'
+import { ChevronRight, Ghost, Info } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
 import { DemoTag, SourceTag } from '@/components/DataTags'
@@ -10,10 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableCell, TableHead, TableRow } from '@/components/ui/table'
+import { HauntedStages } from '@/features/workflow/HauntedStages'
 import { api } from '@/lib/api'
 import { formatDecimal, formatDuration, formatInteger, formatMoney, formatYield } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
-import type { Factory, Stage, StageState } from '@/lib/schemas'
+import type { Factory, Stage, StageState, StageTime } from '@/lib/schemas'
 import { cn } from '@/lib/utils'
 
 function slotsLabel(maxSlots: number | null): string {
@@ -35,10 +36,13 @@ function Pipeline({
   live,
   selectedId,
   onSelect,
+  times,
 }: {
   stages: readonly Stage[]
   /** What is at each stage right now, by stage id; empty while unknown. */
   live: ReadonlyMap<string, StageState>
+  /** Recorded time per stage, by stage id; empty while unknown. */
+  times: ReadonlyMap<string, StageTime>
   selectedId: string
   onSelect: (id: string) => void
 }) {
@@ -50,6 +54,7 @@ function Pipeline({
       {stages.map((stage, index) => {
         const selected = stage.id === selectedId
         const now = live.get(stage.id)
+        const rank = times.get(stage.id)?.hauntedRank ?? null
         return (
           <li key={stage.id} className="flex min-w-0 items-center">
             <button
@@ -75,6 +80,12 @@ function Pipeline({
               </span>
               {now ? (
                 <span className="metric border-t border-border pt-1.5 text-xs text-source-actual">{liveLabel(now)}</span>
+              ) : null}
+              {rank !== null ? (
+                <span className="flex items-center gap-1 text-xs font-medium text-accent">
+                  <Ghost aria-hidden="true" className="size-3.5" />
+                  Haunted #{rank}
+                </span>
               ) : null}
             </button>
             <ChevronRight
@@ -201,6 +212,11 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
     queryKey: queryKeys.factories.state(factory.id, 'now'),
     queryFn: ({ signal }) => api.factories.state(factory.id, undefined, signal),
   })
+  // Where time goes. Optional like the state: without it the page simply shows no haunted stages.
+  const insights = useQuery({
+    queryKey: queryKeys.factories.insights(factory.id),
+    queryFn: ({ signal }) => api.factories.insights(factory.id, signal),
+  })
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   if (list.isError) {
@@ -231,6 +247,7 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
 
   const { stages } = workflow.data
   const live = new Map((state.data?.stages ?? []).map((stage) => [stage.stageId, stage]))
+  const times = new Map((insights.data?.stages ?? []).map((stage) => [stage.stageId, stage]))
   const selected = stages.find((stage) => stage.id === selectedId) ?? stages[0]
   if (!selected) return null
 
@@ -254,8 +271,10 @@ function WorkflowExplorer({ factory }: { factory: Factory }) {
             {state.data ? <SourceTag source="Actual" /> : null}
           </div>
         </CardHeader>
-        <Pipeline stages={stages} live={live} selectedId={selected.id} onSelect={setSelectedId} />
+        <Pipeline stages={stages} live={live} times={times} selectedId={selected.id} onSelect={setSelectedId} />
       </Card>
+
+      {insights.data ? <HauntedStages insights={insights.data} /> : null}
 
       <StageDetail stage={selected} factory={factory} live={live.get(selected.id)} />
 

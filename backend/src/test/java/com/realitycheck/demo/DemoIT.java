@@ -40,6 +40,33 @@ class DemoIT extends IntegrationTest {
         seedsOrdersInEveryStateWithAHistoryThatEndsAtTheSeedingInstant(factoryId);
         theStoredPositionOfEveryBatchMatchesAReplayOfItsHistory(factoryId);
         theSeededHistoryNeverUsesMoreUnitsThanAPoolHas(factoryId);
+        showsWhereTimeGoesAndWhichStagesAreHaunted(factoryId);
+    }
+
+    /** Spec 11: time per stage from recorded history, with the stages that lose the most time ranked. */
+    private void showsWhereTimeGoesAndWhichStagesAreHaunted(String factoryId) {
+        JsonNode insights = get("/api/factories/" + factoryId + "/insights?until=" + SEEDED_AT).getBody();
+
+        assertThat(insights.path("source").asText()).isEqualTo("ACTUAL");
+        assertThat(insights.path("stages")).hasSize(11);
+        long total = 0;
+        java.math.BigDecimal shares = java.math.BigDecimal.ZERO;
+        java.util.List<Integer> ranks = new java.util.ArrayList<>();
+        for (JsonNode stage : insights.path("stages")) {
+            total += stage.path("waitingSeconds").asLong() + stage.path("activeSeconds").asLong();
+            shares = shares.add(new java.math.BigDecimal(stage.path("share").asText()));
+            if (!stage.path("hauntedRank").isNull()) {
+                ranks.add(stage.path("hauntedRank").asInt());
+                assertThat(new java.math.BigDecimal(stage.path("idleShare").asText())).isGreaterThanOrEqualTo(
+                        new java.math.BigDecimal("0.05"));
+            }
+        }
+        assertThat(insights.path("totalSeconds").asLong()).isEqualTo(total).isPositive();
+        assertThat(shares).isBetween(new java.math.BigDecimal("0.999"), new java.math.BigDecimal("1.001"));
+        assertThat(ranks).containsExactlyInAnyOrder(1, 2, 3);
+        // Parking holds packets longest of all, as in the factory the demonstration is calibrated on.
+        assertThat(insights.path("stages").get(5).path("code").asText()).isEqualTo("PARKING");
+        assertThat(insights.path("stages").get(5).path("hauntedRank").asInt()).isEqualTo(1);
     }
 
     private void seedsOneFullyConfiguredFactory(String factoryId) {

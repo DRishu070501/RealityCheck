@@ -10,6 +10,7 @@ import {
   factorySchema,
   factoryStateSchema,
   factorySummarySchema,
+  insightsSchema,
   orderDetailSchema,
   orderSchema,
   pageOf,
@@ -301,6 +302,9 @@ export const api = {
       request(`/api/factories/${id}/state${query({ at })}`, factoryStateSchema, { signal }),
     overview: (id: string, signal?: AbortSignal) =>
       request(`/api/factories/${id}/overview`, factoryOverviewSchema, { signal }),
+    /** Waiting and working or held time per stage, from recorded history up to now. */
+    insights: (id: string, signal?: AbortSignal) =>
+      request(`/api/factories/${id}/insights`, insightsSchema, { signal }),
   },
   orders: {
     list: (factoryId: string, params: OrderListParams, signal?: AbortSignal) =>

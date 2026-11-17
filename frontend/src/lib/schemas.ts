@@ -390,6 +390,38 @@ export const factoryStateSchema = z.object({
 })
 export type FactoryState = z.infer<typeof factoryStateSchema>
 
+/** Where packets' time went at one stage, summed over every visit, in calendar seconds (spec 11). */
+export const stageTimeSchema = z.object({
+  stageId: uuid,
+  code: z.string(),
+  name: z.string(),
+  sequence: z.number().int().positive(),
+  kind: z.enum(['WORKING', 'PARKING', 'WAITING', 'JOB_WORK']),
+  visits: z.number().int().nonnegative(),
+  /** Queued, not yet started. */
+  waitingSeconds: z.number().int().nonnegative(),
+  /** Worked at a working stage; held at a parking, waiting or job-work stage. */
+  activeSeconds: z.number().int().nonnegative(),
+  /** Of all packet time; null when there is none. */
+  share: decimalString.nullable(),
+  /** Waiting, plus holding at a non-working stage, as a share of all packet time. */
+  idleShare: decimalString.nullable(),
+  /** 1 to 3 where packets lose the most time without being worked on; null otherwise. */
+  hauntedRank: z.number().int().positive().nullable(),
+})
+export type StageTime = z.infer<typeof stageTimeSchema>
+
+/** Where time goes, from recorded history only. */
+export const insightsSchema = z.object({
+  factoryId: uuid,
+  from: instant.nullable(),
+  until: instant,
+  totalSeconds: z.number().int().nonnegative(),
+  stages: z.array(stageTimeSchema),
+  source: z.literal('ACTUAL'),
+})
+export type Insights = z.infer<typeof insightsSchema>
+
 const unitsInUseSchema = z.object({
   inUse: z.number().int().nonnegative(),
   capacity: z.number().int().nonnegative(),

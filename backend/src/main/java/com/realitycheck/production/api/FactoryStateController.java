@@ -2,7 +2,9 @@ package com.realitycheck.production.api;
 
 import com.realitycheck.production.api.ProductionDtos.FactoryOverviewResponse;
 import com.realitycheck.production.api.ProductionDtos.FactoryStateResponse;
+import com.realitycheck.production.api.ProductionDtos.InsightsResponse;
 import com.realitycheck.production.service.FactoryStateService;
+import com.realitycheck.production.service.InsightsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
@@ -24,9 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class FactoryStateController {
 
     private final FactoryStateService factoryStateService;
+    private final InsightsService insightsService;
 
-    public FactoryStateController(FactoryStateService factoryStateService) {
+    public FactoryStateController(FactoryStateService factoryStateService, InsightsService insightsService) {
         this.factoryStateService = factoryStateService;
+        this.insightsService = insightsService;
+    }
+
+    @GetMapping("/insights")
+    @Operation(summary = "Where time goes: waiting and working or held time per stage, from recorded history")
+    public InsightsResponse insights(@PathVariable UUID id, @RequestParam(required = false) Instant until) {
+        return insightsService.insights(id, until);
     }
 
     @GetMapping("/state")

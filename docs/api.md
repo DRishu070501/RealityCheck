@@ -328,6 +328,21 @@ UTC instants; buckets with no events are absent.
 |---|---|
 | `GET /api/factories/{id}/state?at=` | The factory as it stood at an instant (default now), rebuilt from the event history |
 | `GET /api/factories/{id}/overview` | Order counts, stage queues, units in use, 14 days of output and recent events, as of now |
+| `GET /api/factories/{id}/insights?until=` | Where time goes: waiting and worked or held time per stage, summed over every recorded visit, up to `until` (default now) |
+
+`insights` (spec 11) reads recorded history only, corrections applied. For each visit to a stage, the
+calendar time from being queued to being started is waiting; from started to completed is worked (working
+stage) or held (parking, waiting or job-work stage); a visit still open counts up to `until`. `idleShare` is
+waiting plus holding, as a share of all packet time; `hauntedRank` ranks the three stages with the largest
+idle share, each at least 5% (otherwise null). Shares are strings at scale 4.
+
+```json
+{ "factoryId": "...", "from": "2026-11-02T03:30:00Z", "until": "2026-11-17T06:00:00Z", "totalSeconds": 91540800,
+  "source": "ACTUAL",
+  "stages": [ { "stageId": "...", "code": "PARKING", "name": "Rough store (parked)", "sequence": 6, "kind": "PARKING",
+                "visits": 31, "waitingSeconds": 0, "activeSeconds": 21600000, "share": "0.2360",
+                "idleShare": "0.2360", "hauntedRank": 1 } ] }
+```
 
 `state` replays every batch's events up to `at`. It is read-only and writes nothing. Corrections apply
 whenever they were recorded, so the answer is what is **now known** about that moment. Before the first

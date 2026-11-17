@@ -22,6 +22,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, ApiError } from '@/lib/api'
 import { queryKeys } from '@/lib/queryKeys'
+import { useTheme, type Theme } from '@/lib/theme'
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -142,6 +143,49 @@ function DemoReset() {
   )
 }
 
+const THEMES: { value: Theme; label: string; hint: string }[] = [
+  { value: 'professional', label: 'Professional', hint: 'The default: calm navy and blue.' },
+  { value: 'halloween', label: 'Halloween', hint: 'Night purple, pumpkin and slime, for Kiroween. Same contrast, same data.' },
+]
+
+/** Chosen per browser; applies at once. Content and data tags are identical in both themes. */
+function Appearance() {
+  const [theme, setTheme] = useTheme()
+  return (
+    <Card aria-labelledby="appearance-title">
+      <CardHeader>
+        <div>
+          <CardTitle id="appearance-title">Appearance</CardTitle>
+          <CardDescription>Only colours change. Remembered in this browser.</CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">Theme</legend>
+          {THEMES.map((option) => (
+            <label key={option.value} className="flex cursor-pointer items-start gap-2 text-sm">
+              <input
+                type="radio"
+                name="theme"
+                value={option.value}
+                checked={theme === option.value}
+                onChange={() => {
+                  setTheme(option.value)
+                }}
+                className="mt-1 accent-primary"
+              />
+              <span>
+                <span className="font-medium text-foreground">{option.label}</span>
+                <span className="block text-xs text-muted-foreground">{option.hint}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function SettingsPage() {
   const info = useQuery({
     queryKey: queryKeys.system.info,
@@ -151,6 +195,10 @@ export function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" description="How this deployment is configured, and the demonstration data reset." />
+
+      <div className="mb-6">
+        <Appearance />
+      </div>
 
       {info.isPending ? (
         <div role="status" aria-label="Loading settings" className="flex flex-col gap-3">
@@ -224,7 +272,10 @@ export function SettingsPage() {
             <CardHeader>
               <div>
                 <CardTitle id="demo-title">Demonstration data</CardTitle>
-                <CardDescription>Surat Diamond Works is fictional and all of its figures are synthetic.</CardDescription>
+                <CardDescription>
+                  Surat Diamond Works is fictional: its patterns are calibrated on rounded measurements from one real
+                  factory, and every name and other figure is synthetic.
+                </CardDescription>
               </div>
             </CardHeader>
             {info.data.demo.resetEnabled ? (

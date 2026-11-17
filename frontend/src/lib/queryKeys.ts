@@ -13,6 +13,7 @@ export const queryKeys = {
     /** `at` is an ISO instant, or 'now' for the present. */
     state: (id: string, at: string) => ['factories', 'state', id, at] as const,
     overview: (id: string) => ['factories', 'overview', id] as const,
+    insights: (id: string) => ['factories', 'insights', id] as const,
   },
   orders: {
     all: ['orders'] as const,

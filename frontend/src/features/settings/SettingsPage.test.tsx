@@ -9,6 +9,8 @@ import { jsonResponse, renderWithProviders } from '@/test/utils'
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  window.localStorage.clear()
+  delete document.documentElement.dataset.theme
 })
 
 const info = (resetEnabled: boolean) => () => jsonResponse({ ...fixtures.systemInfo, demo: { resetEnabled } })
@@ -25,6 +27,27 @@ describe('SettingsPage', () => {
     expect(screen.getByText('4 applied, current version 4')).toBeInTheDocument()
     expect(screen.getByText('Built-in analyst')).toBeInTheDocument()
     expect(screen.getByText('1.0.0')).toBeInTheDocument()
+  })
+
+  it('switches to the Halloween theme at once, remembers it, and switches back', async () => {
+    mockBackend({ 'GET /api/system/info': info(true) })
+    const user = userEvent.setup()
+
+    renderWithProviders(<SettingsPage />)
+
+    const appearance = screen.getByRole('region', { name: 'Appearance' })
+    expect(within(appearance).getByRole('radio', { name: /Professional/ })).toBeChecked()
+    expect(document.documentElement.dataset.theme).toBeUndefined()
+
+    await user.click(within(appearance).getByRole('radio', { name: /Halloween/ }))
+
+    expect(document.documentElement.dataset.theme).toBe('halloween')
+    expect(window.localStorage.getItem('realitycheck.theme')).toBe('halloween')
+
+    await user.click(within(appearance).getByRole('radio', { name: /Professional/ }))
+
+    expect(document.documentElement.dataset.theme).toBeUndefined()
+    expect(window.localStorage.getItem('realitycheck.theme')).toBe('professional')
   })
 
   it('offers no reset when it is disabled by configuration', async () => {

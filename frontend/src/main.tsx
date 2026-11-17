@@ -5,6 +5,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import { App } from '@/app/App'
+import { applyTheme, readTheme } from '@/lib/theme'
+
+// Before the first render, so the chosen theme never flashes in after the default.
+applyTheme(readTheme())
 
 const container = document.getElementById('root')
 if (!container) {

@@ -45,6 +45,42 @@
   --radius: 0.5rem;
 }
 
+/*
+ * Halloween: the second theme, chosen in Settings (spec 11, task 13). Night purple, bone text, pumpkin and
+ * slime. The same guarantees as above: every text/background pair listed there is at least 6:1.
+ */
+:root[data-theme='halloween'] {
+  --background: #120a1c;
+  --surface: #1a1027;
+  --surface-raised: #22152f;
+  --surface-hover: #2c1b3d;
+  --border: #3a2550;
+  --border-strong: #523470;
+
+  --foreground: #f6eedf;
+  --muted-foreground: #c9b8d4;
+  --subtle-foreground: #b09cbd;
+
+  --primary: #ff8c1a;
+  --primary-foreground: #1a0d00;
+  --accent: #9cf06e;
+  --accent-foreground: #0b1a05;
+  --ring: #ffb057;
+
+  --status-ok: #86e08f;
+  --status-ok-surface: #12301a;
+  --status-warn: #ffc14d;
+  --status-warn-surface: #33240a;
+  --status-error: #ff7a7a;
+  --status-error-surface: #3a1216;
+  --status-info: #9cc0ff;
+  --status-info-surface: #16213d;
+
+  --source-actual: #86e08f;
+  --source-simulated: #ff9f40;
+  --source-ai: #cdb0ff;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);

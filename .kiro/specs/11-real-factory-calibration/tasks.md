@@ -178,7 +178,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
   - Test: service against a hand-computed fixture; component test; accessibility suite.
   - _Requirements: 5.1, 5.2_
 
-- [ ] 13. Frankenstein layer
+- [x] 13. Frankenstein layer
   - Ghost futures: on Simulation Results, the alternative's order completions drawn translucent over the
     recorded/baseline timeline (extend `ProductionTimeline`). Haunted stages: on Workflow, stages ranked by
     waiting share from Insights, marked with the same evidence as the bottleneck card. Halloween theme as a
@@ -269,6 +269,20 @@ clears the persistence context every 200 writes; it takes about 32 s on Docker D
 machine otherwise idle (two to three times that under load). `BaselineSimulationIT` no longer expects
 polishing to be the bottleneck: in the calibrated factory packets wait mostly for measured handling and
 holding, so the test checks that the verdict and its evidence agree instead.
+
+Task 13 (17 November): ghost futures are a card on the comparison (`GhostFutures`): each order's baseline
+completion, the alternative's as a translucent ghost joined to it, and recorded completions as diamonds when
+the comparison includes them; one sentence of derived counts above it, and the order delivery table as its
+text equivalent. Haunted stages need recorded time per stage, which is the core of task 12, so that part was
+built now: `InsightsService` and `GET /api/factories/{id}/insights` (waiting and worked or held time per
+stage, idle share, `hauntedRank` for the three stages with the largest idle share of at least 5%); task 12
+adds the rest of the screen on the same endpoint. The Workflow page shows a Haunted stages card and marks
+those stages in the pipeline. Halloween theme: a second token set under `:root[data-theme="halloween"]`,
+every listed text/background pair at least 6:1 (checked by script), chosen in Settings, remembered per
+browser, applied before the first render; the accessibility suite runs it at 375 and 1440 px. README
+rewritten around the stitched parts and the Kiro story. Verified on the rebuilt Docker stack: the demo reset
+(seed) takes 32 s there, and all 62 browser tests pass (the journey, now also checking haunted stages and ghost
+futures, and the accessibility suite in both themes).
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

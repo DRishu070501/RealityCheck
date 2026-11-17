@@ -2,16 +2,61 @@
 
 **See the future before you change the present.**
 
-RealityCheck is a digital twin for business operations. It models a factory's workflow, resources and
-production history, lets you branch from any point in that history, change the conditions, and compare the
-simulated outcome with the baseline. The first implementation targets diamond manufacturing.
+RealityCheck is an operational time machine for a factory. It replays what really happened, lets you stop at
+any recorded moment, change a decision, and watch the other future play out beside the one that happened.
+The first implementation is diamond manufacturing.
 
-Two principles hold throughout:
+It is a Kiroween entry in the **Frankenstein** category: five parts that were never meant to live in one
+body, stitched together so that each keeps its own nature.
 
-- **Numbers come from the simulation engine or from recorded history.** The engine is deterministic: the
-  same input and algorithm version always give the same result. AI explains results; it never calculates them.
-- **Demo data is synthetic.** "Surat Diamond Works" is a fictional factory. Its rates, capacities and costs
-  are not industry benchmarks, and simulated outcomes are estimates, not guarantees.
+## The creature
+
+| Part | What it is | What it is never allowed to do |
+|---|---|---|
+| **The skeleton:** an append-only history | Every packet movement as an immutable event (PostgreSQL, a trigger refuses edits; mistakes are corrected by new rows). The factory can be rebuilt at any past instant. | Change the past |
+| **The heart:** a deterministic engine | A discrete-event simulator in plain Java: calendars, worker and machine pools, routes, parking, outside job work, handling delays, yields, cost, bottleneck evidence. Same input and version, same result, to the second. | Guess, or use randomness |
+| **The blood:** a real factory's patterns | A Python pipeline reads one real diamond factory's month of movements **on the owner's machine only**, and publishes rounded, nameless patterns (`calibration.json`). The demo factory is built from them and reproduces the measured lead times within 15%. | Publish a name, an identifier or a raw row |
+| **The voice:** an AI analyst | Claude explains results, recommends and answers questions, given only the stored evidence. Every number it writes is checked against the stored results; an answer that fails is replaced by a built-in analyst. | Calculate a number |
+| **The face:** a React app | Ten screens over the same API, every figure tagged Actual, Simulated or AI interpretation, with a table behind every chart. | Show a number without its source |
+
+The stitches are contracts, not shared code: the engine sees only a frozen **snapshot** (versioned, hashed,
+stored with each run); the analyst sees only **evidence keys** and its numbers are validated against them;
+the real factory reaches the repository only as **rounded aggregates** that a script refuses to publish if
+any real name appears.
+
+### What only the creature can show
+
+- **Ghost futures.** On a comparison, every order's simulated completion with its ghost: when it would have
+  finished under the alternative decision, and, where history already knows, when it really did.
+- **Haunted stages.** On the workflow, the stages where packets lose the most time without anyone working on
+  them, ranked from every recorded visit.
+- **The Halloween theme** (Settings, Appearance): same data and contrast guarantees, darker night.
+
+### What the real data said
+
+Calibrated on one factory's October 2026 (rounded): the median packet took 17 days from inward to dispatch,
+but 11.5 without parking; parking was about two fifths of all lead time; and most departments held packets
+for one to two days while running well below capacity. In the demonstration, "Park half as long" is
+therefore a bigger lever than "Three more inspectors", and the simulation shows why. Simulated outcomes are
+estimates under stated assumptions, not guarantees.
+
+## How it was built with Kiro
+
+- **Steering** ([.kiro/steering/](.kiro/steering/)): product rules (never fabricate a metric, AI never
+  calculates), the technology and architecture boundaries, and the simulation rules the engine must obey.
+- **Specs** ([.kiro/specs/](.kiro/specs/)): eleven features, each with requirements, a design and a task
+  list, implemented task by task with progress notes; spec 11 is the real-factory calibration.
+- **Hooks and agents** ([.kiro/hooks/](.kiro/hooks/), [.kiro/agents/](.kiro/agents/)): checks run on save
+  (lint and type-check, module tests, API contract, architecture docs, simulation-engine review) and
+  specialist agents for the engine, the database, the backend, the UI and testing.
+
+## Principles
+
+- **Numbers come from the simulation engine or from recorded history.** AI explains results; it never
+  calculates them.
+- **Demo data is calibrated, not real.** "Surat Diamond Works" is fictional. Its patterns come from rounded
+  measurements of one real factory; every name and every other figure is synthetic. Client data never enters
+  the repository ([docs/demo-data.md](docs/demo-data.md)).
 
 ## Status
 
@@ -25,24 +70,7 @@ Two principles hold throughout:
 | 6. Frontend | The ten application screens | **Done** |
 | 7. AI intelligence | Provider abstraction, evidence-checked explanations, Q&A, AI Analyst screen | **Done** |
 | 8. Quality and deployment | End-to-end and accessibility suites, recorded outcome after a fork, demonstration guide | **Done** |
-
-What runs today: a seeded demonstration factory, Surat Diamond Works, with its working calendar, fourteen
-resource pools, an eight-stage workflow, and two to three weeks of production history ending now. You can
-browse orders and their batches, follow the operational timeline, inspect the factory as it stood at any
-past moment, see current queues and units in use, edit pools, record downtime and reset the demonstration
-data. The deterministic simulation engine is built and can be run on the factory as recorded from any
-instant through `GET /api/factories/{id}/baseline-simulation` (see Swagger UI); it predicts completion, waiting,
-utilization, cost and delivery, and names the bottleneck with its evidence. In **Scenario Lab** you can open
-one of six ready-made what-ifs or create your own (from scratch, by branching, or from any moment on the
-Timeline), add changes, check them, and run the simulation; **Simulation Results** shows a run on its own or
-side by side with the baseline, with charts, bottleneck evidence and order-by-order delivery. A scenario branched from its own moment
-gets its baseline (the factory as recorded from that moment, no changes) with one press, and the comparison
-shows, beside the simulation, what recorded history says actually happened to the same orders after the fork.
-Overview shows what the baseline predicts if nothing changes. **AI Analyst** explains a chosen run (on its own or against a
-baseline): reports on the bottleneck, delays, recommendations and an executive summary, and answers to your
-questions, each with the simulated evidence behind it. Every number in an answer is checked against the stored
-results before it is shown; answers that fail the check are replaced by the built-in analyst's. It uses Claude
-when `AI_API_KEY` is set and the built-in template analyst otherwise (see [docs/ai.md](docs/ai.md)).
+| 9. Real-factory calibration | Routes, parking and job-work stages, handling delays, calibrated demo, ghost futures, haunted stages | **In progress** |
 
 **First time here?** Start it with the two commands below, then follow [docs/demo.md](docs/demo.md): a
 fifteen-minute walkthrough of the operational time machine, from a recorded moment to a simulated decision
@@ -85,7 +113,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - [docs/setup.md](docs/setup.md): prerequisites, configuration, commands, troubleshooting
 - [docs/api.md](docs/api.md): API conventions and every endpoint
 - [docs/ai.md](docs/ai.md): the AI analyst: setup, cost, evidence checking, fallback
-- [docs/demo-data.md](docs/demo-data.md): the synthetic demonstration factory and how to reset it
+- [docs/demo-data.md](docs/demo-data.md): the calibrated demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules
 - [.kiro/specs/](.kiro/specs/): requirements, design and tasks for each feature
 
@@ -96,4 +124,9 @@ backend/     Spring Boot 3 (Java 21) modular monolith
 frontend/    React + TypeScript + Vite single-page application
 docs/        Architecture, setup and API documentation
 .kiro/       Kiro steering documents, specifications, hooks and agents
+tools/       The calibration pipeline (Python); it runs on the data owner's machine
 ```
+
+## Licence
+
+MIT; see [LICENSE](LICENSE).

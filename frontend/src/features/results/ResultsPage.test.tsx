@@ -207,6 +207,28 @@ describe('ResultsPage, comparison', () => {
     expect(within(completions).getAllByRole('row')).toHaveLength(actual.ordersCompleted + 1)
   })
 
+  it('draws every order’s ghost future beside its baseline completion and the recorded one', async () => {
+    mockBackend(routes())
+
+    renderWithProviders(<ResultsPage />, { route: `/results?run=${RUN_ID}&baseline=${BASELINE_RUN_ID}` })
+
+    const card = (await screen.findByText('Ghost futures')).closest('[aria-labelledby="ghost-title"]') as HTMLElement
+    const orders = capturedAlternative().orders
+    const ids = new Set(orders.map((order) => order.orderId))
+    const recorded = fixtures.comparison.actual.orders.filter((order) => order.completedAt && ids.has(order.orderId))
+    // In the captured comparison the extra shift brings all 29 orders forward; the median gain is 165,338 s.
+    expect(
+      within(card).getByText(
+        `In “Introduce an additional shift” 29 of 29 orders finish earlier, by a median of ${formatElapsed(165338)}; 0 later.`,
+      ),
+    ).toBeInTheDocument()
+    expect(within(card).getAllByTestId('ghost-row')).toHaveLength(orders.length)
+    expect(within(card).getAllByTestId('ghost-dot')).toHaveLength(orders.length)
+    expect(within(card).getAllByTestId('recorded-mark')).toHaveLength(recorded.length)
+    expect(within(card).getByText('Simulated')).toBeInTheDocument()
+    expect(within(card).getByText('Actual')).toBeInTheDocument()
+  })
+
   it('shows no recorded outcome when the comparison has none', async () => {
     mockBackend(
       routes({ 'POST /api/simulations/compare': () => jsonResponse({ ...fixtures.comparison, actual: null }) }),

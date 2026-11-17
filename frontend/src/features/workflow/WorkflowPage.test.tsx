@@ -96,7 +96,8 @@ describe('WorkflowPage', () => {
     expect(await screen.findByText('Unlimited jobs at once')).toBeInTheDocument()
     expect(screen.getByText('Unlimited slots')).toBeInTheDocument()
     expect(screen.getByText(/This stage needs no resources/)).toBeInTheDocument()
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    const detail = screen.getByRole('region', { name: '1. Rough Intake' })
+    expect(within(detail).queryByRole('table')).not.toBeInTheDocument()
   })
 
   it('calls no stage a bottleneck and says which figures are not available yet', async () => {
@@ -143,6 +144,42 @@ describe('WorkflowPage', () => {
     expect(within(pipeline()).getAllByRole('button')).toHaveLength(8)
     expect(screen.queryByText(/queued ·/)).not.toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('ranks the haunted stages from recorded time and marks them in the pipeline', async () => {
+    mockBackend(demoRoutes())
+
+    renderWithProviders(<WorkflowPage />)
+
+    const card = await screen.findByRole('region', { name: 'Haunted stages' })
+    const ranked = within(card).getAllByRole('listitem')
+    expect(ranked.map((item) => item.textContent)).toEqual([
+      expect.stringContaining('#1 Polishing'),
+      expect.stringContaining('#2 Cutting'),
+      expect.stringContaining('#3 Quality Inspection'),
+    ])
+    expect(ranked[0]).toHaveTextContent('41.42% of all packet time was spent waiting to be worked on here.')
+    expect(ranked[0]).toHaveTextContent('40 visits · waiting 250 h · worked 83 h')
+    expect(within(card).getByText('Actual')).toBeInTheDocument()
+    expect(within(pipeline()).getByRole('button', { name: /Polishing/ })).toHaveTextContent('Haunted #1')
+    expect(within(pipeline()).getByRole('button', { name: /Rough Intake/ })).not.toHaveTextContent('Haunted')
+
+    await userEvent.click(within(card).getByText('Show every stage as a table'))
+    const table = within(card).getByRole('table', { name: 'Packet time at every stage, from recorded history' })
+    expect(within(table).getAllByRole('row')).toHaveLength(9)
+  })
+
+  it('shows no haunted stages when recorded time cannot be read', async () => {
+    mockBackend({
+      ...demoRoutes(),
+      [`GET /api/factories/${FACTORY_ID}/insights`]: () => problem(500, 'Internal server error', 'Something went wrong.'),
+    })
+
+    renderWithProviders(<WorkflowPage />)
+
+    expect(await screen.findByRole('heading', { name: '1. Rough Intake' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Haunted stages' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Haunted #/)).not.toBeInTheDocument()
   })
 
   it('says so when the factory has no workflow', async () => {

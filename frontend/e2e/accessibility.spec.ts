@@ -4,7 +4,8 @@ import { expect, test, type Page } from '@playwright/test'
 /**
  * Every screen, in a real browser against the running stack, at phone, tablet, laptop and desktop
  * widths: no serious or critical axe violations (WCAG 2.1 A and AA, colour contrast included, which
- * jsdom cannot measure) and no sideways scrolling of the page.
+ * jsdom cannot measure) and no sideways scrolling of the page. The Halloween theme (spec 11) only changes
+ * colours, so it is checked for the same violations at the narrowest and widest widths.
  */
 
 const PAGES = [
@@ -29,9 +30,21 @@ async function settle(page: Page, heading: string) {
   await page.waitForLoadState('networkidle')
 }
 
-for (const width of WIDTHS) {
-  test.describe(`at ${width} px`, () => {
+const RUNS = [
+  ...WIDTHS.map((width) => ({ width, theme: 'professional' as const })),
+  { width: 375, theme: 'halloween' as const },
+  { width: 1440, theme: 'halloween' as const },
+]
+
+for (const { width, theme } of RUNS) {
+  test.describe(`at ${width} px${theme === 'halloween' ? ' in the Halloween theme' : ''}`, () => {
     test.use({ viewport: { width, height: 900 } })
+
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript((chosen) => {
+        window.localStorage.setItem('realitycheck.theme', chosen)
+      }, theme)
+    })
 
     for (const { path, heading } of PAGES) {
       test(`${heading} has no serious accessibility violations and no sideways scroll`, async ({ page }) => {

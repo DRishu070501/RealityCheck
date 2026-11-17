@@ -1,0 +1,113 @@
+{
+  "factoryId": "3e56055a-c69d-3e33-9ffa-c6844e063ed2",
+  "from": "2026-11-02T03:30:00Z",
+  "until": "2026-11-14T06:00:00Z",
+  "totalSeconds": 2172800,
+  "stages": [
+    {
+      "stageId": "d13cdecf-d98d-306d-9bb3-0a71e72b2ae6",
+      "code": "ROUGH_INTAKE",
+      "name": "Rough Intake",
+      "sequence": 1,
+      "kind": "WORKING",
+      "visits": 60,
+      "waitingSeconds": 3600,
+      "activeSeconds": 7200,
+      "share": "0.0050",
+      "idleShare": "0.0017",
+      "hauntedRank": null
+    },
+    {
+      "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+      "code": "PLANNING",
+      "name": "Planning",
+      "sequence": 2,
+      "kind": "WORKING",
+      "visits": 58,
+      "waitingSeconds": 36000,
+      "activeSeconds": 90000,
+      "share": "0.0580",
+      "idleShare": "0.0166",
+      "hauntedRank": null
+    },
+    {
+      "stageId": "715810e8-2fc8-30da-a95f-0fb5721a55ac",
+      "code": "MARKING",
+      "name": "Marking",
+      "sequence": 3,
+      "kind": "WORKING",
+      "visits": 55,
+      "waitingSeconds": 18000,
+      "activeSeconds": 30000,
+      "share": "0.0221",
+      "idleShare": "0.0083",
+      "hauntedRank": null
+    },
+    {
+      "stageId": "8c34fd68-837b-36d8-bd9b-c5fb210bcd37",
+      "code": "CUTTING",
+      "name": "Cutting",
+      "sequence": 4,
+      "kind": "WORKING",
+      "visits": 50,
+      "waitingSeconds": 400000,
+      "activeSeconds": 120000,
+      "share": "0.2393",
+      "idleShare": "0.1841",
+      "hauntedRank": 2
+    },
+    {
+      "stageId": "1e07d2be-42e3-3167-a2ef-3fec0698043d",
+      "code": "BRUTING",
+      "name": "Bruting",
+      "sequence": 5,
+      "kind": "WORKING",
+      "visits": 45,
+      "waitingSeconds": 20000,
+      "activeSeconds": 60000,
+      "share": "0.0368",
+      "idleShare": "0.0092",
+      "hauntedRank": null
+    },
+    {
+      "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+      "code": "POLISHING",
+      "name": "Polishing",
+      "sequence": 6,
+      "kind": "WORKING",
+      "visits": 40,
+      "waitingSeconds": 900000,
+      "activeSeconds": 300000,
+      "share": "0.5523",
+      "idleShare": "0.4142",
+      "hauntedRank": 1
+    },
+    {
+      "stageId": "fcc0d941-7ae2-34f2-85e5-f1233a843fa7",
+      "code": "QUALITY_INSPECTION",
+      "name": "Quality Inspection",
+      "sequence": 7,
+      "kind": "WORKING",
+      "visits": 30,
+      "waitingSeconds": 150000,
+      "activeSeconds": 20000,
+      "share": "0.0782",
+      "idleShare": "0.0690",
+      "hauntedRank": 3
+    },
+    {
+      "stageId": "772a6b27-1083-3ac2-a660-2cd10043ad5e",
+      "code": "DISPATCH",
+      "name": "Dispatch",
+      "sequence": 8,
+      "kind": "WORKING",
+      "visits": 25,
+      "waitingSeconds": 10000,
+      "activeSeconds": 8000,
+      "share": "0.0083",
+      "idleShare": "0.0046",
+      "hauntedRank": null
+    }
+  ],
+  "source": "ACTUAL"
+}

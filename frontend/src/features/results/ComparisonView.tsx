@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableCell, TableHead, TableRow } from '@/components/ui/table'
 import type { BarRow } from '@/features/results/ComparisonBars'
+import { GhostFutures } from '@/features/results/GhostFutures'
 import { ChartFigure, SimpleTable } from '@/features/results/resultsUi'
 import { formatDecimal, formatInteger, formatMoney, formatShortDateTimeInZone } from '@/lib/format'
 import { formatByUnit, formatElapsed, NOT_AVAILABLE } from '@/lib/metrics'
@@ -402,6 +403,15 @@ export function ComparisonView({ comparison, timeZone }: { comparison: Compariso
           />
         </CardContent>
       </Card>
+
+      <GhostFutures
+        alternative={alternative}
+        actual={comparison.actual}
+        forkAt={comparison.forkAt}
+        baselineName={baselineName}
+        alternativeName={alternativeName}
+        timeZone={timeZone}
+      />
 
       <Card aria-labelledby="order-compare-title">
         <CardHeader>
