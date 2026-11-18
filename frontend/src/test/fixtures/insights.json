@@ -15,7 +15,14 @@
       "activeSeconds": 7200,
       "share": "0.0050",
       "idleShare": "0.0017",
-      "hauntedRank": null
+      "hauntedRank": null,
+      "completedVisits": 58,
+      "stonesIn": "4640.0000",
+      "stonesOut": "4640.0000",
+      "caratsIn": "5800.0000",
+      "caratsOut": "5800.0000",
+      "stoneYield": "1.0000",
+      "caratYield": "1.0000"
     },
     {
       "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
@@ -28,7 +35,14 @@
       "activeSeconds": 90000,
       "share": "0.0580",
       "idleShare": "0.0166",
-      "hauntedRank": null
+      "hauntedRank": null,
+      "completedVisits": 56,
+      "stonesIn": "4480.0000",
+      "stonesOut": "4480.0000",
+      "caratsIn": "5600.0000",
+      "caratsOut": "5600.0000",
+      "stoneYield": "1.0000",
+      "caratYield": "1.0000"
     },
     {
       "stageId": "715810e8-2fc8-30da-a95f-0fb5721a55ac",
@@ -41,7 +55,14 @@
       "activeSeconds": 30000,
       "share": "0.0221",
       "idleShare": "0.0083",
-      "hauntedRank": null
+      "hauntedRank": null,
+      "completedVisits": 53,
+      "stonesIn": "4240.0000",
+      "stonesOut": "4240.0000",
+      "caratsIn": "5300.0000",
+      "caratsOut": "5300.0000",
+      "stoneYield": "1.0000",
+      "caratYield": "1.0000"
     },
     {
       "stageId": "8c34fd68-837b-36d8-bd9b-c5fb210bcd37",
@@ -54,7 +75,14 @@
       "activeSeconds": 120000,
       "share": "0.2393",
       "idleShare": "0.1841",
-      "hauntedRank": 2
+      "hauntedRank": 2,
+      "completedVisits": 48,
+      "stonesIn": "3840.0000",
+      "stonesOut": "3782.4000",
+      "caratsIn": "4800.0000",
+      "caratsOut": "2976.0000",
+      "stoneYield": "0.9850",
+      "caratYield": "0.6200"
     },
     {
       "stageId": "1e07d2be-42e3-3167-a2ef-3fec0698043d",
@@ -67,7 +95,14 @@
       "activeSeconds": 60000,
       "share": "0.0368",
       "idleShare": "0.0092",
-      "hauntedRank": null
+      "hauntedRank": null,
+      "completedVisits": 43,
+      "stonesIn": "3440.0000",
+      "stonesOut": "3422.8000",
+      "caratsIn": "4300.0000",
+      "caratsOut": "3870.0000",
+      "stoneYield": "0.9950",
+      "caratYield": "0.9000"
     },
     {
       "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
@@ -80,7 +115,14 @@
       "activeSeconds": 300000,
       "share": "0.5523",
       "idleShare": "0.4142",
-      "hauntedRank": 1
+      "hauntedRank": 1,
+      "completedVisits": 38,
+      "stonesIn": "3040.0000",
+      "stonesOut": "3009.6000",
+      "caratsIn": "3800.0000",
+      "caratsOut": "3116.0000",
+      "stoneYield": "0.9900",
+      "caratYield": "0.8200"
     },
     {
       "stageId": "fcc0d941-7ae2-34f2-85e5-f1233a843fa7",
@@ -93,7 +135,14 @@
       "activeSeconds": 20000,
       "share": "0.0782",
       "idleShare": "0.0690",
-      "hauntedRank": 3
+      "hauntedRank": 3,
+      "completedVisits": 28,
+      "stonesIn": "2240.0000",
+      "stonesOut": "2172.8000",
+      "caratsIn": "2800.0000",
+      "caratsOut": "2800.0000",
+      "stoneYield": "0.9700",
+      "caratYield": "1.0000"
     },
     {
       "stageId": "772a6b27-1083-3ac2-a660-2cd10043ad5e",
@@ -106,8 +155,30 @@
       "activeSeconds": 8000,
       "share": "0.0083",
       "idleShare": "0.0046",
-      "hauntedRank": null
+      "hauntedRank": null,
+      "completedVisits": 23,
+      "stonesIn": "1840.0000",
+      "stonesOut": "1840.0000",
+      "caratsIn": "2300.0000",
+      "caratsOut": "2300.0000",
+      "stoneYield": "1.0000",
+      "caratYield": "1.0000"
     }
   ],
-  "source": "ACTUAL"
+  "source": "ACTUAL",
+  "leadTimes": [
+    {
+      "routeCode": null,
+      "name": "All packets",
+      "finished": 25,
+      "medianLeadSeconds": 734400,
+      "medianWithoutParkingSeconds": 486000,
+      "parkingShare": "0.3120"
+    }
+  ],
+  "dispatch": {
+    "dispatched": 12,
+    "medianWaitSeconds": 7200,
+    "waiting": 4
+  }
 }

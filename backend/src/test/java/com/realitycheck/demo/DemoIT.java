@@ -67,6 +67,21 @@ class DemoIT extends IntegrationTest {
         // Parking holds packets longest of all, as in the factory the demonstration is calibrated on.
         assertThat(insights.path("stages").get(5).path("code").asText()).isEqualTo("PARKING");
         assertThat(insights.path("stages").get(5).path("hauntedRank").asInt()).isEqualTo(1);
+
+        // Lead time of the packets that finished, overall and by route; parking is part of it.
+        JsonNode lead = insights.path("leadTimes");
+        assertThat(texts(lead, "name")).containsExactly("All packets", "Tops", "Full manufacturing");
+        assertThat(lead.get(0).path("finished").asLong())
+                .isEqualTo(lead.get(1).path("finished").asLong() + lead.get(2).path("finished").asLong())
+                .isPositive();
+        assertThat(lead.get(0).path("medianWithoutParkingSeconds").asLong())
+                .isLessThanOrEqualTo(lead.get(0).path("medianLeadSeconds").asLong());
+        // Sawing loses stones in this history, and its yield says so.
+        JsonNode sawing = insights.path("stages").get(6);
+        assertThat(new java.math.BigDecimal(sawing.path("stoneYield").asText())).isLessThan(java.math.BigDecimal.ONE);
+        // Lots are dispatched, and the first of every three to finish is still waiting.
+        assertThat(insights.path("dispatch").path("dispatched").asLong()).isPositive();
+        assertThat(insights.path("dispatch").path("waiting").asLong()).isPositive();
     }
 
     private void seedsOneFullyConfiguredFactory(String factoryId) {

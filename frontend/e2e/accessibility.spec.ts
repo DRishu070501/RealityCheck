@@ -15,6 +15,7 @@ const PAGES = [
   { path: '/resources', heading: 'Resources' },
   { path: '/orders', heading: 'Production Orders' },
   { path: '/timeline', heading: 'Operational Timeline' },
+  { path: '/insights', heading: 'Where Time Goes' },
   { path: '/scenarios', heading: 'Scenario Lab' },
   { path: '/results', heading: 'Simulation Results' },
   { path: '/analyst', heading: 'AI Analyst' },

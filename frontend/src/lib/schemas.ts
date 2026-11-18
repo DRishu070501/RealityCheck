@@ -408,8 +408,30 @@ export const stageTimeSchema = z.object({
   idleShare: decimalString.nullable(),
   /** 1 to 3 where packets lose the most time without being worked on; null otherwise. */
   hauntedRank: z.number().int().positive().nullable(),
+  /** Visits that finished at the stage; the quantities below are over these visits only. */
+  completedVisits: z.number().int().nonnegative(),
+  stonesIn: decimalString,
+  stonesOut: decimalString,
+  caratsIn: decimalString,
+  caratsOut: decimalString,
+  /** Out over in; null when nothing finished there. */
+  stoneYield: decimalString.nullable(),
+  caratYield: decimalString.nullable(),
 })
 export type StageTime = z.infer<typeof stageTimeSchema>
+
+/** Lead time of packets that finished in the window: from first queueing to their last stage. */
+export const leadTimeSchema = z.object({
+  /** Null for all packets together. */
+  routeCode: z.string().nullable(),
+  name: z.string(),
+  finished: z.number().int().nonnegative(),
+  medianLeadSeconds: z.number().int().nonnegative().nullable(),
+  medianWithoutParkingSeconds: z.number().int().nonnegative().nullable(),
+  /** Time parked over all lead time of these packets. */
+  parkingShare: decimalString.nullable(),
+})
+export type LeadTime = z.infer<typeof leadTimeSchema>
 
 /** Where time goes, from recorded history only. */
 export const insightsSchema = z.object({
@@ -418,6 +440,13 @@ export const insightsSchema = z.object({
   until: instant,
   totalSeconds: z.number().int().nonnegative(),
   stages: z.array(stageTimeSchema),
+  leadTimes: z.array(leadTimeSchema),
+  dispatch: z.object({
+    dispatched: z.number().int().nonnegative(),
+    medianWaitSeconds: z.number().int().nonnegative().nullable(),
+    /** Finished and not yet dispatched at the end of the window. */
+    waiting: z.number().int().nonnegative(),
+  }),
   source: z.literal('ACTUAL'),
 })
 export type Insights = z.infer<typeof insightsSchema>

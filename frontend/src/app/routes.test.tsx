@@ -29,6 +29,7 @@ describe('routes', () => {
     ['/orders', 'Production Orders'],
     [`/orders/${ORDER_ID}`, 'Order'],
     ['/timeline', 'Operational Timeline'],
+    ['/insights', 'Where Time Goes'],
     ['/scenarios', 'Scenario Lab'],
     ['/results', 'Simulation Results'],
     ['/analyst', 'AI Analyst'],

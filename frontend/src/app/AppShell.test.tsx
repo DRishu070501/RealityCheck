@@ -16,6 +16,7 @@ const EXPECTED_LABELS = [
   'Resources',
   'Production Orders',
   'Operational Timeline',
+  'Where Time Goes',
   'Scenario Lab',
   'Simulation Results',
   'AI Analyst',
@@ -23,7 +24,7 @@ const EXPECTED_LABELS = [
 ]
 
 describe('Sidebar', () => {
-  it('renders the ten navigation links in the specified order', () => {
+  it('renders the eleven navigation links in the specified order', () => {
     renderWithProviders(<Sidebar />)
 
     const nav = screen.getByRole('navigation', { name: 'Primary' })

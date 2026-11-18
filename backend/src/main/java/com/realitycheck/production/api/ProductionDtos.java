@@ -297,7 +297,29 @@ public final class ProductionDtos {
      * @param totalSeconds  all packet time at every stage
      */
     public record InsightsResponse(UUID factoryId, Instant from, Instant until, long totalSeconds,
-            List<StageTime> stages, String source) {
+            List<StageTime> stages, List<LeadTime> leadTimes, DispatchWait dispatch, String source) {
+    }
+
+    /**
+     * Lead time of packets that finished within the window: from first being queued to their last stage.
+     * Packets still in progress are not included, so long journeys are under-represented in a short window.
+     *
+     * @param routeCode             null for all packets together
+     * @param medianLeadSeconds     the lower middle value; null when none finished
+     * @param medianWithoutParkingSeconds the same with time at parking stages left out
+     * @param parkingShare          time parked over all lead time of these packets; null when none finished
+     */
+    public record LeadTime(String routeCode, String name, long finished, Long medianLeadSeconds,
+            Long medianWithoutParkingSeconds, @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal parkingShare) {
+    }
+
+    /**
+     * Lots that finished every stage, and how long they waited to be dispatched.
+     *
+     * @param medianWaitSeconds the lower middle value over dispatched lots; null when none was dispatched
+     * @param waiting           finished and not yet dispatched at the end of the window
+     */
+    public record DispatchWait(long dispatched, Long medianWaitSeconds, long waiting) {
     }
 
     /**
@@ -307,11 +329,20 @@ public final class ProductionDtos {
      * @param idleShare      waiting, plus holding at a non-working stage, as a share of all packet time
      * @param hauntedRank    1 to 3 for the stages where packets lose the most time without being worked on
      *                       (at least 5% of all time each); null otherwise
+     * @param stonesIn       entering the stage over completed visits; out over the same visits
+     * @param stoneYield     out over in, scale 4; null when nothing completed there
      */
     public record StageTime(UUID stageId, String code, String name, int sequence, String kind, long visits,
             long waitingSeconds, long activeSeconds,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal share,
             @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal idleShare,
-            Integer hauntedRank) {
+            Integer hauntedRank,
+            long completedVisits,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal stonesIn,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal stonesOut,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal caratsIn,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal caratsOut,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal stoneYield,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) BigDecimal caratYield) {
     }
 }

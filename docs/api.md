@@ -334,14 +334,25 @@ UTC instants; buckets with no events are absent.
 calendar time from being queued to being started is waiting; from started to completed is worked (working
 stage) or held (parking, waiting or job-work stage); a visit still open counts up to `until`. `idleShare` is
 waiting plus holding, as a share of all packet time; `hauntedRank` ranks the three stages with the largest
-idle share, each at least 5% (otherwise null). Shares are strings at scale 4.
+idle share, each at least 5% (otherwise null). Shares are strings at scale 4. Each stage also reports what entered and left
+it over visits that finished there (`stonesIn`, `stonesOut`, `caratsIn`, `caratsOut`) and the yields.
+`leadTimes` covers packets that **finished** in the window, from first queueing to their last stage: all
+packets first, then each route, with the lower median with and without time at parking stages and
+parking's share of their lead time. Packets still in progress are not counted, so a short history
+under-represents long journeys. `dispatch` counts lots that finished every stage: how many were dispatched,
+the lower median of their wait, and how many are still waiting.
 
 ```json
 { "factoryId": "...", "from": "2026-11-02T03:30:00Z", "until": "2026-11-17T06:00:00Z", "totalSeconds": 91540800,
   "source": "ACTUAL",
   "stages": [ { "stageId": "...", "code": "PARKING", "name": "Rough store (parked)", "sequence": 6, "kind": "PARKING",
                 "visits": 31, "waitingSeconds": 0, "activeSeconds": 21600000, "share": "0.2360",
-                "idleShare": "0.2360", "hauntedRank": 1 } ] }
+                "idleShare": "0.2360", "hauntedRank": 1, "completedVisits": 12, "stonesIn": "168.0000",
+                "stonesOut": "168.0000", "caratsIn": "201.6000", "caratsOut": "201.6000",
+                "stoneYield": "1.0000", "caratYield": "1.0000" } ],
+  "leadTimes": [ { "routeCode": null, "name": "All packets", "finished": 25, "medianLeadSeconds": 734400,
+                   "medianWithoutParkingSeconds": 486000, "parkingShare": "0.3120" } ],
+  "dispatch": { "dispatched": 12, "medianWaitSeconds": 7200, "waiting": 4 } }
 ```
 
 `state` replays every batch's events up to `at`. It is read-only and writes nothing. Corrections apply

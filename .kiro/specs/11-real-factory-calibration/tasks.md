@@ -170,7 +170,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
 
 ### F. Value and theme (25–27 November)
 
-- [ ] 12. Insights: where time goes
+- [x] 12. Insights: where time goes
   - Depends on 7. `production.insights.InsightsService` over recorded events: lead time with/without
     parking by route; per stage working vs waiting; workers per day; yield per stage; dispatch wait.
     `GET /api/factories/{id}/insights`. Screen `features/insights/` with tables for every chart, tagged
@@ -283,6 +283,15 @@ browser, applied before the first render; the accessibility suite runs it at 375
 rewritten around the stitched parts and the Kiro story. Verified on the rebuilt Docker stack: the demo reset
 (seed) takes 32 s there, and all 62 browser tests pass (the journey, now also checking haunted stages and ghost
 futures, and the accessibility suite in both themes).
+
+Task 12 (18 November): the insights endpoint from task 13 now also returns lead times of finished packets
+by route (lower median with and without parking, parking's share), recorded yields per stage over completed
+visits, and the wait for dispatch; screen "Where Time Goes" (`features/insights/`) with a table for every
+chart, all tagged Actual. Workers per day is not shown: recorded events do not say who did the work, and it
+is not inferred. Finished packets understate parking in a short history (parked packets are mostly still
+parked: 2% against 21% of all recorded packet time in the demo), so the headline shows parking over all
+packet time and the finished-only share is labelled as such in the route table. Tests: `StageTimesTest`
+(hand-worked yields and journeys), `DemoIT`, `InsightsPage.test.tsx`, accessibility suite (68 browser tests).
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
