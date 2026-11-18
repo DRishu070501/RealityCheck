@@ -18,6 +18,7 @@ const PAGES = [
   { path: '/insights', heading: 'Where Time Goes' },
   { path: '/scenarios', heading: 'Scenario Lab' },
   { path: '/results', heading: 'Simulation Results' },
+  { path: '/accuracy', heading: 'Accuracy' },
   { path: '/analyst', heading: 'AI Analyst' },
   { path: '/settings', heading: 'Settings' },
 ] as const

@@ -679,6 +679,49 @@ Excerpts from a real comparison (baseline against "Introduce an additional shift
 
 (Excerpt: other metrics, stages and resources omitted.)
 
+### Backtest
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/backtests` | `{"factoryId", "forkAts"?}`: simulate from each past date with no changes and compare with recorded history; `201` with the stored backtest |
+| `GET /api/backtests/{id}` | A stored backtest |
+| `GET /api/backtests?factoryId=` | The factory's latest backtest, as a list of at most one |
+
+`forkAts` (at most 8) must lie strictly between the factory's first and last recorded events (`400`
+otherwise). When it is absent or empty, four dates spread evenly over the recorded history are used, each at
+the start of a day in the factory's time zone. A factory with no recorded history answers `422`.
+
+For each date the baseline snapshot is built as for a scenario that includes later orders (so the lots that
+really arrived after the date arrive in the simulation too), the engine runs with no changes, and the result is
+compared with recorded history over `[forkAt, comparedUntil]`, where `comparedUntil` is the simulation's end or
+the last recorded event if that came first (`cutAtLastEvent: true`). Both sides cover the same batches: those
+unfinished at the date and those arriving before `comparedUntil`.
+
+- `finished`: batches that finished their path in the window.
+- `medianLeadSeconds`: over those batches, from the date (or the batch's arrival, if later) to finishing; the
+  lower median. Shorter than the full lead time on `insights`, which runs from first queueing.
+- `wip`: batches at each stage at `comparedUntil` (queued, being worked on or held); `wipAbsoluteError` is the
+  sum of `|simulated - recorded|` and `wipError` that sum over recorded work in progress.
+
+Each metric has `simulated`, `recorded`, `difference` (simulated minus recorded) and `percent` (difference
+over recorded, signed; null when recorded is zero). `overall` gives, across dates, the lower median of each
+error's absolute value. The engine is deterministic, so the same history and dates give the same result.
+
+```json
+{ "id": "584ab8ab-…", "factoryId": "3e56055a-…", "algorithmVersion": "2.0.0", "createdAt": "2026-11-18T06:17:13Z",
+  "overall": { "forks": 4, "finishedError": "0.193548", "leadTimeError": "0.042129", "wipError": "0.403846" },
+  "forks": [ { "forkAt": "2026-11-04T18:30:00Z", "comparedUntil": "2026-11-17T06:12:29Z", "cutAtLastEvent": true,
+               "batches": 135,
+               "finished": { "simulated": 24, "recorded": 31, "difference": -7, "percent": "-0.225806" },
+               "medianLeadSeconds": { "simulated": 603850, "recorded": 590958, "difference": 12892,
+                                      "percent": "0.021815" },
+               "wip": [ { "stageId": "c332c1cd-…", "code": "INTAKE", "name": "Rough intake", "sequence": 1,
+                          "simulated": 3, "recorded": 1 } ],
+               "wipAbsoluteError": 41, "wipError": "0.394231" } ] }
+```
+
+(Excerpt: other dates and stages omitted.)
+
 ### Demo
 
 | Endpoint | Purpose |

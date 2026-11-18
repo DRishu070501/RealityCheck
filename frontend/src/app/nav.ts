@@ -5,6 +5,7 @@ import {
   ChartColumn,
   Factory,
   FlaskConical,
+  Gauge,
   History,
   Hourglass,
   LayoutDashboard,
@@ -36,6 +37,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/insights', label: 'Where Time Goes', icon: Hourglass },
   { path: '/scenarios', label: 'Scenario Lab', icon: FlaskConical },
   { path: '/results', label: 'Simulation Results', icon: ChartColumn },
+  { path: '/accuracy', label: 'Accuracy', icon: Gauge },
   { path: '/analyst', label: 'AI Analyst', icon: Bot },
   { path: '/settings', label: 'Settings', icon: Settings },
 ]

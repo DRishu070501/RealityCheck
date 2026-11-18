@@ -151,4 +151,16 @@ test('a manager branches from the past, changes capacity, simulates, compares an
     await recommendation.getByText(/^Evidence \(/).click()
     await expect(recommendation.getByText('Simulated').first()).toBeVisible()
   })
+
+  await test.step('13. Check how well the simulation predicted the past', async () => {
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Accuracy' }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Accuracy' })).toBeVisible()
+    await page.getByRole('button', { name: /^(Run a backtest|Run again)$/ }).click()
+    const overall = page.getByRole('region', { name: 'Typical error' })
+    await expect(overall).toBeVisible({ timeout: SIMULATION_TIMEOUT })
+    await expect(overall).toContainText('%')
+    const forks = page.getByRole('region', { name: 'Each date, predicted against recorded' })
+    await expect(forks.getByRole('table').getByRole('row')).toHaveCount(5)
+    await expect(page.getByRole('region', { name: 'Work in progress by stage at the end of the window' })).toBeVisible()
+  })
 })

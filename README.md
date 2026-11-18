@@ -17,7 +17,7 @@ body, stitched together so that each keeps its own nature.
 | **The heart:** a deterministic engine | A discrete-event simulator in plain Java: calendars, worker and machine pools, routes, parking, outside job work, handling delays, yields, cost, bottleneck evidence. Same input and version, same result, to the second. | Guess, or use randomness |
 | **The blood:** a real factory's patterns | A Python pipeline reads one real diamond factory's month of movements **on the owner's machine only**, and publishes rounded, nameless patterns (`calibration.json`). The demo factory is built from them and reproduces the measured lead times within 15%. | Publish a name, an identifier or a raw row |
 | **The voice:** an AI analyst | Claude explains results, recommends and answers questions, given only the stored evidence. Every number it writes is checked against the stored results; an answer that fails is replaced by a built-in analyst. | Calculate a number |
-| **The face:** a React app | Ten screens over the same API, every figure tagged Actual, Simulated or AI interpretation, with a table behind every chart. | Show a number without its source |
+| **The face:** a React app | Twelve screens over the same API, every figure tagged Actual, Simulated or AI interpretation, with a table behind every chart. | Show a number without its source |
 
 The stitches are contracts, not shared code: the engine sees only a frozen **snapshot** (versioned, hashed,
 stored with each run); the analyst sees only **evidence keys** and its numbers are validated against them;
@@ -30,6 +30,12 @@ any real name appears.
   finished under the alternative decision, and, where history already knows, when it really did.
 - **Haunted stages.** On the workflow, the stages where packets lose the most time without anyone working on
   them, ranked from every recorded visit.
+- **Where Time Goes.** Lead time with and without parking, packet time per stage, yields and the wait for
+  dispatch, all from recorded events.
+- **Accuracy.** A backtest: the factory simulated from past dates with no changes and compared with what was
+  recorded. On the demonstration factory the typical error is 19% for packets finished, 4% for median lead
+  time and 40% for work in progress by stage (the simulation holds too many packets at polishing), shown as
+  measured.
 - **The Halloween theme** (Settings, Appearance): same data and contrast guarantees, darker night.
 
 ### What the real data said
@@ -70,7 +76,7 @@ estimates under stated assumptions, not guarantees.
 | 6. Frontend | The ten application screens | **Done** |
 | 7. AI intelligence | Provider abstraction, evidence-checked explanations, Q&A, AI Analyst screen | **Done** |
 | 8. Quality and deployment | End-to-end and accessibility suites, recorded outcome after a fork, demonstration guide | **Done** |
-| 9. Real-factory calibration | Routes, parking and job-work stages, handling delays, calibrated demo, ghost futures, haunted stages | **In progress** |
+| 9. Real-factory calibration | Routes, parking and job-work stages, handling delays, calibrated demo, ghost futures, haunted stages, Where Time Goes, Accuracy | **In progress** |
 
 **First time here?** Start it with the two commands below, then follow [docs/demo.md](docs/demo.md): a
 fifteen-minute walkthrough of the operational time machine, from a recorded moment to a simulated decision

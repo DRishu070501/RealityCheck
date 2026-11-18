@@ -1,0 +1,454 @@
+{
+  "id": "584ab8ab-981f-4327-81bb-2cb7ef0d7460",
+  "factoryId": "3e56055a-c69d-3e33-9ffa-c6844e063ed2",
+  "algorithmVersion": "2.0.0",
+  "createdAt": "2026-11-18T06:17:13.527695Z",
+  "overall": {
+    "forks": 4,
+    "finishedError": "0.193548",
+    "leadTimeError": "0.042129",
+    "wipError": "0.403846"
+  },
+  "forks": [
+    {
+      "forkAt": "2026-11-04T18:30:00Z",
+      "comparedUntil": "2026-11-17T06:12:29Z",
+      "cutAtLastEvent": true,
+      "batches": 135,
+      "finished": {
+        "simulated": 24,
+        "recorded": 31,
+        "difference": -7,
+        "percent": "-0.225806"
+      },
+      "medianLeadSeconds": {
+        "simulated": 603850,
+        "recorded": 590958,
+        "difference": 12892,
+        "percent": "0.021815"
+      },
+      "wip": [
+        {
+          "stageId": "c332c1cd-24e0-371a-80dd-de15340d8f76",
+          "code": "INTAKE",
+          "name": "Rough intake",
+          "sequence": 1,
+          "simulated": 3,
+          "recorded": 1
+        },
+        {
+          "stageId": "13522b2d-d623-3a93-9fcf-dd0c916fb49e",
+          "code": "IMAGING",
+          "name": "Imaging and scanning",
+          "sequence": 2,
+          "simulated": 7,
+          "recorded": 2
+        },
+        {
+          "stageId": "09529cc0-af50-3caa-93f9-2350013e14d4",
+          "code": "LAB",
+          "name": "Lab grading",
+          "sequence": 3,
+          "simulated": 9,
+          "recorded": 12
+        },
+        {
+          "stageId": "c73ebb21-f4a4-375a-9877-1328852e95da",
+          "code": "INSPECTION",
+          "name": "Inspection",
+          "sequence": 4,
+          "simulated": 8,
+          "recorded": 10
+        },
+        {
+          "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+          "code": "PLANNING",
+          "name": "Planning",
+          "sequence": 5,
+          "simulated": 18,
+          "recorded": 15
+        },
+        {
+          "stageId": "3d82de0b-8531-3965-a832-ebe6eb78de0f",
+          "code": "PARKING",
+          "name": "Rough store (parked)",
+          "sequence": 6,
+          "simulated": 27,
+          "recorded": 29
+        },
+        {
+          "stageId": "e2a361eb-6ed0-3510-9e4e-e8b3b36f259c",
+          "code": "SAWING",
+          "name": "Laser sawing",
+          "sequence": 7,
+          "simulated": 10,
+          "recorded": 10
+        },
+        {
+          "stageId": "cd175fc3-abc4-3508-b853-88c46cb0bcfa",
+          "code": "JOB_WORK",
+          "name": "Outside job work",
+          "sequence": 8,
+          "simulated": 10,
+          "recorded": 17
+        },
+        {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "sequence": 9,
+          "simulated": 15,
+          "recorded": 1
+        },
+        {
+          "stageId": "ef197188-56b2-36f2-ba52-0632c76bc629",
+          "code": "RECUT",
+          "name": "Recut",
+          "sequence": 10,
+          "simulated": 4,
+          "recorded": 6
+        },
+        {
+          "stageId": "cd74d34f-96fb-3801-9fc5-c3943d265bf6",
+          "code": "DISPATCH_WAIT",
+          "name": "Dispatch",
+          "sequence": 11,
+          "simulated": 0,
+          "recorded": 1
+        }
+      ],
+      "wipAbsoluteError": 41,
+      "wipError": "0.394231"
+    },
+    {
+      "forkAt": "2026-11-07T18:30:00Z",
+      "comparedUntil": "2026-11-17T06:12:29Z",
+      "cutAtLastEvent": true,
+      "batches": 135,
+      "finished": {
+        "simulated": 25,
+        "recorded": 31,
+        "difference": -6,
+        "percent": "-0.193548"
+      },
+      "medianLeadSeconds": {
+        "simulated": 392576,
+        "recorded": 470559,
+        "difference": -77983,
+        "percent": "-0.165724"
+      },
+      "wip": [
+        {
+          "stageId": "c332c1cd-24e0-371a-80dd-de15340d8f76",
+          "code": "INTAKE",
+          "name": "Rough intake",
+          "sequence": 1,
+          "simulated": 3,
+          "recorded": 1
+        },
+        {
+          "stageId": "13522b2d-d623-3a93-9fcf-dd0c916fb49e",
+          "code": "IMAGING",
+          "name": "Imaging and scanning",
+          "sequence": 2,
+          "simulated": 7,
+          "recorded": 2
+        },
+        {
+          "stageId": "09529cc0-af50-3caa-93f9-2350013e14d4",
+          "code": "LAB",
+          "name": "Lab grading",
+          "sequence": 3,
+          "simulated": 9,
+          "recorded": 12
+        },
+        {
+          "stageId": "c73ebb21-f4a4-375a-9877-1328852e95da",
+          "code": "INSPECTION",
+          "name": "Inspection",
+          "sequence": 4,
+          "simulated": 8,
+          "recorded": 10
+        },
+        {
+          "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+          "code": "PLANNING",
+          "name": "Planning",
+          "sequence": 5,
+          "simulated": 18,
+          "recorded": 15
+        },
+        {
+          "stageId": "3d82de0b-8531-3965-a832-ebe6eb78de0f",
+          "code": "PARKING",
+          "name": "Rough store (parked)",
+          "sequence": 6,
+          "simulated": 27,
+          "recorded": 29
+        },
+        {
+          "stageId": "e2a361eb-6ed0-3510-9e4e-e8b3b36f259c",
+          "code": "SAWING",
+          "name": "Laser sawing",
+          "sequence": 7,
+          "simulated": 11,
+          "recorded": 10
+        },
+        {
+          "stageId": "cd175fc3-abc4-3508-b853-88c46cb0bcfa",
+          "code": "JOB_WORK",
+          "name": "Outside job work",
+          "sequence": 8,
+          "simulated": 8,
+          "recorded": 17
+        },
+        {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "sequence": 9,
+          "simulated": 14,
+          "recorded": 1
+        },
+        {
+          "stageId": "ef197188-56b2-36f2-ba52-0632c76bc629",
+          "code": "RECUT",
+          "name": "Recut",
+          "sequence": 10,
+          "simulated": 4,
+          "recorded": 6
+        },
+        {
+          "stageId": "cd74d34f-96fb-3801-9fc5-c3943d265bf6",
+          "code": "DISPATCH_WAIT",
+          "name": "Dispatch",
+          "sequence": 11,
+          "simulated": 1,
+          "recorded": 1
+        }
+      ],
+      "wipAbsoluteError": 42,
+      "wipError": "0.403846"
+    },
+    {
+      "forkAt": "2026-11-10T18:30:00Z",
+      "comparedUntil": "2026-11-17T06:12:29Z",
+      "cutAtLastEvent": true,
+      "batches": 130,
+      "finished": {
+        "simulated": 25,
+        "recorded": 26,
+        "difference": -1,
+        "percent": "-0.038462"
+      },
+      "medianLeadSeconds": {
+        "simulated": 191544,
+        "recorded": 215664,
+        "difference": -24120,
+        "percent": "-0.111841"
+      },
+      "wip": [
+        {
+          "stageId": "c332c1cd-24e0-371a-80dd-de15340d8f76",
+          "code": "INTAKE",
+          "name": "Rough intake",
+          "sequence": 1,
+          "simulated": 3,
+          "recorded": 1
+        },
+        {
+          "stageId": "13522b2d-d623-3a93-9fcf-dd0c916fb49e",
+          "code": "IMAGING",
+          "name": "Imaging and scanning",
+          "sequence": 2,
+          "simulated": 7,
+          "recorded": 2
+        },
+        {
+          "stageId": "09529cc0-af50-3caa-93f9-2350013e14d4",
+          "code": "LAB",
+          "name": "Lab grading",
+          "sequence": 3,
+          "simulated": 9,
+          "recorded": 12
+        },
+        {
+          "stageId": "c73ebb21-f4a4-375a-9877-1328852e95da",
+          "code": "INSPECTION",
+          "name": "Inspection",
+          "sequence": 4,
+          "simulated": 9,
+          "recorded": 10
+        },
+        {
+          "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+          "code": "PLANNING",
+          "name": "Planning",
+          "sequence": 5,
+          "simulated": 21,
+          "recorded": 15
+        },
+        {
+          "stageId": "3d82de0b-8531-3965-a832-ebe6eb78de0f",
+          "code": "PARKING",
+          "name": "Rough store (parked)",
+          "sequence": 6,
+          "simulated": 26,
+          "recorded": 29
+        },
+        {
+          "stageId": "e2a361eb-6ed0-3510-9e4e-e8b3b36f259c",
+          "code": "SAWING",
+          "name": "Laser sawing",
+          "sequence": 7,
+          "simulated": 6,
+          "recorded": 10
+        },
+        {
+          "stageId": "cd175fc3-abc4-3508-b853-88c46cb0bcfa",
+          "code": "JOB_WORK",
+          "name": "Outside job work",
+          "sequence": 8,
+          "simulated": 9,
+          "recorded": 17
+        },
+        {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "sequence": 9,
+          "simulated": 11,
+          "recorded": 1
+        },
+        {
+          "stageId": "ef197188-56b2-36f2-ba52-0632c76bc629",
+          "code": "RECUT",
+          "name": "Recut",
+          "sequence": 10,
+          "simulated": 4,
+          "recorded": 6
+        },
+        {
+          "stageId": "cd74d34f-96fb-3801-9fc5-c3943d265bf6",
+          "code": "DISPATCH_WAIT",
+          "name": "Dispatch",
+          "sequence": 11,
+          "simulated": 0,
+          "recorded": 1
+        }
+      ],
+      "wipAbsoluteError": 45,
+      "wipError": "0.432692"
+    },
+    {
+      "forkAt": "2026-11-13T18:30:00Z",
+      "comparedUntil": "2026-11-17T06:12:29Z",
+      "cutAtLastEvent": true,
+      "batches": 112,
+      "finished": {
+        "simulated": 19,
+        "recorded": 8,
+        "difference": 11,
+        "percent": "1.375000"
+      },
+      "medianLeadSeconds": {
+        "simulated": 200628,
+        "recorded": 209452,
+        "difference": -8824,
+        "percent": "-0.042129"
+      },
+      "wip": [
+        {
+          "stageId": "c332c1cd-24e0-371a-80dd-de15340d8f76",
+          "code": "INTAKE",
+          "name": "Rough intake",
+          "sequence": 1,
+          "simulated": 3,
+          "recorded": 1
+        },
+        {
+          "stageId": "13522b2d-d623-3a93-9fcf-dd0c916fb49e",
+          "code": "IMAGING",
+          "name": "Imaging and scanning",
+          "sequence": 2,
+          "simulated": 7,
+          "recorded": 2
+        },
+        {
+          "stageId": "09529cc0-af50-3caa-93f9-2350013e14d4",
+          "code": "LAB",
+          "name": "Lab grading",
+          "sequence": 3,
+          "simulated": 9,
+          "recorded": 12
+        },
+        {
+          "stageId": "c73ebb21-f4a4-375a-9877-1328852e95da",
+          "code": "INSPECTION",
+          "name": "Inspection",
+          "sequence": 4,
+          "simulated": 8,
+          "recorded": 10
+        },
+        {
+          "stageId": "49d96fa9-7308-35a6-a47b-08e1a2d3a76a",
+          "code": "PLANNING",
+          "name": "Planning",
+          "sequence": 5,
+          "simulated": 25,
+          "recorded": 15
+        },
+        {
+          "stageId": "3d82de0b-8531-3965-a832-ebe6eb78de0f",
+          "code": "PARKING",
+          "name": "Rough store (parked)",
+          "sequence": 6,
+          "simulated": 17,
+          "recorded": 29
+        },
+        {
+          "stageId": "e2a361eb-6ed0-3510-9e4e-e8b3b36f259c",
+          "code": "SAWING",
+          "name": "Laser sawing",
+          "sequence": 7,
+          "simulated": 8,
+          "recorded": 10
+        },
+        {
+          "stageId": "cd175fc3-abc4-3508-b853-88c46cb0bcfa",
+          "code": "JOB_WORK",
+          "name": "Outside job work",
+          "sequence": 8,
+          "simulated": 8,
+          "recorded": 17
+        },
+        {
+          "stageId": "b9564d64-b754-3b22-9bf0-a12f92f63ee1",
+          "code": "POLISHING",
+          "name": "Polishing",
+          "sequence": 9,
+          "simulated": 7,
+          "recorded": 1
+        },
+        {
+          "stageId": "ef197188-56b2-36f2-ba52-0632c76bc629",
+          "code": "RECUT",
+          "name": "Recut",
+          "sequence": 10,
+          "simulated": 0,
+          "recorded": 6
+        },
+        {
+          "stageId": "cd74d34f-96fb-3801-9fc5-c3943d265bf6",
+          "code": "DISPATCH_WAIT",
+          "name": "Dispatch",
+          "sequence": 11,
+          "simulated": 1,
+          "recorded": 1
+        }
+      ],
+      "wipAbsoluteError": 57,
+      "wipError": "0.548077"
+    }
+  ]
+}

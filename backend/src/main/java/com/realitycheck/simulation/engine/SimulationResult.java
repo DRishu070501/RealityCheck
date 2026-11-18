@@ -12,6 +12,7 @@ import java.util.UUID;
  *
  * @param endTime the last stage completion (T1), or the fork time if nothing completed
  * @param trace   what happened, in the order it happened
+ * @param batchFinishes when each batch that finished its path did so, sorted by batch id
  */
 public record SimulationResult(
         String algorithmVersion,
@@ -25,7 +26,12 @@ public record SimulationResult(
         List<OrderResult> orders,
         BottleneckResult bottleneck,
         List<UnfinishedJob> unfinished,
-        List<TraceEvent> trace) {
+        List<TraceEvent> trace,
+        List<BatchFinish> batchFinishes) {
+
+    /** @param time when the batch left the last stage of its path, handling delay included */
+    public record BatchFinish(UUID batchId, long time) {
+    }
 
     public enum TerminationReason {
         /** Every batch finished the last stage. */

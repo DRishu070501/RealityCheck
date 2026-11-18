@@ -14,6 +14,7 @@ export const queryKeys = {
     state: (id: string, at: string) => ['factories', 'state', id, at] as const,
     overview: (id: string) => ['factories', 'overview', id] as const,
     insights: (id: string) => ['factories', 'insights', id] as const,
+    backtest: (id: string) => ['factories', 'backtest', id] as const,
   },
   orders: {
     all: ['orders'] as const,

@@ -451,6 +451,59 @@ export const insightsSchema = z.object({
 })
 export type Insights = z.infer<typeof insightsSchema>
 
+/** Simulated against recorded; difference and its share of recorded, null when recorded is zero or missing. */
+const backtestMetricSchema = z.object({
+  simulated: z.number().int().nullable(),
+  recorded: z.number().int().nullable(),
+  difference: z.number().int().nullable(),
+  /** Signed: negative when the simulation gave less than was recorded. */
+  percent: z.string().regex(/^-?\d+(\.\d+)?$/).nullable(),
+})
+export type BacktestMetric = z.infer<typeof backtestMetricSchema>
+
+/** One fork of a backtest: the simulation from that date against recorded history over the same window. */
+export const backtestForkSchema = z.object({
+  forkAt: instant,
+  /** The simulation's end, or the last recorded event if that came first. */
+  comparedUntil: instant,
+  cutAtLastEvent: z.boolean(),
+  /** Batches unfinished at the fork, or arriving before the end of the window. */
+  batches: z.number().int().nonnegative(),
+  finished: backtestMetricSchema,
+  /** From the fork (or arrival, if later) to finishing, over batches that finished in the window. */
+  medianLeadSeconds: backtestMetricSchema,
+  wip: z.array(
+    z.object({
+      stageId: uuid,
+      code: z.string(),
+      name: z.string(),
+      sequence: z.number().int(),
+      simulated: z.number().int().nonnegative(),
+      recorded: z.number().int().nonnegative(),
+    }),
+  ),
+  wipAbsoluteError: z.number().int().nonnegative(),
+  /** Sum of |simulated - recorded| over stages, over recorded work in progress. */
+  wipError: decimalString.nullable(),
+})
+export type BacktestFork = z.infer<typeof backtestForkSchema>
+
+export const backtestSchema = z.object({
+  id: uuid,
+  factoryId: uuid,
+  algorithmVersion: z.string(),
+  createdAt: instant,
+  /** Across forks, the median absolute value of each error. */
+  overall: z.object({
+    forks: z.number().int().nonnegative(),
+    finishedError: decimalString.nullable(),
+    leadTimeError: decimalString.nullable(),
+    wipError: decimalString.nullable(),
+  }),
+  forks: z.array(backtestForkSchema),
+})
+export type Backtest = z.infer<typeof backtestSchema>
+
 const unitsInUseSchema = z.object({
   inUse: z.number().int().nonnegative(),
   capacity: z.number().int().nonnegative(),

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { insightSchema, type AskInput, type InsightInput } from '@/lib/aiSchemas'
 import {
   availabilityWindowSchema,
+  backtestSchema,
   capacityTimelineSchema,
   demoResetSchema,
   eventSchema,
@@ -388,6 +389,13 @@ export const api = {
     /** Stored insights of a run, newest first. */
     history: (runId: string, signal?: AbortSignal) =>
       request(`/api/ai/insights/${runId}${query({ size: 50 })}`, pageOf(insightSchema), { signal }),
+  },
+  backtests: {
+    /** The factory's latest backtest, if any. */
+    latest: async (factoryId: string, signal?: AbortSignal) =>
+      (await request(`/api/backtests${query({ factoryId })}`, z.array(backtestSchema), { signal }))[0] ?? null,
+    /** Simulates from past dates with no changes and compares with what was recorded; dates spread over the history. */
+    run: (factoryId: string) => request('/api/backtests', backtestSchema, { method: 'POST', body: { factoryId } }),
   },
   demo: {
     /** Erases all data and re-creates the demonstration factory. Answers 404 when disabled. */

@@ -147,7 +147,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
 
 ### E. Accuracy (22–25 November)
 
-- [ ] 10. Backtest service, API and screen
+- [x] 10. Backtest service, API and screen
   - Depends on 7. `simulation.backtest.BacktestService`: for each fork date, snapshot with no changes,
     run, compare over [fork, min(simulated end, last recorded event)] using `ActualOutcomeService` and
     `FactoryStateService` per-stage WIP at the comparison end. Stored in `backtest` and `backtest_fork`
@@ -292,6 +292,22 @@ is not inferred. Finished packets understate parking in a short history (parked 
 parked: 2% against 21% of all recorded packet time in the demo), so the headline shows parking over all
 packet time and the finished-only share is labelled as such in the route table. Tests: `StageTimesTest`
 (hand-worked yields and journeys), `DemoIT`, `InsightsPage.test.tsx`, accessibility suite (68 browser tests).
+
+Task 10 (18 November): `simulation.backtest.BacktestService` builds the baseline snapshot at each date with later
+orders included (the lots that really arrived arrive in the simulation too), runs the engine with no changes and
+compares with recorded history over [date, min(simulated end, last recorded event)] for the same batches. The
+engine result now lists each finished batch's finish time (`batchFinishes`; handling at the last stage makes the
+trace alone insufficient); nothing stored changes. Recorded progress is read through the scenario module
+(`RecordedProgressService`, over `FactoryStateService`), because simulation may not read production directly.
+Lead time in a backtest runs from the date (or arrival) to finishing on both sides, not from first queueing.
+Stored in `backtest` and `backtest_fork` (`V12__backtest.sql`; V10 was taken by task 8). With no dates given,
+four are spread evenly over the history. Screen "Accuracy": typical error across dates, each date predicted
+against recorded (chart and table), work in progress by stage for a chosen date. On the demo factory (4 dates,
+about 4 s): packets finished 19%, median lead time 4%, work in progress 40% placed at the wrong stage, mostly
+because the simulation queues packets at polishing that were recorded further on. The numbers are shown as
+they are. Tests: `BacktestComparisonTest` (hand-worked), `BacktestIT` (window cut at the last event, errors
+finite, stored as computed, a date outside history refused), `AccuracyPage.test.tsx` with a captured fixture,
+the journey (step 13) and the accessibility suite.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.

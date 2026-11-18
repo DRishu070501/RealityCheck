@@ -32,6 +32,7 @@ describe('routes', () => {
     ['/insights', 'Where Time Goes'],
     ['/scenarios', 'Scenario Lab'],
     ['/results', 'Simulation Results'],
+    ['/accuracy', 'Accuracy'],
     ['/analyst', 'AI Analyst'],
     ['/settings', 'Settings'],
   ])('loads the screen for %s on demand', async (path, heading) => {

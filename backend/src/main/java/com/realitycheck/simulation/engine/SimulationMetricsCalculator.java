@@ -241,7 +241,10 @@ final class SimulationMetricsCalculator {
         return new SimulationResult(SimulationEngine.ALGORITHM_VERSION, t0, t1, reason, state.eventsProcessed,
                 summary, List.copyOf(stageResults), List.copyOf(poolResults), List.copyOf(orderResults),
                 new BottleneckResult(analysis.primaryStageId(), analysis.reasonCode(), context.input.bottleneck()),
-                unfinished(context, state), List.copyOf(state.trace));
+                unfinished(context, state), List.copyOf(state.trace),
+                state.batchFinishedAt.entrySet().stream()
+                        .map(entry -> new SimulationResult.BatchFinish(entry.getKey(), entry.getValue()))
+                        .toList());
     }
 
     private static List<UnfinishedJob> unfinished(SimulationContext context, SimulationState state) {

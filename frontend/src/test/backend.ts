@@ -4,6 +4,7 @@ import aiAnswer from '@/test/fixtures/aiAnswer.json'
 import aiFallbackInsight from '@/test/fixtures/aiFallbackInsight.json'
 import aiInsight from '@/test/fixtures/aiInsight.json'
 import availability from '@/test/fixtures/availability.json'
+import backtest from '@/test/fixtures/backtest.json'
 import baselineResults from '@/test/fixtures/baselineResults.json'
 import comparison from '@/test/fixtures/comparison.json'
 import simulatedEvents from '@/test/fixtures/events.json'
@@ -41,6 +42,7 @@ export const fixtures = {
   aiFallbackInsight,
   aiInsight,
   availability,
+  backtest,
   baselineResults,
   insights,
   comparison,
@@ -166,6 +168,8 @@ export function demoRoutes(): Routes {
     [`GET /api/factories/${FACTORY_ID}/state`]: () => jsonResponse(state),
     [`GET /api/factories/${FACTORY_ID}/overview`]: () => jsonResponse(overview),
     [`GET /api/factories/${FACTORY_ID}/insights`]: () => jsonResponse(insights),
+    // No backtest stored unless a test says otherwise.
+    'GET /api/backtests': () => jsonResponse([]),
     'GET /api/workflows': () => jsonResponse(workflows),
     [`GET /api/workflows/${WORKFLOW_ID}`]: () => jsonResponse(workflow),
     'GET /api/resources': ({ query }) => {
