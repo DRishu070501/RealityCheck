@@ -334,7 +334,8 @@ an admin port: nothing to expose, and it refuses to run while a non-demonstratio
 (`DemoNightlyResetIT`). `deploy/docker-compose.public.yml` (only Caddy publishes ports; API docs off; reset
 endpoint off), `deploy/Caddyfile`, `deploy/public.env.example`, `docs/deploy.md`. Rehearsed locally over HTTPS
 with `tls internal`: 74 browser tests pass (`E2E_IGNORE_HTTPS_ERRORS=1`). Still open: the server, the domain and
-the AI choice (owner), then the journey against the public URL.
+the server and domain (owner: decide later), then the journey against the public URL. AI: Claude with a $2
+daily cap (owner, 19 November).
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
