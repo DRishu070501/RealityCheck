@@ -13,7 +13,7 @@ const config = JSON.parse(readFileSync(process.argv[2], 'utf8'))
 const { base, runs, scenarios, audioDir, outDir, repo } = config
 mkdirSync(outDir, { recursive: true })
 const durations = JSON.parse(readFileSync(join(audioDir, 'durations.json'), 'utf8'))
-const GAP = 0.9 // seconds of silence between narration segments
+const GAP = 0.6 // seconds of silence between narration segments
 const W = 1600
 const H = 900
 
@@ -193,7 +193,8 @@ await segment('01-hook', async (at, c) => {
 
 // 2. The creature: five parts, each appearing as it is named.
 await segment('02-creature', async (at, c) => {
-  const delays = [c[1], c[2], c[3], c[4], c[5]].map((s, i) => (s ?? 4 + i * 3.5) - 0.2)
+  // Sentence 0 names the creature, sentence 1 the idea; the parts follow, one per sentence.
+  const delays = [c[2], c[3], c[4], c[5], c[6]].map((s, i) => (s ?? 6 + i * 3) - 0.2)
   const parts = [
     ['The skeleton', 'Append-only history', 'never changes the past'],
     ['The heart', 'Deterministic simulation engine', 'never guesses'],
@@ -216,11 +217,11 @@ await segment('03-history', async (at, c) => {
 // 4. Back in time: two scenarios forked from a recorded moment.
 await segment('04-fork', async (at, c) => {
   await open('/scenarios')
-  await at((c[1] ?? 4) + 0.3)
+  await at((c[2] ?? 8) - 0.8)
   await open(`/scenarios/${scenarios.park}`)
-  await at((c[2] ?? 9) + 0.2)
+  await at((c[3] ?? 12) - 0.8)
   await open(`/scenarios/${scenarios.insp}`)
-  await at(c[3] ?? 12)
+  await at(c[4] ?? 15)
   await scrollBy(250, 1.5)
 })
 
@@ -229,7 +230,7 @@ const results = (run) => `/results?run=${run}&baseline=${runs.base}`
 await segment('05-results', async (at, c) => {
   await open(results(runs.park))
   await scrollTo('text=Headline metrics', 1.4)
-  await at((c[1] ?? 8) - 2.2)
+  await at((c[2] ?? 10) - 2.2)
   await scrollTo('text=Ghost futures', 1.6)
 })
 
@@ -242,7 +243,7 @@ await segment('06-inspectors', async () => {
 // 7. The analyst, and the evidence behind its answer.
 await segment('07-analyst', async (at, c) => {
   await open(`/analyst?run=${runs.park}&baseline=${runs.base}`)
-  await at(c[2] ?? 9)
+  await at((c[1] ?? 8) + 1.2)
   const evidence = page.getByText('Evidence behind this answer').first()
   await pointAndClick(evidence)
   await sleep(0.4)
@@ -252,7 +253,7 @@ await segment('07-analyst', async (at, c) => {
 // 8. Accuracy: the backtest.
 await segment('08-accuracy', async (at, c) => {
   await open('/accuracy')
-  await at(c[1] ?? 6)
+  await at((c[2] ?? 9) - 1.0)
   await scrollTo('text=Each date, predicted against recorded', 1.4)
 })
 
@@ -266,7 +267,7 @@ await segment('09-close', async (at, c) => {
   await scrollTo('text=Ghost futures', 0.01)
   await at((c[1] ?? 5) - 0.5)
   await hideOverlay()
-  await at((c[1] ?? 5) + 1.6)
+  await at((c[1] ?? 5) + 0.8)
   await page.evaluate(() => {
     window.localStorage.setItem('realitycheck.theme', 'halloween')
     document.documentElement.setAttribute('data-theme', 'halloween')

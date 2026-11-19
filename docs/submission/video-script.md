@@ -1,6 +1,6 @@
 # Video script (under three minutes)
 
-Target: **2 min 45 s**, about 400 spoken words at a calm pace. Screen recording of the app at 1920 × 1080 (or
+Target: under **3 minutes** (the generated version runs 2:53), about 440 spoken words at a calm pace. Screen recording of the app at 1920 × 1080 (or
 1440 × 900), with narration recorded separately or live. The numbers below are from a run on 19 November 2026.
 The demonstration is seeded relative to the day it starts, so **read the figures on screen** when recording
 and change the narration to match. Don't read these aloud from the page.
@@ -18,19 +18,23 @@ and change the narration to match. Don't read these aloud from the page.
 
 ## Script
 
-| Time | Screen | Narration |
-|---|---|---|
-| 0:00–0:15 | Overview | "In this diamond factory a rough packet takes about seventeen days to reach dispatch. People spend hours on it, not weeks. So where does the time go, and what would have happened if we'd changed something last week? RealityCheck is a time machine for the factory floor." |
-| 0:15–0:35 | README "The creature" table, or a title card with five labels | "It's a Frankenstein: five parts that were never meant to share a body. An append-only history that can't change the past. A deterministic simulation engine. Patterns measured from a real factory's month of data. An AI analyst that isn't allowed to calculate. And one app that tags every number as Actual, Simulated or AI." |
-| 0:35–0:55 | Where Time Goes (lead time with and without parking), then Workflow, scrolled to **Haunted stages** | "Recorded history first. Packets spend a large share of their time parked in the rough store. On the workflow, the haunted stages are where packets lose the most time with nobody working on them. Parking is number one." |
-| 0:55–1:20 | Scenario Lab: open **Park half as long**, show the fork date and the single change; then **Three more inspectors** | "Now we go back in time. A scenario forks from a recorded moment last week and changes one decision. Here we halve the time packets sit parked. Here we hire three more inspectors instead. The engine replays the factory from that moment, forward, under each decision." |
-| 1:20–1:50 | Simulation Results: run *Park half as long* against *Current factory operations*; headline metrics, then scroll to **Ghost futures** | "Halving parking finishes the work about thirty percent sooner, and on-time delivery rises from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes; its ghost is when it would have finished. Where history already knows, a diamond shows what really happened." |
-| 1:50–2:00 | Switch the run to *Three more inspectors* | "Three more inspectors? Completion doesn't move at all. Cost goes up nine percent. More people only help where a stage is waiting for capacity, and the data says it isn't." |
-| 2:00–2:20 | AI Analyst: the stored answer; open **Evidence behind this answer** | "Claude explains the result, but only from stored evidence. Every number it writes is checked against the simulation. Notice it says the evidence doesn't isolate a cause. It won't invent one. If it ever states a number the results don't support, the built-in analyst answers instead." |
-| 2:20–2:35 | Accuracy: typical error card, then the per-date table | "Can you trust the engine? Accuracy runs a backtest: it simulates from past dates, changing nothing, and compares with what was recorded. On one real factory, imported privately, it's within about a fifth on packets finished, and we publish where it's wrong." |
-| 2:35–2:45 | Settings → Appearance → **Halloween**; Ghost futures in the night theme; end card with the public link | "Built spec-first with Kiro: steering rules, eleven specs, hooks. And for Kiroween, a night theme with the same contrast. RealityCheck: see the future before you change the present." |
+The narration is `narration.json`; this table is generated from it and from the recorded timing. Emotion
+comes from the wording, pauses ("...") and each scene's own pace and pitch (`rate`, `pitch` in the file), since
+the voice service takes no emotion styles. A human narrator should follow the Tone column.
 
-About 400 words. If a take runs long, cut the second sentence of 0:55–1:20 and the last sentence of 2:00–2:20.
+| Time | Tone | Screen | Narration |
+|---|---|---|---|
+| 0:02–0:22 | curious, a little puzzled | Overview | "Seventeen days. That's how long a rough diamond packet takes to reach dispatch in this factory... yet people work on it for only a few hours. So where does all that time go? And what if you could go back to last week... and change one decision? Meet RealityCheck: a time machine for the factory floor." |
+| 0:22–0:45 | playful, dramatic | Title card: the five parts appear one by one as they are named | "It's a Frankenstein. Five parts that were never meant to share a body. A history that can never change the past. A simulation engine that never guesses. Patterns from a real factory's month of data. An AI analyst that is forbidden to calculate. And one app, where every number tells you exactly where it came from." |
+| 0:45–1:03 | revealing, slightly ominous | Where Time Goes, then Workflow scrolled to **Haunted stages** | "Start with what really happened. Packets spend a huge share of their lives... parked in the rough store. On the workflow, these are the haunted stages: where packets lose the most time, with nobody working on them. And the worst one? Parking." |
+| 1:03–1:23 | excited | Scenario Lab list, then **Park half as long**, then **Three more inspectors** | "Now, let's go back in time. A scenario forks from a recorded moment... and changes just one decision. In this one, we halve the time packets sit parked. In this one, we hire three more inspectors instead. Then the engine replays the factory, from that moment forward, under each decision." |
+| 1:23–1:44 | triumphant, then wonder | Simulation Results (Park half as long against the baseline): headline metrics, then **Ghost futures** | "And the result? Halving parking finishes the work about thirty percent sooner... and on-time delivery jumps from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes. Its ghost... is when it would have finished. And where history already knows, a diamond shows what truly happened." |
+| 1:44–1:56 | wry | Simulation Results for Three more inspectors: headline metrics | "And three more inspectors? Completion doesn't move. Not by a minute. Cost goes up nine percent. More people only help where a stage is actually waiting for capacity." |
+| 1:56–2:17 | calm, trustworthy | AI Analyst: the stored Claude answer; **Evidence behind this answer** opens | "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation. Look closely: it says the evidence does not isolate a cause. It refuses to invent one. And if it ever states a number the results can't support, the built-in analyst steps in instead." |
+| 2:17–2:34 | confident, honest | Accuracy: typical error, then the per-date table | "But can you trust the engine? A backtest simulates past dates, changing nothing, and compares the result with what was recorded. On one real factory, imported privately, it's within about a fifth on packets finished... and we publish exactly where it's wrong." |
+| 2:34–2:53 | warm, uplifting | "Built with Kiro" card, lifting to Ghost futures; the Halloween theme switches on live; end card | "Built spec-first with Kiro: steering rules, eleven specs, and hooks. And for Kiroween, a night theme, with exactly the same contrast. RealityCheck. See the future... before you change the present." |
+
+About 405 words; 2:53 in the generated version.
 
 ## On screen, never spoken
 
@@ -63,5 +67,5 @@ node frontend/scripts/video.mjs <work>/config.json      # from frontend/; prepar
 python -I tools/video/assemble.py build <work>/audio <work>/out
 ```
 
-The output is `<work>/out/realitycheck-demo.mp4` (1920 × 1080, about 2 min 44 s) and `captions.srt` for the
+The output is `<work>/out/realitycheck-demo.mp4` (1920 × 1080, about 2:53) and `captions.srt` for the
 upload. The video built on 19 November is kept outside the repository, in `local/video/`.

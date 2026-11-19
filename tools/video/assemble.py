@@ -3,7 +3,8 @@
     python -I tools/video/assemble.py narrate <narration.json> <audio-dir>
     python -I tools/video/assemble.py build <audio-dir> <out-dir> [ffmpeg-dir]
 
-`narrate` voices each segment with edge-tts (Microsoft's online neural voices; only the narration text is
+`narrate` voices each segment with edge-tts, at the segment's own rate and pitch (its "tone" is a note for
+people; the service takes no emotion styles, so feeling comes from wording, pauses ("...") and prosody) (Microsoft's online neural voices; only the narration text is
 sent) and writes <id>.mp3, <id>.vtt (sentence cues) and durations.json. Then record the picture with
 `node frontend/scripts/video.mjs <config.json>`, which writes picture.webm and timeline.json. `build` places
 each segment's audio where its scene starts, burns in captions, and encodes realitycheck-demo.mp4 (1920 x 1080,
@@ -24,11 +25,14 @@ def narrate(narration: Path, audio: Path) -> None:
     durations = {}
     for s in n["segments"]:
         mp3 = audio / f"{s['id']}.mp3"
-        subprocess.run([sys.executable, "-m", "edge_tts", "--voice", n["voice"], f"--rate={n['rate']}",
+        rate = s.get("rate", n.get("rate", "+0%"))
+        pitch = s.get("pitch", n.get("pitch", "+0Hz"))
+        subprocess.run([sys.executable, "-m", "edge_tts", "--voice", s.get("voice", n["voice"]), f"--rate={rate}",
+                        f"--pitch={pitch}",
                         "--text", s["text"], "--write-media", str(mp3),
                         "--write-subtitles", str(audio / f"{s['id']}.vtt")], check=True, capture_output=True)
         durations[s["id"]] = probe(mp3, "ffprobe")
-        print(f"{s['id']}: {durations[s['id']]:.1f} s")
+        print(f"{s['id']}: {durations[s['id']]:.1f} s ({s.get('tone', '')})")
     (audio / "durations.json").write_text(json.dumps(durations, indent=1))
     print(f"speech {sum(durations.values()):.1f} s")
 

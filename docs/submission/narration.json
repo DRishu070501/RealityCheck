@@ -1,15 +1,25 @@
 {
   "voice": "en-US-AvaNeural",
   "rate": "-5%",
+  "pitch": "+0Hz",
   "segments": [
-    {"id": "01-hook", "text": "In this diamond factory, a rough packet takes about seventeen days to reach dispatch. People spend hours on it, not weeks. So where does the time go? And what would have happened if we had changed something last week? RealityCheck is a time machine for the factory floor."},
-    {"id": "02-creature", "text": "It is a Frankenstein: five parts that were never meant to share a body. An append-only history that cannot change the past. A deterministic simulation engine. Patterns measured from a real factory's month of data. An AI analyst that is not allowed to calculate. And one app that tags every number as actual, simulated, or AI."},
-    {"id": "03-history", "text": "Recorded history first. Packets spend a large share of their time parked in the rough store. On the workflow, the haunted stages are where packets lose the most time with nobody working on them. Parking is number one."},
-    {"id": "04-fork", "text": "Now we go back in time. A scenario forks from a recorded moment and changes one decision. Here, we halve the time packets sit parked. Here, we hire three more inspectors instead. The engine replays the factory from that moment, forward, under each decision."},
-    {"id": "05-results", "text": "Halving parking finishes the work about thirty percent sooner, and on-time delivery rises from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes. Its ghost is when it would have finished. Where history already knows, a diamond shows what really happened."},
-    {"id": "06-inspectors", "text": "Three more inspectors? Completion does not move at all, and cost goes up nine percent. More people only help where a stage is waiting for capacity."},
-    {"id": "07-analyst", "text": "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation. Notice that it says the evidence does not isolate a cause. It will not invent one. If it ever states a number the results do not support, the built-in analyst answers instead."},
-    {"id": "08-accuracy", "text": "Can you trust the engine? A backtest simulates from past dates, changing nothing, and compares with what was recorded. On one real factory, imported privately, it is within about a fifth on packets finished, and we publish where it is wrong."},
-    {"id": "09-close", "text": "Built spec-first with Kiro: steering rules, eleven specs, and hooks. And for Kiroween, a night theme with the same contrast. RealityCheck. See the future before you change the present."}
+    {"id": "01-hook", "tone": "curious, a little puzzled", "rate": "-8%", "pitch": "+0Hz",
+     "text": "Seventeen days. That's how long a rough diamond packet takes to reach dispatch in this factory... yet people work on it for only a few hours. So where does all that time go? And what if you could go back to last week... and change one decision? Meet RealityCheck: a time machine for the factory floor."},
+    {"id": "02-creature", "tone": "playful, dramatic", "rate": "-6%", "pitch": "-3Hz",
+     "text": "It's a Frankenstein. Five parts that were never meant to share a body. A history that can never change the past. A simulation engine that never guesses. Patterns from a real factory's month of data. An AI analyst that is forbidden to calculate. And one app, where every number tells you exactly where it came from."},
+    {"id": "03-history", "tone": "revealing, slightly ominous", "rate": "-8%", "pitch": "-2Hz",
+     "text": "Start with what really happened. Packets spend a huge share of their lives... parked in the rough store. On the workflow, these are the haunted stages: where packets lose the most time, with nobody working on them. And the worst one? Parking."},
+    {"id": "04-fork", "tone": "excited", "rate": "-1%", "pitch": "+2Hz",
+     "text": "Now, let's go back in time. A scenario forks from a recorded moment... and changes just one decision. In this one, we halve the time packets sit parked. In this one, we hire three more inspectors instead. Then the engine replays the factory, from that moment forward, under each decision."},
+    {"id": "05-results", "tone": "triumphant, then wonder", "rate": "-3%", "pitch": "+3Hz",
+     "text": "And the result? Halving parking finishes the work about thirty percent sooner... and on-time delivery jumps from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes. Its ghost... is when it would have finished. And where history already knows, a diamond shows what truly happened."},
+    {"id": "06-inspectors", "tone": "wry", "rate": "-5%", "pitch": "+0Hz",
+     "text": "And three more inspectors? Completion doesn't move. Not by a minute. Cost goes up nine percent. More people only help where a stage is actually waiting for capacity."},
+    {"id": "07-analyst", "tone": "calm, trustworthy", "rate": "-6%", "pitch": "+0Hz",
+     "text": "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation. Look closely: it says the evidence does not isolate a cause. It refuses to invent one. And if it ever states a number the results can't support, the built-in analyst steps in instead."},
+    {"id": "08-accuracy", "tone": "confident, honest", "rate": "-4%", "pitch": "+0Hz",
+     "text": "But can you trust the engine? A backtest simulates past dates, changing nothing, and compares the result with what was recorded. On one real factory, imported privately, it's within about a fifth on packets finished... and we publish exactly where it's wrong."},
+    {"id": "09-close", "tone": "warm, uplifting", "rate": "-10%", "pitch": "+1Hz",
+     "text": "Built spec-first with Kiro: steering rules, eleven specs, and hooks. And for Kiroween, a night theme, with exactly the same contrast. RealityCheck. See the future... before you change the present."}
   ]
 }
