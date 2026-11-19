@@ -46,3 +46,22 @@ About 400 words. If a take runs long, cut the second sentence of 0:55–1:20 and
 - No API key, `.env` file or terminal with secrets in frame.
 - Captions on (YouTube auto-captions corrected, or an uploaded `.srt`).
 - Public on YouTube or Vimeo, link in Devpost.
+
+## Generated version
+
+A complete version is generated rather than recorded by hand. The narration is `narration.json`, voiced by
+Microsoft's neural voice *en-US-AvaNeural* through `edge-tts`; only the narration text is sent to the service.
+The picture is a scripted browser run timed to each sentence, and the captions come from the voice's sentence
+timings. To rebuild after editing a line or re-seeding the demonstration:
+
+```sh
+pip install edge-tts                      # once; ffmpeg must also be installed (winget install Gyan.FFmpeg)
+python -I tools/video/assemble.py narrate docs/submission/narration.json <work>/audio
+# config.json: {"base": "http://localhost:3000", "runs": {"base", "park", "insp"}, "scenarios": {"park", "insp"},
+#               "audioDir": "<work>/audio", "outDir": "<work>/out", "repo": "github.com/…"}
+node frontend/scripts/video.mjs <work>/config.json      # from frontend/; prepare the app as above first
+python -I tools/video/assemble.py build <work>/audio <work>/out
+```
+
+The output is `<work>/out/realitycheck-demo.mp4` (1920 × 1080, about 2 min 44 s) and `captions.srt` for the
+upload. The video built on 19 November is kept outside the repository, in `local/video/`.

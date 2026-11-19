@@ -7,6 +7,7 @@ Paste each section into the matching Devpost field. Fill the bracketed links bef
   decision, and watch the other future play out beside the one that happened.
 - **Category:** Frankenstein
 - **Links:** public app [https://…], video [https://…], repository https://github.com/DRishu070501/RealityCheck
+- **Video note (optional, for transparency):** The narration is a text-to-speech voice (Microsoft Ava).
 - **Screenshots:** `docs/screenshots/01-overview.png` to `09-halloween-ghost-futures.png`, in order.
 
 ---
