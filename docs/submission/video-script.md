@@ -143,5 +143,15 @@ node frontend/scripts/video.mjs <work>/config.json      # from frontend/; prepar
 python -I tools/video/assemble.py build <work>/audio <work>/out
 ```
 
+To use a recorded voice-over instead (the final video uses ElevenLabs clips, one per scene, named `01-hook.mp3`
+to `09-close.mp3`), replace the `narrate` step with:
+
+```sh
+python -I tools/video/assemble.py voiceover docs/submission/narration.json <clips-dir> <work>/audio
+```
+
+It finds where each sentence starts from the pauses in the clips, so scenes and captions follow that voice.
+`build` then merges the clips into one narration track (`narration.m4a`) and maps it onto the picture.
+
 The output is `<work>/out/realitycheck-demo.mp4` (1920 × 1080, about 2:53) and `captions.srt` for the
 upload. The video built on 19 November is kept outside the repository, in `local/video/`.

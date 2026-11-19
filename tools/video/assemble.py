@@ -1,14 +1,20 @@
 """Builds the demo video from narration and the recorded picture (spec 11, task 17).
 
     python -I tools/video/assemble.py narrate <narration.json> <audio-dir>
+    python -I tools/video/assemble.py voiceover <narration.json> <clips-dir> <audio-dir> [ffmpeg-dir]
     python -I tools/video/assemble.py build <audio-dir> <out-dir> [ffmpeg-dir]
 
-`narrate` voices each segment with edge-tts, at the segment's own rate and pitch (its "tone" is a note for
-people; the service takes no emotion styles, so feeling comes from wording, pauses ("...") and prosody) (Microsoft's online neural voices; only the narration text is
-sent) and writes <id>.mp3, <id>.vtt (sentence cues) and durations.json. Then record the picture with
-`node frontend/scripts/video.mjs <config.json>`, which writes picture.webm and timeline.json. `build` places
-each segment's audio where its scene starts, burns in captions, and encodes realitycheck-demo.mp4 (1920 x 1080,
-H.264 and AAC).
+The narration comes from one of two places:
+
+- `narrate` voices each segment with edge-tts (Microsoft's online neural voices; only the narration text is
+  sent), at the segment's own rate and pitch.
+- `voiceover` takes recorded clips, one per segment, named <id>.mp3 (for example from ElevenLabs). It finds
+  each sentence's start from the pauses in the clip, matched to the segment's sentences in narration.json.
+
+Both write <id>.mp3, <id>.vtt (sentence cues) and durations.json. Then record the picture with
+`node frontend/scripts/video.mjs <config.json>`, which times each scene to those files and writes picture.webm
+and timeline.json. `build` merges the clips into one narration track (each at the moment its scene starts),
+burns in captions, and encodes realitycheck-demo.mp4 (1920 x 1080, H.264 and AAC) and narration.m4a.
 """
 from __future__ import annotations
 
@@ -53,6 +59,60 @@ def cue_seconds(value: str) -> float:
     return int(value[:2]) * 3600 + int(value[3:5]) * 60 + float(value[6:].replace(",", "."))
 
 
+def sentences(text: str) -> list[str]:
+    """A segment's sentences, split as the captions show them (a "..." inside a sentence does not split it)."""
+    return [t.strip() for t in re.split(r"(?<=[.?!])\s+(?=[A-Z])", text) if t.strip()]
+
+
+def silences(clip: Path, ffmpeg: str) -> list[tuple[float, float]]:
+    log = subprocess.run([ffmpeg, "-hide_banner", "-i", str(clip), "-af", "silencedetect=noise=-35dB:d=0.18",
+                          "-f", "null", "-"], capture_output=True, text=True).stderr
+    starts = [float(v) for v in re.findall(r"silence_start: ([\d.]+)", log)]
+    ends = [float(v) for v in re.findall(r"silence_end: ([\d.]+)", log)]
+    return list(zip(starts, ends))
+
+
+def voiceover(narration: Path, clips: Path, audio: Path, ffmpeg_dir: str = "") -> None:
+    ffmpeg = str(Path(ffmpeg_dir) / "ffmpeg") if ffmpeg_dir else "ffmpeg"
+    ffprobe = str(Path(ffmpeg_dir) / "ffprobe") if ffmpeg_dir else "ffprobe"
+    audio.mkdir(parents=True, exist_ok=True)
+    n = json.loads(narration.read_text(encoding="utf-8"))
+    durations = {}
+    for s in n["segments"]:
+        clip = clips / f"{s['id']}.mp3"
+        (audio / clip.name).write_bytes(clip.read_bytes())
+        length = probe(clip, ffprobe)
+        durations[s["id"]] = length
+        quiet = silences(clip, ffmpeg)
+        # Speech runs from the end of any leading silence to the start of any trailing one.
+        first = quiet[0][1] if quiet and quiet[0][0] <= 0.05 else 0.0
+        last = quiet[-1][0] if quiet and quiet[-1][1] >= length - 0.05 else length
+        gaps = [(a, b) for a, b in quiet if a > first + 0.3 and b < last - 0.3]
+        parts = sentences(s["text"])
+        # Each sentence boundary is expected where its share of the characters falls; take the nearest pause.
+        total = sum(len(t) for t in parts)
+        bounds, used, done = [], set(), 0
+        for t in parts[:-1]:
+            done += len(t)
+            expected = first + (last - first) * done / total
+            options = [(abs((a + b) / 2 - expected), i) for i, (a, b) in enumerate(gaps)
+                       if i not in used and (not bounds or (a + b) / 2 > bounds[-1][1])]
+            if options and min(options)[0] < 2.5:
+                i = min(options)[1]
+                used.add(i)
+                bounds.append(gaps[i])
+            else:
+                bounds.append((expected, expected))
+        starts = [first] + [b for _, b in bounds]
+        ends = [a for a, _ in bounds] + [last]
+        cues = [f"{k + 1}\n{stamp(a)} --> {stamp(b)}\n{t}\n" for k, (a, b, t) in enumerate(zip(starts, ends, parts))]
+        (audio / f"{s['id']}.vtt").write_text("\n".join(cues), encoding="utf-8")
+        matched = sum(1 for a, b in bounds if a != b)
+        print(f"{s['id']}: {length:.1f} s, {len(parts)} sentences, {matched}/{len(parts) - 1} pauses found")
+    (audio / "durations.json").write_text(json.dumps(durations, indent=1))
+    print(f"speech {sum(durations.values()):.1f} s")
+
+
 def build(audio: Path, out: Path, ffmpeg_dir: str = "") -> None:
     ffmpeg = str(Path(ffmpeg_dir) / "ffmpeg") if ffmpeg_dir else "ffmpeg"
     timeline = json.loads((out / "timeline.json").read_text())
@@ -82,11 +142,15 @@ def build(audio: Path, out: Path, ffmpeg_dir: str = "") -> None:
                     "-map", "[aout]", "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
                     "-r", "30", "-c:a", "aac", "-b:a", "160k", "-t", f"{timeline['length']:.2f}",
                     "-movflags", "+faststart", "realitycheck-demo.mp4"], cwd=out, check=True)
-    print(f"{out / 'realitycheck-demo.mp4'}: {n - 1} captions, {timeline['length']:.1f} s")
+    subprocess.run([ffmpeg, "-y", "-v", "error", "-i", "realitycheck-demo.mp4", "-vn", "-c:a", "copy",
+                    "narration.m4a"], cwd=out, check=True)
+    print(f"{out / 'realitycheck-demo.mp4'}: {n - 1} captions, {timeline['length']:.1f} s; merged track narration.m4a")
 
 
 if __name__ == "__main__":
     if sys.argv[1] == "narrate":
         narrate(Path(sys.argv[2]), Path(sys.argv[3]))
+    elif sys.argv[1] == "voiceover":
+        voiceover(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5] if len(sys.argv) > 5 else "")
     else:
         build(Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4] if len(sys.argv) > 4 else "")
