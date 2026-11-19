@@ -321,7 +321,7 @@ dispatched in the month, so compared to the last event nothing is left in progre
 (finished 36%, work in progress undefined); over seven-day windows from 1, 8, 15 and 22 October the typical
 error is finished 19%, lead time 44% (simulation faster), work in progress 64% (too many at imaging and
 inspection). Recorded in `docs/accuracy.md`; detailed results stay in `local/`. Not tuned. Two real department
-names found in committed files during this task were replaced; they remain in unpushed history. Tests:
+names found in committed files during this task were replaced, and the branch history was rewritten before any push so that no commit holds them. Tests:
 `tools/import/tests` (fake 200-row extract; names check when `local/names.txt` exists), `WorkflowApiIT`
 (configuration), `BacktestIT` (horizon).
 
@@ -337,7 +337,7 @@ with `tls internal`: 74 browser tests pass (`E2E_IGNORE_HTTPS_ERRORS=1`). Still 
 the server and domain (owner: decide later), then the journey against the public URL. AI: Claude with a $2
 daily cap (owner, 19 November).
 
-Task 16 (19 November): all suites green on commit 6a4c830: backend 345 unit and 120 integration tests, frontend
+Task 16 (19 November): all suites green on commit 2719271: backend 345 unit and 120 integration tests, frontend
 251 tests with type-check and lint clean, 11 tool tests, and the 74 browser tests. Fresh-machine check: a new
 clone, `cp .env.example .env`, `docker compose up --build` with an empty database seeds the demonstration and
 passes all 74 browser tests (frontend on 3100 because another program held 3000, the case the README's
