@@ -6,6 +6,8 @@ RealityCheck is an operational time machine for a factory. It replays what reall
 any recorded moment, change a decision, and watch the other future play out beside the one that happened.
 The first implementation is diamond manufacturing.
 
+![Ghost futures: each order's completion beside its ghost under the alternative decision](docs/screenshots/05-ghost-futures.png)
+
 It is a Kiroween entry in the **Frankenstein** category: five parts that were never meant to live in one
 body, stitched together so that each keeps its own nature.
 
@@ -33,9 +35,10 @@ any real name appears.
 - **Where Time Goes.** Lead time with and without parking, packet time per stage, yields and the wait for
   dispatch, all from recorded events.
 - **Accuracy.** A backtest: the factory simulated from past dates with no changes and compared with what was
-  recorded. On the demonstration factory the typical error is 19% for packets finished, 4% for median lead
-  time and 40% for work in progress by stage (the simulation holds too many packets at polishing), shown as
-  measured. On one real factory's month, imported privately and compared over seven-day windows, it is 19%,
+  recorded. On the demonstration factory seeded on 18 November, the typical error was 19% for packets
+  finished, 4% for median lead time and 40% for work in progress by stage (the simulation holds too many
+  packets at polishing), shown as measured; the demonstration is seeded relative to the day it starts, so the
+  figures move with it. On one real factory's month, imported privately and compared over seven-day windows, it is 19%,
   44% and 64%: see [docs/accuracy.md](docs/accuracy.md).
 - **The Halloween theme** (Settings, Appearance): same data and contrast guarantees, darker night.
 

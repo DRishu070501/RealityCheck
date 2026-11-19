@@ -23,7 +23,9 @@ absolute errors across dates: neither the best nor the worst date.
 
 ## Demonstration factory
 
-Four dates spread over its seeded history; each window runs to the last recorded event.
+Four dates spread over its seeded history; each window runs to the last recorded event. The demonstration is
+seeded relative to the day it starts, so its history, and these figures, move with that day. Seeded on
+18 November 2026:
 
 | Measure | Typical error |
 |---|---|
@@ -31,7 +33,8 @@ Four dates spread over its seeded history; each window runs to the last recorded
 | Median lead time | 4% |
 | Work in progress by stage | 40% |
 
-The demonstration factory is generated from the calibration, so lead time is close by construction. Work in
+Seeded on 19 November 2026, the same backtest gave 3%, 15% and 40%. The demonstration factory is generated
+from the calibration, so lead time is close by construction. Work in
 progress is not: the simulation queues packets at polishing that the generated history had already moved on.
 
 ## A real diamond factory (factory A)

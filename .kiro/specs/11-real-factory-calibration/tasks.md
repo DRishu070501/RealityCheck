@@ -345,6 +345,14 @@ troubleshooting covers). New: `docs/method.md` (calibration, privacy, limits) an
 specs, hooks, agents). Spec 10 tasks 2 and 5 stay open as recorded there. From here only fixes go in until
 submission; the public server (task 15) is the remaining open item.
 
+Task 17, prepared (19 November): `docs/submission/video-script.md` (2 min 45 s, timed shot list and narration,
+pre-recording checklist; figures from a run on 19 November, to be re-read on screen when recording),
+`docs/submission/devpost.md` (every field, category Frankenstein, Kiro section with a place for the owner's own
+account), `docs/submission/social.md`, and nine screenshots in `docs/screenshots/` captured by
+`frontend/scripts/screenshots.mjs`. The demonstration's backtest figures are now dated in README and
+accuracy.md, because they move with the seeding day. Open (owner): record the video, add the public and video
+links, submit by 4 December.
+
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
 
