@@ -200,7 +200,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
   - Test: `AiBudgetTest`; the e2e journey run against the public URL.
   - _Requirements: 7.2, 7.3_
 
-- [ ] 16. Quality pass and code freeze (28 November)
+- [x] 16. Quality pass and code freeze (28 November)
   - All suites green; fresh-machine `docker compose up` check; `docs/accuracy.md`, `docs/method.md`
     (calibration, privacy, limits: factory A only, splitting as yield, repairs out of scope); Kiro usage
     write-up `docs/kiro.md`; spec notes.
@@ -336,6 +336,14 @@ endpoint off), `deploy/Caddyfile`, `deploy/public.env.example`, `docs/deploy.md`
 with `tls internal`: 74 browser tests pass (`E2E_IGNORE_HTTPS_ERRORS=1`). Still open: the server, the domain and
 the server and domain (owner: decide later), then the journey against the public URL. AI: Claude with a $2
 daily cap (owner, 19 November).
+
+Task 16 (19 November): all suites green on commit 6a4c830: backend 345 unit and 120 integration tests, frontend
+251 tests with type-check and lint clean, 11 tool tests, and the 74 browser tests. Fresh-machine check: a new
+clone, `cp .env.example .env`, `docker compose up --build` with an empty database seeds the demonstration and
+passes all 74 browser tests (frontend on 3100 because another program held 3000, the case the README's
+troubleshooting covers). New: `docs/method.md` (calibration, privacy, limits) and `docs/kiro.md` (steering,
+specs, hooks, agents). Spec 10 tasks 2 and 5 stay open as recorded there. From here only fixes go in until
+submission; the public server (task 15) is the remaining open item.
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
