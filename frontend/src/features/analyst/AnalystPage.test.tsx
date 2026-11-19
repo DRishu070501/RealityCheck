@@ -69,6 +69,18 @@ describe('AI Analyst', () => {
     expect(within(card).queryByRole('status')).not.toBeInTheDocument()
   })
 
+  it('says when the daily spending cap made the built-in analyst answer', async () => {
+    const capped = { ...fixtures.aiFallbackInsight, fallbackReason: 'DAILY_BUDGET' }
+    mockBackend(
+      routes({ [`GET /api/ai/insights/${FIVE_AWAY_RUN}`]: () => jsonResponse(pageOfItems([capped])) }),
+    )
+
+    renderWithProviders(<AnalystPage />, { route: `/analyst?run=${FIVE_AWAY_RUN}` })
+
+    const card = await screen.findByTestId('insight-card')
+    expect(within(card).getByRole('status')).toHaveTextContent("Today's spending cap")
+  })
+
   it('says when the built-in analyst answered instead of the language model', async () => {
     mockBackend(
       routes({

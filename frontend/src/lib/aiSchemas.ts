@@ -57,7 +57,7 @@ export const evidenceItemSchema = z.object({
 })
 export type EvidenceItem = z.infer<typeof evidenceItemSchema>
 
-export const fallbackReasonSchema = z.enum(['VALIDATION_FAILED', 'PROVIDER_ERROR', 'TIMEOUT'])
+export const fallbackReasonSchema = z.enum(['VALIDATION_FAILED', 'PROVIDER_ERROR', 'TIMEOUT', 'DAILY_BUDGET'])
 
 export const insightSchema = z.object({
   id: uuid,

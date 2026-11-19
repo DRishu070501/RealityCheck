@@ -116,7 +116,7 @@ class SystemInfoServiceTest {
         }
         RealityCheckProperties properties =
                 new RealityCheckProperties(new Cors(List.of("http://localhost:5173")), ai,
-                        new RealityCheckProperties.Demo(false, false));
+                        new RealityCheckProperties.Demo(false, false, null));
         ObjectProvider<AlgorithmVersionSource> algorithm = mock(ObjectProvider.class);
         when(algorithm.getIfAvailable()).thenReturn(() -> "9.9.9");
         return new SystemInfoService(dataSource, flyway, Clock.fixed(NOW, ZoneOffset.UTC), properties, buildProperties,

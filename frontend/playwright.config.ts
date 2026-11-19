@@ -16,6 +16,8 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+    // For a rehearsal of the public deployment behind a self-signed certificate (`tls internal`).
+    ignoreHTTPSErrors: process.env.E2E_IGNORE_HTTPS_ERRORS === '1',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

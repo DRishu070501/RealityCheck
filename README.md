@@ -120,6 +120,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - [docs/setup.md](docs/setup.md): prerequisites, configuration, commands, troubleshooting
 - [docs/api.md](docs/api.md): API conventions and every endpoint
 - [docs/ai.md](docs/ai.md): the AI analyst: setup, cost, evidence checking, fallback
+- [docs/deploy.md](docs/deploy.md): public deployment: one server, HTTPS, nightly reset, AI spending cap
 - [docs/accuracy.md](docs/accuracy.md): backtests on the demonstration factory and on one real factory
 - [docs/demo-data.md](docs/demo-data.md): the calibrated demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules

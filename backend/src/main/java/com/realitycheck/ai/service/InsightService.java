@@ -44,15 +44,17 @@ public class InsightService {
     private final AiProviders providers;
     private final InsightStore store;
     private final AiRateLimiter rateLimiter;
+    private final AiBudget budget;
     private final Clock clock;
     private final int maxOutputTokens;
 
     public InsightService(EvidenceSource evidenceSource, AiProviders providers, InsightStore store,
-            AiRateLimiter rateLimiter, Clock clock, RealityCheckProperties properties) {
+            AiRateLimiter rateLimiter, AiBudget budget, Clock clock, RealityCheckProperties properties) {
         this.evidenceSource = evidenceSource;
         this.providers = providers;
         this.store = store;
         this.rateLimiter = rateLimiter;
+        this.budget = budget;
         this.clock = clock;
         this.maxOutputTokens = properties.ai().maxOutputTokens();
     }
@@ -105,6 +107,11 @@ public class InsightService {
         if (!active.languageModel()) {
             return new Outcome(template(type, evidence, question), providers.template().name(), null, null, null, null);
         }
+        if (budget.exhausted()) {
+            log.info("AI daily budget reached; the built-in analyst answers for run {} ({})", evidence.run().runId(),
+                    type);
+            return fallback(type, evidence, question, AiBudget.DAILY_BUDGET, null, null);
+        }
         String system = PromptFactory.systemPrompt(type);
         List<ValidationError> errors = List.of();
         int inputTokens = 0;
@@ -152,6 +159,8 @@ public class InsightService {
         List<String> limitations = new ArrayList<>();
         limitations.add(VALIDATION_FAILED.equals(reason)
                 ? "The language model's answer did not pass the evidence check, so the built-in analyst answered."
+                : AiBudget.DAILY_BUDGET.equals(reason)
+                ? "Today's spending cap for the language model was reached, so the built-in analyst answered."
                 : "The language model was unavailable, so the built-in analyst answered.");
         limitations.addAll(content.limitations());
         content = new InsightContent(content.summary(), content.keyChanges(), content.risks(),

@@ -99,6 +99,15 @@ public class InsightStore {
                 this::insight, runId, typeName(type), typeName(type), limit, offset));
     }
 
+    /** Input and output tokens of every language-model call stored since {@code from}: {input, output}. */
+    @Transactional(readOnly = true)
+    public long[] tokensSince(Instant from) {
+        return jdbc.queryForObject("""
+                select coalesce(sum(input_tokens), 0), coalesce(sum(output_tokens), 0) from simulation_insight
+                where created_at >= ?""", (rs, n) -> new long[] {rs.getLong(1), rs.getLong(2)},
+                Timestamp.from(from));
+    }
+
     @Transactional(readOnly = true)
     public long count(UUID runId, InsightType type) {
         Long count = jdbc.queryForObject("""

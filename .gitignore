@@ -30,6 +30,7 @@ Thumbs.db
 
 # Real client data never enters the repository (spec 11).
 local/
+deploy/public.env
 *.cnf
 *.calibration.json
 

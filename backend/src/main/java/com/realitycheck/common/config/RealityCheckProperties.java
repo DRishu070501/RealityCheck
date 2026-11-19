@@ -14,8 +14,10 @@ public record RealityCheckProperties(@DefaultValue Cors cors, @DefaultValue Ai a
     /**
      * @param seedOnStartup create the demonstration factory at start-up when the database has no factory
      * @param resetEnabled  register {@code POST /api/demo/reset}, which erases all data and re-seeds
+     * @param resetCron     when set, re-seed on this schedule (Spring cron, UTC); see {@code DemoNightlyReset}
      */
-    public record Demo(@DefaultValue("false") boolean seedOnStartup, @DefaultValue("false") boolean resetEnabled) {
+    public record Demo(@DefaultValue("false") boolean seedOnStartup, @DefaultValue("false") boolean resetEnabled,
+            String resetCron) {
     }
 
     public record Cors(@DefaultValue("http://localhost:5173") List<String> allowedOrigins) {
@@ -34,6 +36,10 @@ public record RealityCheckProperties(@DefaultValue Cors cors, @DefaultValue Ai a
      * @param maxRetries        transport retries on timeouts, 429 and 5xx, with backoff
      * @param maxOutputTokens   upper bound on the length of one answer
      * @param requestsPerMinute AI requests accepted per minute across all callers; more get 429
+     * @param dailyBudgetUsd    spending cap per UTC day on language-model tokens, in US dollars; null or zero for
+     *                          none. Once reached, the built-in analyst answers until the day ends.
+     * @param inputUsdPerMtok   price of a million input tokens for {@code model}; the default is Claude Haiku 5.5's
+     * @param outputUsdPerMtok  price of a million output tokens for {@code model}; the default is Claude Haiku 5.5's
      */
     public record Ai(
             @DefaultValue(TEMPLATE) String provider,
@@ -43,14 +49,18 @@ public record RealityCheckProperties(@DefaultValue Cors cors, @DefaultValue Ai a
             @DefaultValue("30") int timeoutSeconds,
             @DefaultValue("2") int maxRetries,
             @DefaultValue("4000") int maxOutputTokens,
-            @DefaultValue("20") int requestsPerMinute) {
+            @DefaultValue("20") int requestsPerMinute,
+            java.math.BigDecimal dailyBudgetUsd,
+            @DefaultValue("0.10") java.math.BigDecimal inputUsdPerMtok,
+            @DefaultValue("0.50") java.math.BigDecimal outputUsdPerMtok) {
 
         public static final String TEMPLATE = "template";
         public static final String NO_PROVIDER = "none";
 
         /** Defaults for everything except the provider and key; for tests. */
         public static Ai of(String provider, String apiKey) {
-            return new Ai(provider, apiKey, "claude-haiku-5-5", null, 30, 2, 4000, 20);
+            return new Ai(provider, apiKey, "claude-haiku-5-5", null, 30, 2, 4000, 20, null,
+                    new java.math.BigDecimal("0.10"), new java.math.BigDecimal("0.50"));
         }
 
         /** The model name when a language model is in use; null for the template analyst. */

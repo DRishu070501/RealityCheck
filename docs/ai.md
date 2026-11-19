@@ -32,6 +32,8 @@ it reports `"provider": "template"`. The key is never logged, never returned and
 | `AI_MAX_RETRIES` | `2` | Transport retries on timeouts, 429 and 5xx, with backoff (done by the Anthropic SDK). |
 | `AI_MAX_OUTPUT_TOKENS` | `4000` | Upper bound per answer. |
 | `AI_REQUESTS_PER_MINUTE` | `20` | Across all users; more get `429` with `Retry-After`. Bounds what the model can cost. |
+| `AI_DAILY_BUDGET_USD` | empty | Spending cap per UTC day in US dollars; empty for none. Today's spend is the input and output tokens stored on insights since midnight UTC, priced below. Once reached, the built-in analyst answers (`DAILY_BUDGET`) until midnight. Checked before each request, so simultaneous requests can overshoot by their own cost. |
+| `AI_INPUT_USD_PER_MTOK`, `AI_OUTPUT_USD_PER_MTOK` | `0.10`, `0.50` | Price per million input and output tokens of `AI_MODEL`; the defaults are Claude Haiku 5.5's (prompts up to 100K tokens). Change them with the model. |
 
 ### What it costs
 
@@ -132,8 +134,9 @@ The template analyst answers, with `fallback: true` and a `fallbackReason`, when
 | `VALIDATION_FAILED` | Both answers failed the check |
 | `PROVIDER_ERROR` | HTTP error after retries, refusal, or the API could not be reached |
 | `TIMEOUT` | No answer within `AI_TIMEOUT_SECONDS` |
+| `DAILY_BUDGET` | Today's spend has reached `AI_DAILY_BUDGET_USD`; the model is not called |
 
-AI endpoints answer `200` in all three cases; they return `5xx` only for internal errors. Non-AI endpoints are
+AI endpoints answer `200` in all these cases; they return `5xx` only for internal errors. Non-AI endpoints are
 unaffected by the provider's state. The AI Analyst screen states plainly when the built-in analyst answered and
 why.
 

@@ -1,0 +1,39 @@
+# Public deployment overlay (spec 11, task 15). Use with the base file:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.public.yml --env-file deploy/public.env up -d --build
+# Only Caddy is reachable from the internet (80 and 443). The database, backend and frontend have no published
+# ports; Caddy reaches the frontend, and the frontend's nginx reaches the backend, on the private network.
+services:
+  db:
+    ports: !reset []
+
+  backend:
+    ports: !reset []
+    environment:
+      REALITYCHECK_DEMO_SEED: "true"
+      REALITYCHECK_DEMO_RESET_ENABLED: "false"
+      API_DOCS_ENABLED: "false"
+      CORS_ALLOWED_ORIGINS: https://${SITE_ADDRESS:?set SITE_ADDRESS in deploy/public.env}
+
+  frontend:
+    ports: !reset []
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in deploy/public.env}
+      TLS_DIRECTIVE: ${TLS_DIRECTIVE:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

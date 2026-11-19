@@ -325,6 +325,17 @@ names found in committed files during this task were replaced; they remain in un
 `tools/import/tests` (fake 200-row extract; names check when `local/names.txt` exists), `WorkflowApiIT`
 (configuration), `BacktestIT` (horizon).
 
+Task 15, repository part (19 November): `AI_DAILY_BUDGET_USD` with prices per million tokens
+(`AI_INPUT_USD_PER_MTOK`, `AI_OUTPUT_USD_PER_MTOK`, defaults Claude Haiku 5.5's $0.10 and $0.50); today's spend
+is summed from tokens stored on insights since midnight UTC, and past it the template answers with
+`fallbackReason: DAILY_BUDGET` (`AiBudget`, `AiBudgetTest`, `InsightServiceTest`, frontend notice). The nightly
+reset is a schedule inside the backend (`REALITYCHECK_DEMO_RESET_CRON`, `DemoNightlyReset`) instead of cron and
+an admin port: nothing to expose, and it refuses to run while a non-demonstration factory exists
+(`DemoNightlyResetIT`). `deploy/docker-compose.public.yml` (only Caddy publishes ports; API docs off; reset
+endpoint off), `deploy/Caddyfile`, `deploy/public.env.example`, `docs/deploy.md`. Rehearsed locally over HTTPS
+with `tls internal`: 74 browser tests pass (`E2E_IGNORE_HTTPS_ERRORS=1`). Still open: the server, the domain and
+the AI choice (owner), then the journey against the public URL.
+
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
 

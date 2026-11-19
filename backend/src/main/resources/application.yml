@@ -71,9 +71,16 @@ realitycheck:
     max-retries: ${AI_MAX_RETRIES:2}
     max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:4000}
     requests-per-minute: ${AI_REQUESTS_PER_MINUTE:20}
+    # Spending cap per UTC day in US dollars; empty for none. Prices are per million tokens for AI_MODEL
+    # (defaults: Claude Haiku 5.5). Once the cap is reached the built-in analyst answers until midnight UTC.
+    daily-budget-usd: ${AI_DAILY_BUDGET_USD:}
+    input-usd-per-mtok: ${AI_INPUT_USD_PER_MTOK:0.10}
+    output-usd-per-mtok: ${AI_OUTPUT_USD_PER_MTOK:0.50}
   demo:
     seed-on-startup: ${REALITYCHECK_DEMO_SEED:false}
     reset-enabled: ${REALITYCHECK_DEMO_RESET_ENABLED:false}
+    # A Spring cron in UTC, e.g. "0 30 21 * * *": restore the demonstration on a schedule (public deployment).
+    reset-cron: ${REALITYCHECK_DEMO_RESET_CRON:}
 
 ---
 # Used by the Docker deployment. No credential has a fallback here: a missing one stops startup.

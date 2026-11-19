@@ -105,13 +105,15 @@ class InsightServiceTest {
     private InsightService service(AiProviders providers, int perMinute) {
         Clock clock = Clock.fixed(Instant.parse("2026-11-15T10:00:00Z"), ZoneOffset.UTC);
         RealityCheckProperties properties = properties(perMinute);
-        return new InsightService(source, providers, store, new AiRateLimiter(properties, clock), clock, properties);
+        return new InsightService(source, providers, store, new AiRateLimiter(properties, clock),
+                new AiBudget(store, clock, properties), clock, properties);
     }
 
     private static RealityCheckProperties properties(int perMinute) {
         return new RealityCheckProperties(new RealityCheckProperties.Cors(List.of()),
-                new RealityCheckProperties.Ai("anthropic", "k", "claude-haiku-5-5", null, 30, 2, 4000, perMinute),
-                new RealityCheckProperties.Demo(false, false));
+                new RealityCheckProperties.Ai("anthropic", "k", "claude-haiku-5-5", null, 30, 2, 4000, perMinute, null,
+                        new java.math.BigDecimal("0.10"), new java.math.BigDecimal("0.50")),
+                new RealityCheckProperties.Demo(false, false, null));
     }
 
     private NewInsight saved() {
@@ -236,6 +238,26 @@ class InsightServiceTest {
         assertThat(response.provider()).isEqualTo("template");
         assertThat(response.fallback()).isFalse();
         assertThat(saved().inputTokens()).isNull();
+    }
+
+    @Test
+    void onceTheDailyBudgetIsSpentTheTemplateAnswersWithoutCallingTheModel() {
+        Clock clock = Clock.fixed(Instant.parse("2026-11-15T10:00:00Z"), ZoneOffset.UTC);
+        RealityCheckProperties capped = new RealityCheckProperties(new RealityCheckProperties.Cors(List.of()),
+                new RealityCheckProperties.Ai("anthropic", "k", "claude-haiku-5-5", null, 30, 2, 4000, 20,
+                        new java.math.BigDecimal("0.50"), new java.math.BigDecimal("0.10"),
+                        new java.math.BigDecimal("0.50")),
+                new RealityCheckProperties.Demo(false, false, null));
+        when(store.tokensSince(any())).thenReturn(new long[] {1_000_000, 1_000_000}); // $0.60 today
+        InsightService service = new InsightService(source, new AiProviders(model, new TemplateAiProvider()), store,
+                new AiRateLimiter(capped, clock), new AiBudget(store, clock, capped), clock, capped);
+
+        InsightResponse response = service.insight(RUN, null, InsightType.EXPLANATION, false);
+
+        assertThat(model.requests).isEmpty();
+        assertThat(response.provider()).isEqualTo("template");
+        assertThat(response.fallbackReason()).isEqualTo(AiBudget.DAILY_BUDGET);
+        assertThat(response.content().limitations().get(0)).contains("spending cap");
     }
 
     @Test

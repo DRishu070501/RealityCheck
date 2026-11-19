@@ -13,6 +13,8 @@ const FALLBACK_TEXT = {
     "The language model's answer did not pass the evidence check (it stated something the simulation does not support), so the built-in analyst answered instead.",
   PROVIDER_ERROR: 'The AI provider was unavailable, so the built-in analyst answered instead.',
   TIMEOUT: 'The AI provider did not answer in time, so the built-in analyst answered instead.',
+  DAILY_BUDGET:
+    "Today's spending cap for the language model has been reached, so the built-in analyst answered instead. It resets at midnight UTC.",
 } as const
 
 interface EvidenceListProps {

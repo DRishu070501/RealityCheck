@@ -1,0 +1,11 @@
+# HTTPS in front of the frontend container. With a domain, Caddy obtains a Let's Encrypt certificate on its own.
+# Without one, set SITE_ADDRESS to the server's IP and TLS_DIRECTIVE to "tls internal" (self-signed: browsers warn).
+{$SITE_ADDRESS} {
+	{$TLS_DIRECTIVE}
+	encode zstd gzip
+	reverse_proxy frontend:80
+	log {
+		output stdout
+		format console
+	}
+}
