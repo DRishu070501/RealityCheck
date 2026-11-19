@@ -1,7 +1,7 @@
 # Video script (under three minutes)
 
-Target: under **3 minutes** (the generated version runs 2:53), about 440 spoken words at a calm pace. Screen recording of the app at 1920 × 1080 (or
-1440 × 900), with narration recorded separately or live. The numbers below are from a run on 19 November 2026.
+Target: under **3 minutes**; the generated version runs 2:53. Screen recording of the app at 1920 × 1080
+(or 1440 × 900), with narration recorded separately or live. The numbers below are from a run on 19 November 2026.
 The demonstration is seeded relative to the day it starts, so **read the figures on screen** when recording
 and change the narration to match. Don't read these aloud from the page.
 
@@ -18,23 +18,99 @@ and change the narration to match. Don't read these aloud from the page.
 
 ## Script
 
-The narration is `narration.json`; this table is generated from it and from the recorded timing. Emotion
-comes from the wording, pauses ("...") and each scene's own pace and pitch (`rate`, `pitch` in the file), since
-the voice service takes no emotion styles. A human narrator should follow the Tone column.
+Nine scenes, about 405 spoken words. Each scene describes what the viewer sees, how the moment should feel,
+and the line that is spoken. The spoken lines are kept in `narration.json`, which the generated video reads;
+a human narrator should follow the feeling described for each scene. Times are from the generated version.
 
-| Time | Tone | Screen | Narration |
-|---|---|---|---|
-| 0:02–0:22 | curious, a little puzzled | Overview | "Seventeen days. That's how long a rough diamond packet takes to reach dispatch in this factory... yet people work on it for only a few hours. So where does all that time go? And what if you could go back to last week... and change one decision? Meet RealityCheck: a time machine for the factory floor." |
-| 0:22–0:45 | playful, dramatic | Title card: the five parts appear one by one as they are named | "It's a Frankenstein. Five parts that were never meant to share a body. A history that can never change the past. A simulation engine that never guesses. Patterns from a real factory's month of data. An AI analyst that is forbidden to calculate. And one app, where every number tells you exactly where it came from." |
-| 0:45–1:03 | revealing, slightly ominous | Where Time Goes, then Workflow scrolled to **Haunted stages** | "Start with what really happened. Packets spend a huge share of their lives... parked in the rough store. On the workflow, these are the haunted stages: where packets lose the most time, with nobody working on them. And the worst one? Parking." |
-| 1:03–1:23 | excited | Scenario Lab list, then **Park half as long**, then **Three more inspectors** | "Now, let's go back in time. A scenario forks from a recorded moment... and changes just one decision. In this one, we halve the time packets sit parked. In this one, we hire three more inspectors instead. Then the engine replays the factory, from that moment forward, under each decision." |
-| 1:23–1:44 | triumphant, then wonder | Simulation Results (Park half as long against the baseline): headline metrics, then **Ghost futures** | "And the result? Halving parking finishes the work about thirty percent sooner... and on-time delivery jumps from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes. Its ghost... is when it would have finished. And where history already knows, a diamond shows what truly happened." |
-| 1:44–1:56 | wry | Simulation Results for Three more inspectors: headline metrics | "And three more inspectors? Completion doesn't move. Not by a minute. Cost goes up nine percent. More people only help where a stage is actually waiting for capacity." |
-| 1:56–2:17 | calm, trustworthy | AI Analyst: the stored Claude answer; **Evidence behind this answer** opens | "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation. Look closely: it says the evidence does not isolate a cause. It refuses to invent one. And if it ever states a number the results can't support, the built-in analyst steps in instead." |
-| 2:17–2:34 | confident, honest | Accuracy: typical error, then the per-date table | "But can you trust the engine? A backtest simulates past dates, changing nothing, and compares the result with what was recorded. On one real factory, imported privately, it's within about a fifth on packets finished... and we publish exactly where it's wrong." |
-| 2:34–2:53 | warm, uplifting | "Built with Kiro" card, lifting to Ghost futures; the Halloween theme switches on live; end card | "Built spec-first with Kiro: steering rules, eleven specs, and hooks. And for Kiroween, a night theme, with exactly the same contrast. RealityCheck. See the future... before you change the present." |
+### Scene 1: The question (0:02–0:22)
 
-About 405 words; 2:53 in the generated version.
+**Feeling:** curious, a little puzzled, as if noticing something odd for the first time.
+
+**On screen:** The Overview of Surat Diamond Works. Fifty-six orders in progress, packets queued at every stage. Everything looks busy and normal. After a few seconds the view drifts down to the stage-by-stage queues, inviting the viewer to wonder what is really going on.
+
+**Spoken:** "Seventeen days. That's how long a rough diamond packet takes to reach dispatch in this factory... yet people work on it for only a few hours. So where does all that time go? And what if you could go back to last week... and change one decision? Meet RealityCheck: a time machine for the factory floor."
+
+**Delivery:** Open slowly on "Seventeen days." Let the pause after "dispatch in this factory" hang before the contrast. Lift on "Meet RealityCheck".
+
+### Scene 2: The creature (0:22–0:45)
+
+**Feeling:** playful and dramatic, a Frankenstein reveal.
+
+**On screen:** A dark title card, "RealityCheck: a Frankenstein of five parts". The parts appear one at a time, each as it is named: the skeleton (append-only history), the heart (deterministic simulation engine), the blood (a real factory's patterns), the voice (the AI analyst) and the face (one app where every number is tagged).
+
+**Spoken:** "It's a Frankenstein. Five parts that were never meant to share a body. A history that can never change the past. A simulation engine that never guesses. Patterns from a real factory's month of data. An AI analyst that is forbidden to calculate. And one app, where every number tells you exactly where it came from."
+
+**Delivery:** A slightly lower, theatrical voice. Give each part its own beat, and lean on "forbidden".
+
+### Scene 3: The haunting (0:45–1:03)
+
+**Feeling:** revealing, slightly ominous, like uncovering where the trouble hides.
+
+**On screen:** Where Time Goes: lead time with and without parking, and the bar chart of where packet time is spent, with the long purple "held" bar for the rough store. Then the Workflow screen glides down to **Haunted stages**, with the rough store ranked number one.
+
+**Spoken:** "Start with what really happened. Packets spend a huge share of their lives... parked in the rough store. On the workflow, these are the haunted stages: where packets lose the most time, with nobody working on them. And the worst one? Parking."
+
+**Delivery:** Quieter, as if sharing a secret. A short pause before "Parking." so it lands as the answer.
+
+### Scene 4: Back in time (1:03–1:23)
+
+**Feeling:** excited; this is the idea the whole product is built on.
+
+**On screen:** Scenario Lab with its six scenarios. Then **Park half as long**: its fork date, and its single change, the rough store's holding time cut by 50%. Then **Three more inspectors**: inspection capacity from three to six people.
+
+**Spoken:** "Now, let's go back in time. A scenario forks from a recorded moment... and changes just one decision. In this one, we halve the time packets sit parked. In this one, we hire three more inspectors instead. Then the engine replays the factory, from that moment forward, under each decision."
+
+**Delivery:** Brighter and a touch quicker. Emphasise "one decision", and give the two "In this one" lines the same rhythm so they feel like a fair contest.
+
+### Scene 5: The payoff (1:23–1:44)
+
+**Feeling:** triumphant at the numbers, then a moment of wonder at the ghosts.
+
+**On screen:** Simulation Results for Park half as long against the factory as it is: the headline metrics, with completion time about 31% shorter and on-time delivery up. Then the view glides to **Ghost futures**: every order's real finish as a solid dot, and its ghost where it would have finished, joined by a faint line. Green diamonds mark what history actually recorded.
+
+**Spoken:** "And the result? Halving parking finishes the work about thirty percent sooner... and on-time delivery jumps from fifty-seven to sixty-two percent. Each solid dot is when an order really finishes. Its ghost... is when it would have finished. And where history already knows, a diamond shows what truly happened."
+
+**Delivery:** A confident lift on the numbers. Then slow down and soften for the ghost lines; "Its ghost..." is the most atmospheric moment in the film.
+
+### Scene 6: The twist (1:44–1:56)
+
+**Feeling:** wry, a gentle surprise that undercuts the obvious answer.
+
+**On screen:** The same results screen, now for Three more inspectors. Completion time is unchanged. Total cost is marked worse, in red.
+
+**Spoken:** "And three more inspectors? Completion doesn't move. Not by a minute. Cost goes up nine percent. More people only help where a stage is actually waiting for capacity."
+
+**Delivery:** A small, knowing smile in the voice. Short sentences, each with its own beat.
+
+### Scene 7: An honest voice (1:56–2:17)
+
+**Feeling:** calm and trustworthy; the AI is the careful one in the room.
+
+**On screen:** The AI Analyst with Claude's stored answer to "Why does halving parking time shorten completion so much?", tagged AI interpretation. The pointer opens **Evidence behind this answer**, and every figure Claude used is listed with its source.
+
+**Spoken:** "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation. Look closely: it says the evidence does not isolate a cause. It refuses to invent one. And if it ever states a number the results can't support, the built-in analyst steps in instead."
+
+**Delivery:** Even and reassuring. Slow down on "Look closely". "It refuses to invent one." is said with quiet pride.
+
+### Scene 8: The proof (2:17–2:34)
+
+**Feeling:** confident but honest; no overselling.
+
+**On screen:** The Accuracy screen: the typical error across four past dates, simulated against recorded. Then the per-date chart and table, with the misses shown as plainly as the hits.
+
+**Spoken:** "But can you trust the engine? A backtest simulates past dates, changing nothing, and compares the result with what was recorded. On one real factory, imported privately, it's within about a fifth on packets finished... and we publish exactly where it's wrong."
+
+**Delivery:** Treat the opening question as the one judges are thinking. End firmly on "exactly where it's wrong"; it is a point of pride, not an apology.
+
+### Scene 9: The close (2:34–2:53)
+
+**Feeling:** warm and uplifting, with a little Halloween magic.
+
+**On screen:** A "Built with Kiro" card: steering rules, eleven specs, hooks and agents. It fades to reveal the ghost futures chart, and as the narrator says "a night theme" the whole screen switches live to the Halloween palette: same chart, same numbers, darker night. The film ends on a card: RealityCheck, the tagline, Kiroween, Frankenstein category, and the repository link.
+
+**Spoken:** "Built spec-first with Kiro: steering rules, eleven specs, and hooks. And for Kiroween, a night theme, with exactly the same contrast. RealityCheck. See the future... before you change the present."
+
+**Delivery:** Unhurried and warm. Pause after "RealityCheck." and let the final line breathe.
 
 ## On screen, never spoken
 
@@ -44,7 +120,7 @@ About 405 words; 2:53 in the generated version.
 
 ## Checks before uploading
 
-- Under 3:00 (aim for 2:45).
+- Under 3:00 (the generated version is 2:53).
 - No real factory names, dates or screens from the private import appear. Only the demonstration factory is
   shown.
 - No API key, `.env` file or terminal with secrets in frame.
