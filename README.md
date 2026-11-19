@@ -55,7 +55,8 @@ estimates under stated assumptions, not guarantees.
   list, implemented task by task with progress notes; spec 11 is the real-factory calibration.
 - **Hooks and agents** ([.kiro/hooks/](.kiro/hooks/), [.kiro/agents/](.kiro/agents/)): checks run on save
   (lint and type-check, module tests, API contract, architecture docs, simulation-engine review) and
-  specialist agents for the engine, the database, the backend, the UI and testing.
+  specialist agents for the engine, the database, the backend, the UI and testing. The full account is in
+  [docs/kiro.md](docs/kiro.md).
 
 ## Principles
 
@@ -77,7 +78,7 @@ estimates under stated assumptions, not guarantees.
 | 6. Frontend | The ten application screens | **Done** |
 | 7. AI intelligence | Provider abstraction, evidence-checked explanations, Q&A, AI Analyst screen | **Done** |
 | 8. Quality and deployment | End-to-end and accessibility suites, recorded outcome after a fork, demonstration guide | **Done** |
-| 9. Real-factory calibration | Routes, parking and job-work stages, handling delays, calibrated demo, ghost futures, haunted stages, Where Time Goes, Accuracy | **In progress** |
+| 9. Real-factory calibration | Routes, parking and job-work stages, handling delays, calibrated demo, ghost futures, haunted stages, Where Time Goes, Accuracy, private backtest of a real factory, public deployment setup | **Done** (public server pending) |
 
 **First time here?** Start it with the two commands below, then follow [docs/demo.md](docs/demo.md): a
 fifteen-minute walkthrough of the operational time machine, from a recorded moment to a simulated decision
@@ -121,6 +122,8 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - [docs/api.md](docs/api.md): API conventions and every endpoint
 - [docs/ai.md](docs/ai.md): the AI analyst: setup, cost, evidence checking, fallback
 - [docs/deploy.md](docs/deploy.md): public deployment: one server, HTTPS, nightly reset, AI spending cap
+- [docs/method.md](docs/method.md): how the real factory was measured, kept private, and what the model leaves out
+- [docs/kiro.md](docs/kiro.md): how the steering, specs, hooks and agents in `.kiro/` shaped the build
 - [docs/accuracy.md](docs/accuracy.md): backtests on the demonstration factory and on one real factory
 - [docs/demo-data.md](docs/demo-data.md): the calibrated demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules
