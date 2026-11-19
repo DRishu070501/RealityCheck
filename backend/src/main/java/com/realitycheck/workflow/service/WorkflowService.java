@@ -104,8 +104,8 @@ public class WorkflowService implements FactoryCountProvider {
     }
 
     /**
-     * Sets stage kinds, delays and the workflow's routes. Not exposed by the API in this release: the
-     * demonstration seed and imports configure them.
+     * Sets stage kinds, delays and the workflow's routes. The demonstration seed configures them, and an
+     * import through {@code PUT /api/workflows/{id}/configuration}.
      *
      * @param behaviours by stage code; stages not named stay as they are
      * @throws ValidationException when a stage or route does not fit the workflow
@@ -114,6 +114,11 @@ public class WorkflowService implements FactoryCountProvider {
     public void configure(UUID workflowId, Map<String, StageBehaviour> behaviours, List<WorkflowRoute> routes) {
         Workflow workflow = workflows.findById(workflowId)
                 .orElseThrow(() -> ApiException.notFound("Workflow", workflowId));
+        for (String code : behaviours.keySet()) {
+            if (workflow.getStages().stream().noneMatch(s -> s.getCode().equals(code))) {
+                throw new ValidationException("stages", "Unknown stage " + code);
+            }
+        }
         try {
             for (WorkflowStage stage : workflow.getStages()) {
                 StageBehaviour behaviour = behaviours.get(stage.getCode());

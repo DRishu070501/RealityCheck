@@ -41,7 +41,7 @@ public class BacktestController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Simulate the factory from past dates, changing nothing, and compare with what was recorded")
     public BacktestResponse create(@Valid @RequestBody CreateBacktestRequest request) {
-        return toResponse(backtestService.run(request.factoryId(), request.forkAts()));
+        return toResponse(backtestService.run(request.factoryId(), request.forkAts(), request.horizonDays()));
     }
 
     @GetMapping("/{id}")

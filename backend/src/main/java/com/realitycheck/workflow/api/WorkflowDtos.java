@@ -67,6 +67,36 @@ public final class WorkflowDtos {
             @NotNull @Min(1) @Max(100_000) Integer unitsPerSlot) {
     }
 
+    /**
+     * Stage kinds, measured delays and routes (spec 11), set by an import before any order is placed. Stages
+     * not named keep their behaviour; the routes replace the workflow's routes.
+     */
+    public record ConfigureWorkflowRequest(
+            @Size(max = 50) List<@NotNull @Valid StageBehaviourRequest> stages,
+            @Size(max = 20) List<@NotNull @Valid RouteRequest> routes) {
+    }
+
+    /**
+     * @param kind            WORKING, PARKING, WAITING or JOB_WORK
+     * @param delayDeciles    holding kinds: ten ascending calendar durations in seconds
+     * @param handlingDeciles WORKING, optional: ten ascending durations a batch stays after processing
+     */
+    public record StageBehaviourRequest(
+            @NotBlank String code,
+            @NotNull @Pattern(regexp = "WORKING|PARKING|WAITING|JOB_WORK") String kind,
+            List<Long> delayDeciles,
+            List<Long> handlingDeciles) {
+    }
+
+    public record RouteRequest(
+            @NotBlank @Size(max = 40) String code,
+            @NotBlank @Size(max = 120) String name,
+            @NotEmpty @Size(max = 50) List<@NotNull @Valid RouteStepRequest> steps) {
+    }
+
+    public record RouteStepRequest(@NotBlank String stageCode, @NotNull @Min(1) @Max(100) Integer visitPercent) {
+    }
+
     public record WorkflowSummaryResponse(UUID id, UUID factoryId, String name, WorkflowStatus status,
             int stageCount) {
     }

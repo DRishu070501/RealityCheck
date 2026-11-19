@@ -93,6 +93,17 @@ class BacktestIT extends ScenarioTestSupport {
         assertThat(chosen.getBody().path("forks").get(0).path("forkAt").asText())
                 .isEqualTo(forks.get(1).path("forkAt").asText());
         assertThat(chosen.getBody().path("forks").get(0)).isEqualTo(forks.get(1));
+
+        // A horizon stops each comparison that many days after its date.
+        ResponseEntity<JsonNode> week = post("/api/backtests", """
+                {"factoryId": "%s", "forkAts": ["%s"], "horizonDays": 2}""".formatted(factory, forkDates.get(0)));
+        assertThat(week.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        JsonNode short0 = week.getBody().path("forks").get(0);
+        assertThat(Instant.parse(short0.path("comparedUntil").asText())).isEqualTo(forkDates.get(0).plusSeconds(2 * 86_400));
+        assertThat(short0.path("cutAtLastEvent").asBoolean()).isFalse();
+        assertThat(post("/api/backtests", """
+                {"factoryId": "%s", "horizonDays": 0}""".formatted(factory)).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test

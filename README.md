@@ -35,7 +35,8 @@ any real name appears.
 - **Accuracy.** A backtest: the factory simulated from past dates with no changes and compared with what was
   recorded. On the demonstration factory the typical error is 19% for packets finished, 4% for median lead
   time and 40% for work in progress by stage (the simulation holds too many packets at polishing), shown as
-  measured.
+  measured. On one real factory's month, imported privately and compared over seven-day windows, it is 19%,
+  44% and 64%: see [docs/accuracy.md](docs/accuracy.md).
 - **The Halloween theme** (Settings, Appearance): same data and contrast guarantees, darker night.
 
 ### What the real data said
@@ -119,6 +120,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 - [docs/setup.md](docs/setup.md): prerequisites, configuration, commands, troubleshooting
 - [docs/api.md](docs/api.md): API conventions and every endpoint
 - [docs/ai.md](docs/ai.md): the AI analyst: setup, cost, evidence checking, fallback
+- [docs/accuracy.md](docs/accuracy.md): backtests on the demonstration factory and on one real factory
 - [docs/demo-data.md](docs/demo-data.md): the calibrated demonstration factory and how to reset it
 - [.kiro/steering/](.kiro/steering/): product, technology, architecture and simulation rules
 - [.kiro/specs/](.kiro/specs/): requirements, design and tasks for each feature

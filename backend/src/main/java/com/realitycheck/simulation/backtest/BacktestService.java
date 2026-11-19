@@ -39,6 +39,7 @@ public class BacktestService {
 
     /** Enough to cover a month weekly with room to spare, while keeping a request within seconds. */
     static final int MAX_FORKS = 8;
+    static final int MAX_HORIZON_DAYS = 90;
     static final int DEFAULT_FORKS = 4;
 
     private static final Logger log = LoggerFactory.getLogger(BacktestService.class);
@@ -68,6 +69,18 @@ public class BacktestService {
      */
     @Transactional
     public StoredBacktest run(UUID factoryId, List<Instant> forkAts) {
+        return run(factoryId, forkAts, null);
+    }
+
+    /**
+     * @param horizonDays when set, each comparison stops this many days after its date at the latest (1 to
+     *                    {@value #MAX_HORIZON_DAYS}); otherwise at the simulated end or the last recorded event
+     */
+    @Transactional
+    public StoredBacktest run(UUID factoryId, List<Instant> forkAts, Integer horizonDays) {
+        if (horizonDays != null && (horizonDays < 1 || horizonDays > MAX_HORIZON_DAYS)) {
+            throw new ValidationException("horizonDays", "must be 1 to " + MAX_HORIZON_DAYS);
+        }
         Instant first = recorded.firstEventAt(factoryId);
         Instant last = recorded.lastEventAt(factoryId);
         if (first == null) {
@@ -85,7 +98,7 @@ public class BacktestService {
                 SimulationEngine.ALGORITHM_VERSION));
         List<ForkComparison> comparisons = new ArrayList<>();
         for (Instant forkAt : dates) {
-            ForkComparison comparison = compare(factoryId, forkAt, last);
+            ForkComparison comparison = compare(factoryId, forkAt, last, horizonDays);
             forks.save(new BacktestFork(UUID.randomUUID(), now, backtest.getId(), comparisons.size(), comparison));
             comparisons.add(comparison);
         }
@@ -110,7 +123,7 @@ public class BacktestService {
                 .map(BacktestFork::getResult).toList());
     }
 
-    private ForkComparison compare(UUID factoryId, Instant forkAt, Instant lastEvent) {
+    private ForkComparison compare(UUID factoryId, Instant forkAt, Instant lastEvent, Integer horizonDays) {
         Snapshot snapshot = assembler.build(factoryId, forkAt, true);
         SimulationResult result;
         try {
@@ -121,6 +134,10 @@ public class BacktestService {
         Instant simulatedEnd = Instant.ofEpochSecond(result.endTime());
         boolean cut = lastEvent.isBefore(simulatedEnd);
         Instant until = cut ? lastEvent : simulatedEnd;
+        if (horizonDays != null && forkAt.plus(Duration.ofDays(horizonDays)).isBefore(until)) {
+            until = forkAt.plus(Duration.ofDays(horizonDays));
+            cut = false;
+        }
         Set<UUID> ids = snapshot.batches().stream().map(BatchSnapshot::id).collect(Collectors.toSet());
         return BacktestComparison.compare(snapshot, result, until, cut, recorded.at(factoryId, until, ids));
     }

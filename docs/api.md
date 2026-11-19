@@ -211,10 +211,25 @@ A workflow is an ordered list of stages. A factory has at most one `ACTIVE` work
 | `delayDeciles` | Holding kinds only: ten calendar durations in seconds, ascending; each batch is held for one of them |
 | `handlingDeciles` | Working stages, when set: ten calendar durations a batch stays after processing, its people already free |
 
-Kinds, delays and routes are set by the demonstration seed or an import; this release does not edit them
-through the API. A workflow may have **routes**: ordered subsets of its stages, with the share of batches
-that visit each optional step. A batch may follow one (`routeCode` when the order is created); without one
-it visits every stage in sequence.
+Kinds, delays and routes are set by the demonstration seed, or by an import through
+`PUT /api/workflows/{id}/configuration` before any order is placed; the screens do not edit them. A workflow
+may have **routes**: ordered subsets of its stages, with the share of batches that visit each optional step.
+A batch may follow one (`routeCode` when the order is created); without one it visits every stage in
+sequence.
+
+```json
+{ "stages": [
+    { "code": "PARKING", "kind": "PARKING", "delayDeciles": [0, 60, 60, 120, 120, 180, 240, 300, 360, 600] },
+    { "code": "CUTTING", "kind": "WORKING", "handlingDeciles": [0, 0, 0, 0, 60, 60, 60, 120, 120, 240] } ],
+  "routes": [ { "code": "R1", "name": "Route one", "steps": [
+    { "stageCode": "INWARD", "visitPercent": 100 }, { "stageCode": "PARKING", "visitPercent": 40 },
+    { "stageCode": "CUTTING", "visitPercent": 100 } ] } ] }
+```
+
+Stages not named keep their behaviour; `routes` replaces the workflow's routes. Route steps are in stage
+sequence and the first and last are visited by every batch (`visitPercent` 100). The answer is the
+workflow; an unknown stage, a delay that is not ten ascending non-negative durations, or a route out of
+order answers 400.
 
 Decimals are strings so that no precision is lost in JavaScript; requests accept strings or numbers. Stage
 codes are upper-case letters, digits and underscores, unique in the workflow. Each requirement must name an
@@ -683,7 +698,7 @@ Excerpts from a real comparison (baseline against "Introduce an additional shift
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/backtests` | `{"factoryId", "forkAts"?}`: simulate from each past date with no changes and compare with recorded history; `201` with the stored backtest |
+| `POST /api/backtests` | `{"factoryId", "forkAts"?, "horizonDays"?}`: simulate from each past date with no changes and compare with recorded history; `201` with the stored backtest |
 | `GET /api/backtests/{id}` | A stored backtest |
 | `GET /api/backtests?factoryId=` | The factory's latest backtest, as a list of at most one |
 
@@ -694,7 +709,9 @@ the start of a day in the factory's time zone. A factory with no recorded histor
 For each date the baseline snapshot is built as for a scenario that includes later orders (so the lots that
 really arrived after the date arrive in the simulation too), the engine runs with no changes, and the result is
 compared with recorded history over `[forkAt, comparedUntil]`, where `comparedUntil` is the simulation's end or
-the last recorded event if that came first (`cutAtLastEvent: true`). Both sides cover the same batches: those
+the last recorded event if that came first (`cutAtLastEvent: true`). With `horizonDays` (1 to 90), each
+comparison also stops at most that many days after its date; use it when the recorded history holds only
+packets that finished, so that something is still in progress at the end of the window. Both sides cover the same batches: those
 unfinished at the date and those arriving before `comparedUntil`.
 
 - `finished`: batches that finished their path in the window.

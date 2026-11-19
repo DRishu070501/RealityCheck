@@ -185,6 +185,52 @@ class WorkflowApiIT extends IntegrationTest {
     }
 
     @Test
+    void anImportSetsStageKindsDelaysAndRoutes() {
+        String id = post("/api/workflows", """
+                {"factoryId": "%s", "name": "Imported", "status": "ACTIVE", "stages": [%s, %s, %s]}"""
+                .formatted(factoryId, stage("INWARD", 1, "[]"), stage("PARKING", 2, "[]"), stage("CUTTING", 3, "[]")))
+                .getBody().path("id").asText();
+
+        ResponseEntity<JsonNode> configured = put("/api/workflows/" + id + "/configuration", """
+                {"stages": [
+                   {"code": "PARKING", "kind": "PARKING", "delayDeciles": [0, 60, 60, 120, 120, 180, 240, 300, 360, 600]},
+                   {"code": "CUTTING", "kind": "WORKING", "handlingDeciles": [0, 0, 0, 0, 60, 60, 60, 120, 120, 240]}],
+                 "routes": [{"code": "R1", "name": "Route one", "steps": [
+                   {"stageCode": "INWARD", "visitPercent": 100}, {"stageCode": "PARKING", "visitPercent": 40},
+                   {"stageCode": "CUTTING", "visitPercent": 100}]}]}""");
+
+        assertThat(configured.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode stages = configured.getBody().path("stages");
+        assertThat(stages.get(1).path("kind").asText()).isEqualTo("PARKING");
+        assertThat(stages.get(1).path("delayDeciles").get(9).asLong()).isEqualTo(600);
+        assertThat(stages.get(2).path("handlingDeciles").get(9).asLong()).isEqualTo(240);
+
+        // A batch may now follow the route.
+        ResponseEntity<JsonNode> order = post("/api/orders", """
+                {"factoryId": "%s", "orderNumber": "L0001", "priority": 3, "placedAt": "2026-01-05T04:00:00Z",
+                 "batches": [{"stoneCount": 10, "roughCarats": "12", "routeCode": "R1"}]}""".formatted(factoryId));
+        assertThat(order.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    void rejectsAConfigurationThatDoesNotFitTheWorkflow() {
+        String id = post("/api/workflows", twoStageWorkflow("Main", "ACTIVE")).getBody().path("id").asText();
+
+        assertThat(put("/api/workflows/" + id + "/configuration", """
+                {"stages": [{"code": "NOPE", "kind": "PARKING", "delayDeciles": [0,0,0,0,0,0,0,0,0,0]}]}""")
+                .getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(put("/api/workflows/" + id + "/configuration", """
+                {"stages": [{"code": "CUTTING", "kind": "PARKING", "delayDeciles": [5, 1]}]}""")
+                .getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(put("/api/workflows/" + id + "/configuration", """
+                {"routes": [{"code": "BACK", "name": "Backwards", "steps": [
+                  {"stageCode": "POLISHING", "visitPercent": 100}, {"stageCode": "CUTTING", "visitPercent": 100}]}]}""")
+                .getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(get("/api/workflows/" + id).getBody().path("stages").get(0).path("kind").asText())
+                .isEqualTo("WORKING");
+    }
+
+    @Test
     void anUnknownWorkflowIsNotFound() {
         assertThat(get("/api/workflows/00000000-0000-0000-0000-000000000001").getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);

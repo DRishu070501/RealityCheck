@@ -49,18 +49,21 @@ def load(extract: Path, grouping: dict[int, dict]) -> dict[str, pd.DataFrame]:
     }
 
 
-def lineage_intervals(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Every dispatched piece's path from inward to its end, as (piece, stage, kind, hours) intervals."""
+def piece_paths(data: dict[str, pd.DataFrame]) -> list[dict]:
+    """Every dispatched piece's dated path from inward to its end.
+
+    Each path is {piece, packetType, root, start, end, visits}, where visits are (dept, arrive, leave)
+    clipped to [start, end], in time order, END departments left out.
+    """
     g = data["grouping"].set_index("dept")
     kind_of = g["kind"].to_dict()
-    stage_of = g["stage"].to_dict()
     h = data["history"]
     final = h[(h.actionId == FINAL_DISPATCH_ACTION) & (h.status == 1)].groupby("packetId").createdDate.min()
     pieces = data["dispatched"].copy()
     pieces["finalDispatch"] = pieces.id.map(final)
     by_packet = dict(tuple(data["routes"].sort_values(["packetId", "createdDate", "id"]).groupby("packetId")))
 
-    rows, leads = [], []
+    paths = []
     for p in pieces.itertuples():
         if pd.isna(p.finalDispatch) or pd.isna(p.lotCreation):
             continue
@@ -86,20 +89,33 @@ def lineage_intervals(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.D
         if end <= lo:
             continue
         leave = np.append(sent[1:], end)
-        parked = 0.0
+        visits = []
         for dept, a, l in zip(depts, arrive, leave):
             a2, l2 = max(a, lo), min(l, end)
-            if l2 <= a2:
+            if l2 <= a2 or kind_of.get(dept) == "END":
                 continue
-            hours = (l2 - a2) / np.timedelta64(1, "h")
+            visits.append((int(dept), a2, l2))
+        paths.append({"piece": p.id, "packetType": p.packetType, "root": p.root, "start": lo, "end": end,
+                      "visits": visits})
+    return paths
+
+
+def lineage_intervals(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Every dispatched piece's path from inward to its end, as (piece, stage, kind, hours) intervals."""
+    g = data["grouping"].set_index("dept")
+    kind_of = g["kind"].to_dict()
+    stage_of = g["stage"].to_dict()
+    rows, leads = [], []
+    for path in piece_paths(data):
+        parked = 0.0
+        for dept, a, l in path["visits"]:
+            hours = (l - a) / np.timedelta64(1, "h")
             kind = kind_of.get(dept, "OTHER")
-            if kind == "END":
-                continue
-            rows.append((p.id, p.packetType, stage_of.get(dept, "Other"), kind, hours))
+            rows.append((path["piece"], path["packetType"], stage_of.get(dept, "Other"), kind, hours))
             if kind == "PARKING":
                 parked += hours
-        total = (end - lo) / np.timedelta64(1, "h")
-        leads.append((p.id, p.packetType, total / 24, (total - parked) / 24, parked / 24))
+        total = (path["end"] - path["start"]) / np.timedelta64(1, "h")
+        leads.append((path["piece"], path["packetType"], total / 24, (total - parked) / 24, parked / 24))
     intervals = pd.DataFrame(rows, columns=["piece", "packetType", "stage", "kind", "hours"])
     lead = pd.DataFrame(leads, columns=["piece", "packetType", "leadDays", "manufacturingDays", "parkedDays"])
     return intervals, lead

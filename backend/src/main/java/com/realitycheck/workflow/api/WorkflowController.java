@@ -2,7 +2,16 @@ package com.realitycheck.workflow.api;
 
 import com.realitycheck.common.api.PageResponse;
 import com.realitycheck.common.api.Paging;
+import com.realitycheck.workflow.api.WorkflowDtos.ConfigureWorkflowRequest;
 import com.realitycheck.workflow.api.WorkflowDtos.CreateWorkflowRequest;
+import com.realitycheck.workflow.api.WorkflowDtos.RouteRequest;
+import com.realitycheck.workflow.api.WorkflowDtos.StageBehaviourRequest;
+import com.realitycheck.workflow.domain.WorkflowRoute;
+import com.realitycheck.workflow.service.WorkflowService.StageBehaviour;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.web.bind.annotation.PutMapping;
 import com.realitycheck.workflow.api.WorkflowDtos.StageResponse;
 import com.realitycheck.workflow.api.WorkflowDtos.WorkflowResponse;
 import com.realitycheck.workflow.api.WorkflowDtos.WorkflowSummaryResponse;
@@ -60,5 +69,22 @@ public class WorkflowController {
     public ResponseEntity<WorkflowResponse> create(@Valid @RequestBody CreateWorkflowRequest request) {
         WorkflowResponse created = workflowService.create(request);
         return ResponseEntity.created(URI.create("/api/workflows/" + created.id())).body(created);
+    }
+
+    @PutMapping(path = "/{id}/configuration", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set stage kinds, measured delays and routes; meant for an import, before orders exist")
+    public WorkflowResponse configure(@PathVariable UUID id, @Valid @RequestBody ConfigureWorkflowRequest request) {
+        Map<String, StageBehaviour> behaviours = new LinkedHashMap<>();
+        for (StageBehaviourRequest stage : request.stages() == null ? List.<StageBehaviourRequest>of()
+                : request.stages()) {
+            behaviours.put(stage.code(), new StageBehaviour(stage.kind(), stage.delayDeciles(),
+                    stage.handlingDeciles()));
+        }
+        List<WorkflowRoute> routes = (request.routes() == null ? List.<RouteRequest>of() : request.routes()).stream()
+                .map(r -> new WorkflowRoute(r.code(), r.name(), r.steps().stream()
+                        .map(s -> new WorkflowRoute.Step(s.stageCode(), s.visitPercent())).toList()))
+                .toList();
+        workflowService.configure(id, behaviours, routes);
+        return workflowService.get(id);
     }
 }

@@ -13,8 +13,15 @@ public final class BacktestDtos {
     private BacktestDtos() {
     }
 
-    /** @param forkAts past instants to simulate from; empty or absent for dates spread over the history */
-    public record CreateBacktestRequest(@NotNull UUID factoryId, List<Instant> forkAts) {
+    /**
+     * @param forkAts     past instants to simulate from; empty or absent for dates spread over the history
+     * @param horizonDays optional: compare at most this many days after each date, 1 to 90
+     */
+    public record CreateBacktestRequest(@NotNull UUID factoryId, List<Instant> forkAts, Integer horizonDays) {
+
+        public CreateBacktestRequest(UUID factoryId, List<Instant> forkAts) {
+            this(factoryId, forkAts, null);
+        }
     }
 
     /**

@@ -158,7 +158,7 @@ Tasks 3–5 (measure) and 6–7 (engine) run in parallel; everything else waits 
     component test with a captured fixture.
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 11. Local import of factory A and private backtest
+- [x] 11. Local import of factory A and private backtest
   - Depends on 3, 7, 9. `tools/import/` (Python) writes factory A, anonymised, into a **local** RealityCheck
     database through the public API: stages from the grouping, worker pools from workers-per-day, lots as
     orders, packets as batches, movements as events. Names → codes (`D01`, `W017`, `L0042`).
@@ -308,6 +308,22 @@ because the simulation queues packets at polishing that were recorded further on
 they are. Tests: `BacktestComparisonTest` (hand-worked), `BacktestIT` (window cut at the last event, errors
 finite, stored as computed, a date outside history refused), `AccuracyPage.test.tsx` with a captured fixture,
 the journey (step 13) and the accessibility suite.
+
+Task 11 (19 November): `tools/import/plan.py` turns the extracts into an anonymised plan in `local/` (lots as
+codes `L0001`…, generic stages, crews instead of people; one piece is one batch from its lot's arrival, laid
+onto route FULL or TOPS by the longest in-order chain of its visits); `load.py` posts it through the API to a
+separate local stack (`docker compose -p rc-private`, no demo, no AI key) and refuses any request containing a
+name from `local/names.txt`; `summarise.py` prints rounded, dateless figures. The API gained
+`PUT /api/workflows/{id}/configuration` (kinds, delays, routes; for imports) and `horizonDays` on
+`POST /api/backtests`. Not in the plan: real department ids, people, weights (every batch is one stone of one
+carat). One lot in five was imported (about 6,000 pieces, 100,000 events). The extracts hold only pieces
+dispatched in the month, so compared to the last event nothing is left in progress on the recorded side
+(finished 36%, work in progress undefined); over seven-day windows from 1, 8, 15 and 22 October the typical
+error is finished 19%, lead time 44% (simulation faster), work in progress 64% (too many at imaging and
+inspection). Recorded in `docs/accuracy.md`; detailed results stay in `local/`. Not tuned. Two real department
+names found in committed files during this task were replaced; they remain in unpushed history. Tests:
+`tools/import/tests` (fake 200-row extract; names check when `local/names.txt` exists), `WorkflowApiIT`
+(configuration), `BacktestIT` (horizon).
 
 Factory B: its October 2026 data is extracted locally and its draft grouping is in the conversation record,
 but nothing from it is used in this release.
