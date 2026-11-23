@@ -102,6 +102,18 @@ a human narrator should follow the feeling described for each scene. Times are f
 
 **Delivery:** Treat the opening question as the one judges are thinking. End firmly on "exactly where it's wrong"; it is a point of pride, not an apology.
 
+### Insert: Your own data (about 15 s, between Scenes 8 and 9)
+
+**Feeling:** practical and inviting; the answer to "could my factory use this?".
+
+**On screen:** The Import Data screen (`local/video/import-data.mp4`, recorded by `frontend/scripts/import-clip.mjs`): the two templates download, the orders and movements files are chosen and read, Check reports "Ready to import 2 orders, 3 packets, 4 stage visits", and the pointer comes to rest on Import.
+
+**Spoken:** "And any factory can bring its own history. Two spreadsheets: orders, and where each packet went. One check runs every row through the same rules as live recording... and one click makes it history."
+
+**Delivery:** Brisk and light after the weight of Scene 8. A small lift on "one click".
+
+**Timing:** the film is 2:53, and Devpost asks for three minutes or less. Make room by trimming about 10 seconds elsewhere, for example the pause after the creature's five parts in Scene 2 or the glide in Scene 5.
+
 ### Scene 9: The close (2:34–2:53)
 
 **Feeling:** warm and uplifting, with a little Halloween magic.

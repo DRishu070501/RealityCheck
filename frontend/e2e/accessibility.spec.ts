@@ -14,6 +14,7 @@ const PAGES = [
   { path: '/workflow', heading: 'Workflow' },
   { path: '/resources', heading: 'Resources' },
   { path: '/orders', heading: 'Production Orders' },
+  { path: '/import', heading: 'Import Data' },
   { path: '/timeline', heading: 'Operational Timeline' },
   { path: '/insights', heading: 'Where Time Goes' },
   { path: '/scenarios', heading: 'Scenario Lab' },

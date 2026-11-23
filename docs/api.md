@@ -694,6 +694,45 @@ Excerpts from a real comparison (baseline against "Introduce an additional shift
 
 (Excerpt: other metrics, stages and resources omitted.)
 
+### Import
+
+A factory's own orders and packet movements, as read from two CSV files by the Import Data screen.
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/imports` | Create the orders and replay the movements, all or nothing. With `"dryRun": true` everything is done and then rolled back |
+
+```json
+{ "factoryId": "...", "dryRun": true,
+  "orders": [
+    { "row": 2, "orderNumber": "ORD-1001", "customerRef": "Buyer A", "priority": 3,
+      "placedAt": "2026-10-01T03:30:00Z", "dueAt": "2026-10-20T12:30:00Z", "dispatchedAt": null,
+      "packet": "P1", "stones": 40, "carats": "52.5", "route": null } ],
+  "movements": [
+    { "row": 2, "orderNumber": "ORD-1001", "packet": "P1", "stage": "CUTTING",
+      "startedAt": "2026-10-01T04:30:00Z", "completedAt": "2026-10-02T10:30:00Z",
+      "stonesOut": "40", "caratsOut": "30.1" } ] }
+```
+
+`row` is the line in the file, so a problem can point at it. An orders row is one packet; rows with the same
+order number (any case) form one order, and their order-level fields must agree or be blank. `packet` is a
+label matched by the movements; blank packets are numbered in order. A movements row is one visit of a
+packet to a stage, named by code or name. Each packet's visits are replayed in order of `startedAt`
+through the same rules as `POST /api/events`: a start, then a completion that queues it at the stage of its
+next visit. A blank `completedAt` leaves the packet at that stage (only its last visit may), and blank
+`stonesOut` / `caratsOut` mean nothing was lost. `dispatchedAt` dispatches a finished order. Priority
+defaults to 3. At most 5,000 order rows and 20,000 movement rows.
+
+The answer is 200 whether or not the rows were accepted:
+
+```json
+{ "dryRun": true, "saved": false, "orders": 2, "packets": 3, "movements": 5, "dispatched": 1,
+  "firstEventAt": "...", "lastEventAt": "...", "error": null }
+```
+
+With `error` (`{ "file": "movements", "row": 7, "message": "..." }`), the first row that broke a rule,
+nothing was saved and the counts are zero. A missing or oversized `orders` list is 400.
+
 ### Backtest
 
 | Endpoint | Purpose |

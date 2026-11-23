@@ -6,6 +6,8 @@ RealityCheck is an operational time machine for a factory. It replays what reall
 any recorded moment, change a decision, and watch the other future play out beside the one that happened.
 The first implementation is diamond manufacturing.
 
+**Watch the 3-minute demo:** https://youtu.be/YBT9XyOghP4
+
 ![Ghost futures: each order's completion beside its ghost under the alternative decision](docs/screenshots/05-ghost-futures.png)
 
 It is a Kiroween entry in the **Frankenstein** category: five parts that were never meant to live in one
@@ -19,7 +21,7 @@ body, stitched together so that each keeps its own nature.
 | **The heart:** a deterministic engine | A discrete-event simulator in plain Java: calendars, worker and machine pools, routes, parking, outside job work, handling delays, yields, cost, bottleneck evidence. Same input and version, same result, to the second. | Guess, or use randomness |
 | **The blood:** a real factory's patterns | A Python pipeline reads one real diamond factory's month of movements **on the owner's machine only**, and publishes rounded, nameless patterns (`calibration.json`). The demo factory is built from them and reproduces the measured lead times within 15%. | Publish a name, an identifier or a raw row |
 | **The voice:** an AI analyst | Claude explains results, recommends and answers questions, given only the stored evidence. Every number it writes is checked against the stored results; an answer that fails is replaced by a built-in analyst. | Calculate a number |
-| **The face:** a React app | Twelve screens over the same API, every figure tagged Actual, Simulated or AI interpretation, with a table behind every chart. | Show a number without its source |
+| **The face:** a React app | Thirteen screens over the same API, every figure tagged Actual, Simulated or AI interpretation, with a table behind every chart. | Show a number without its source |
 
 The stitches are contracts, not shared code: the engine sees only a frozen **snapshot** (versioned, hashed,
 stored with each run); the analyst sees only **evidence keys** and its numbers are validated against them;
@@ -86,6 +88,21 @@ estimates under stated assumptions, not guarantees.
 **First time here?** Start it with the two commands below, then follow [docs/demo.md](docs/demo.md): a
 fifteen-minute walkthrough of the operational time machine, from a recorded moment to a simulated decision
 and the AI analyst's explanation.
+
+## Bring your own data
+
+**Import Data** takes two CSV files, exported from a production system or a spreadsheet:
+
+- **orders**: one row per packet: `order_number, customer_ref, priority, placed_at, due_at, dispatched_at,
+  packet, stones, carats, route`
+- **movements**: one row per stage a packet visited: `order_number, packet, stage, started_at,
+  completed_at, stones_out, carats_out`
+
+The screen offers both templates and checks every row's format at once. **Check** then runs the whole import
+through the same rules as live recording and undoes it, naming the file and row of any problem. **Import**
+saves it all or nothing. Imported rows are recorded history like any other, so Where Time Goes, the
+timeline, scenarios and backtests work on them straight away. The stages must exist in the active workflow.
+For a continuous feed, a system can post the same rows to `POST /api/imports` ([docs/api.md](docs/api.md)).
 
 ## Run it with Docker
 

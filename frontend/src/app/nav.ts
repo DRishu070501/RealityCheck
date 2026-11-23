@@ -10,6 +10,7 @@ import {
   Hourglass,
   LayoutDashboard,
   Settings,
+  Upload,
   Workflow,
   type LucideIcon,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/workflow', label: 'Workflow', icon: Workflow },
   { path: '/resources', label: 'Resources', icon: Boxes },
   { path: '/orders', label: 'Production Orders', icon: Activity },
+  { path: '/import', label: 'Import Data', icon: Upload },
   { path: '/timeline', label: 'Operational Timeline', icon: History },
   { path: '/insights', label: 'Where Time Goes', icon: Hourglass },
   { path: '/scenarios', label: 'Scenario Lab', icon: FlaskConical },

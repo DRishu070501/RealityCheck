@@ -45,6 +45,7 @@ const screenRoutes: RouteObject[] = [
   { path: '/resources', element: screen(() => import('@/features/resources/ResourcesPage'), 'ResourcesPage') },
   { path: '/orders', element: screen(() => import('@/features/orders/OrdersPage'), 'OrdersPage') },
   { path: '/orders/:id', element: screen(() => import('@/features/orders/OrderDetailPage'), 'OrderDetailPage') },
+  { path: '/import', element: screen(() => import('@/features/import/ImportPage'), 'ImportPage') },
   { path: '/timeline', element: screen(() => import('@/features/timeline/TimelinePage'), 'TimelinePage') },
   { path: '/insights', element: screen(() => import('@/features/insights/InsightsPage'), 'InsightsPage') },
   { path: '/scenarios', element: screen(() => import('@/features/scenarios/ScenariosPage'), 'ScenariosPage') },

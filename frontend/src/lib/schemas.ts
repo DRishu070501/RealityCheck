@@ -544,3 +544,21 @@ export const factoryOverviewSchema = z.object({
   source: z.literal('ACTUAL'),
 })
 export type FactoryOverview = z.infer<typeof factoryOverviewSchema>
+
+/* ---- Import --------------------------------------------------------------------------------- */
+
+/** What `POST /api/imports` created, or would create on a dry run. With `error`, nothing was saved. */
+export const importResultSchema = z.object({
+  dryRun: z.boolean(),
+  saved: z.boolean(),
+  orders: z.number().int().nonnegative(),
+  packets: z.number().int().nonnegative(),
+  movements: z.number().int().nonnegative(),
+  dispatched: z.number().int().nonnegative(),
+  firstEventAt: instant.nullable(),
+  lastEventAt: instant.nullable(),
+  error: z
+    .object({ file: z.enum(['orders', 'movements']), row: z.number().int(), message: z.string() })
+    .nullable(),
+})
+export type ImportResult = z.infer<typeof importResultSchema>

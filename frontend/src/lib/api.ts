@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { insightSchema, type AskInput, type InsightInput } from '@/lib/aiSchemas'
+import type { MovementRow, OrderRow } from '@/lib/importCsv'
 import {
   availabilityWindowSchema,
   backtestSchema,
@@ -11,6 +12,7 @@ import {
   factorySchema,
   factoryStateSchema,
   factorySummarySchema,
+  importResultSchema,
   insightsSchema,
   orderDetailSchema,
   orderSchema,
@@ -396,6 +398,11 @@ export const api = {
       (await request(`/api/backtests${query({ factoryId })}`, z.array(backtestSchema), { signal }))[0] ?? null,
     /** Simulates from past dates with no changes and compares with what was recorded; dates spread over the history. */
     run: (factoryId: string) => request('/api/backtests', backtestSchema, { method: 'POST', body: { factoryId } }),
+  },
+  imports: {
+    /** Imports orders and packet movements all or nothing; with `dryRun` everything is checked and nothing saved. */
+    run: (body: { factoryId: string; dryRun: boolean; orders: OrderRow[]; movements: MovementRow[] }) =>
+      request('/api/imports', importResultSchema, { method: 'POST', body }),
   },
   demo: {
     /** Erases all data and re-creates the demonstration factory. Answers 404 when disabled. */
