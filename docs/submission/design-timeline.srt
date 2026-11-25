@@ -1,0 +1,393 @@
+1
+00:00:00,000 --> 00:00:02,389
+[NO VOICE]
+Opening. Black. The RealityCheck diamond icon glints in with fine dust particles, then the Overview dashboard fades up, blurred, at 140% on the "Active orders 56" tile, and pulls into focus.
+
+2
+00:00:02,389 --> 00:00:04,538
+VOICE: "Seventeen days."
+SCREEN: Overview (screenshot 01-overview), dark theme.
+CAMERA: Starts tight at 140% on the "Active orders 56" tile, slow push to 150%.
+CURSOR: Hidden.
+MOTION: A large "17 days" counter rolls up from 0 to 17 beside the tile in big display type, landing exactly on "days".
+
+3
+00:00:05,129 --> 00:00:12,041
+VOICE: "That's how long a rough diamond packet takes to reach dispatch in this factory... yet people work on it for only a few hours."
+SCREEN: Overview, scrolling to "Work at each stage".
+CAMERA: Smooth pull-out from 150% to 100% over 2 s, then a slow pan down to the stage cards.
+CURSOR: Enters from bottom right on a curved path and glides left to right along Stage 1 to Stage 8.
+MOTION: Each stage card lifts as the cursor passes (hover). A small glowing packet travels card to card. On "only a few hours" a split bar appears: a long grey 17-day bar and a tiny bright "working" sliver.
+
+4
+00:00:12,449 --> 00:00:14,225
+VOICE: "So where does all that time go?"
+SCREEN: Overview, "Work at each stage".
+CAMERA: Push in from 100% to 125% on the Stage 6 "Rough store (parked)" card.
+CURSOR: Stops on the Stage 6 card and rests there.
+MOTION: Card hovers: lifts, amber border glow. Its Queued and In-progress numbers pulse once. Other cards dim to 60%.
+
+5
+00:00:14,701 --> 00:00:18,460
+VOICE: "And what if you could go back to last week... and change one decision?"
+SCREEN: Overview, top: "Production now" header.
+CAMERA: Pull back to 100% and drift up to the header.
+CURSOR: Moves up to the date "Thu, 19 Nov 2026" in the Production now header.
+MOTION: Rewind effect: thin scan lines and a slight colour shift sweep the screen; the date spins backwards like a flip clock to "Fri, 13 Nov". On "change one decision" one stage card flips over like a switch.
+
+6
+00:00:18,933 --> 00:00:22,579
+VOICE: "Meet RealityCheck: a time machine for the factory floor."
+SCREEN: Overview, top-left logo.
+CAMERA: Glide to the top-left; the logo scales up to centre screen.
+CURSOR: Hovers the RealityCheck logo: logo glints.
+MOTION: The header tagline "See the future before you change the present." types on. The logo flies to centre and grows into a title, ready for the cut.
+
+7
+00:00:22,579 --> 00:00:23,235
+[NO VOICE]
+Transition. The logo fills the frame; a lightning flicker cuts to the dark title card.
+
+8
+00:00:23,235 --> 00:00:24,991
+VOICE: "It's a Frankenstein."
+SCREEN: Dark title card: "RealityCheck: a Frankenstein of five parts".
+CAMERA: Locked off, very slow push 100% to 105%.
+CURSOR: Hidden on title cards.
+MOTION: A lightning flicker lights the title; a stitched seam draws across it left to right.
+
+9
+00:00:25,707 --> 00:00:28,517
+VOICE: "Five parts that were never meant to share a body."
+SCREEN: Title card, five empty panels arranged like stitched body parts.
+CAMERA: Pull back to fit all five panels.
+CURSOR: Hidden.
+MOTION: Five outlined panels draw on one after another, edges sewn with stitch marks. They stay empty and dim.
+
+10
+00:00:29,262 --> 00:00:31,782
+VOICE: "A history that can never change the past."
+SCREEN: Panel 1 lights: "Skeleton: append-only history".
+CAMERA: Small push towards panel 1.
+CURSOR: Hidden.
+MOTION: Event rows stack downwards inside the panel; a lock icon snaps shut on "never change the past".
+
+11
+00:00:32,358 --> 00:00:34,817
+VOICE: "A simulation engine that never guesses."
+SCREEN: Panel 2 lights: "Heart: deterministic simulation engine".
+CAMERA: Slide across to panel 2.
+CURSOR: Hidden.
+MOTION: A heartbeat line pulses in a perfectly even rhythm; a die icon is crossed out on "never guesses".
+
+12
+00:00:35,333 --> 00:00:37,945
+VOICE: "Patterns from a real factory's month of data."
+SCREEN: Panel 3 lights: "Blood: a real factory's patterns".
+CAMERA: Slide across to panel 3.
+CURSOR: Hidden.
+MOTION: Glowing lines flow through the panel like veins. A small tag fades in: "rounded, nameless". Bottom-left caption (small, not spoken): "Demonstration factory: synthetic, calibrated on rounded patterns from one real factory." Keep it on screen for this cue and the next.
+
+13
+00:00:38,506 --> 00:00:41,515
+VOICE: "An AI analyst that is forbidden to calculate."
+SCREEN: Panel 4 lights: "Voice: the AI analyst".
+CAMERA: Slide across to panel 4.
+CURSOR: Hidden.
+MOTION: A calculator icon appears and a red "FORBIDDEN" stamp slams onto it on the word "forbidden", with a small shake.
+
+14
+00:00:41,994 --> 00:00:46,021
+VOICE: "And one app, where every number tells you exactly where it came from."
+SCREEN: Panel 5 lights: "Face: one app where every number is tagged".
+CAMERA: Pull out to show all five panels together.
+CURSOR: Hidden.
+MOTION: A mini app frame inside panel 5: tags "Actual", "Simulated" and "AI interpretation" pop onto numbers one by one. Then a spark of lightning runs through all five panels and they stitch together into one.
+
+15
+00:00:46,021 --> 00:00:47,087
+[NO VOICE]
+Transition. The stitched body zooms into panel 5's little app, which match-cuts into the real app.
+
+16
+00:00:47,087 --> 00:00:49,006
+VOICE: "Start with what really happened."
+SCREEN: Where Time Goes (screenshot 06-where-time-goes).
+CAMERA: Starts at 100%; settles on the page header.
+CURSOR: Clicks "Where Time Goes" in the sidebar: hover highlight, click ripple.
+MOTION: The page slides in from the right. The "Actual" badge pulses once.
+
+17
+00:00:49,600 --> 00:00:53,154
+VOICE: "Packets spend a huge share of their lives... parked in the rough store."
+SCREEN: Where Time Goes, bar chart of where packet time is spent.
+CAMERA: Zoom 100% to 130% into the chart, tracking the purple bar's tip as it grows.
+CURSOR: Hovers the long purple "held" bar for the rough store; a tooltip opens.
+MOTION: Bars grow from zero, staggered; the purple rough-store bar grows last and longest. Hold still on the "..." pause, then the bar finishes on "parked in the rough store".
+
+18
+00:00:53,654 --> 00:01:00,071
+VOICE: "On the workflow, these are the haunted stages: where packets lose the most time, with nobody working on them."
+SCREEN: Workflow (screenshot 02-haunted-stages), scrolling to "Haunted stages".
+CAMERA: Smooth scroll down; settles at 110% on the Haunted stages panel.
+CURSOR: Clicks "Workflow" in the sidebar, then hovers each haunted-stage row in turn.
+MOTION: Page slides in. A faint ghost wisp drifts across the Haunted stages panel. Rows fade in by rank; each lifts as the cursor passes.
+
+19
+00:01:00,585 --> 00:01:01,303
+VOICE: "And the worst one?"
+SCREEN: Haunted stages, rank 1 row.
+CAMERA: Push in to 140% on the rank 1 row.
+CURSOR: Rests on the rank 1 row.
+MOTION: All other rows dim to 40%. A short suspense beat.
+
+20
+00:01:01,984 --> 00:01:02,468
+VOICE: "Parking."
+SCREEN: Haunted stages, rank 1: "Rough store (parked)".
+CAMERA: Tiny punch-in (140% to 145%) with a soft shake.
+CURSOR: Clicks the row: ripple.
+MOTION: The row flashes amber; a small ghost icon pops up beside it.
+
+21
+00:01:02,468 --> 00:01:03,324
+[NO VOICE]
+Transition. A counter-clockwise clock-hand wipe into Scenario Lab.
+
+22
+00:01:03,324 --> 00:01:05,513
+VOICE: "Now, let's go back in time."
+SCREEN: Scenario Lab (screenshot 03-scenario-lab).
+CAMERA: Starts at 100%.
+CURSOR: Clicks "Scenario Lab" in the sidebar.
+MOTION: A translucent clock overlay spins counter-clockwise. The six scenario cards deal in one after another, like playing cards.
+
+23
+00:01:05,942 --> 00:01:10,352
+VOICE: "A scenario forks from a recorded moment... and changes just one decision."
+SCREEN: Scenario Lab with a timeline graphic across the top.
+CAMERA: Slight tilt-up to the timeline.
+CURSOR: Hovers the fork marker on the timeline.
+MOTION: A solid line (recorded history) draws to a marker "Fork: Fri, 13 Nov 2026, 14:01", then splits into two dashed branches. On "just one decision" the marker pulses.
+
+24
+00:01:10,801 --> 00:01:13,645
+VOICE: "In this one, we halve the time packets sit parked."
+SCREEN: Scenario Lab, "Park half as long" card.
+CAMERA: Push in to 125% on the card.
+CURSOR: Hovers the card (lift, glow), then clicks.
+MOTION: The card expands to show its single change: "Rough store (parked): time held -50%". The -50% chip pops with a bounce. The upper timeline branch lights blue.
+
+25
+00:01:14,058 --> 00:01:16,980
+VOICE: "In this one, we hire three more inspectors instead."
+SCREEN: Scenario Lab, "Three more inspectors" card.
+CAMERA: Same move as the previous cue, mirrored: push in to 125% on this card.
+CURSOR: Hovers the card (lift, glow), then clicks.
+MOTION: The card expands: "Inspection: 3 to 6 people" chip bounces in. The lower branch lights in a second colour. End on both cards side by side, like a fair contest.
+
+26
+00:01:17,387 --> 00:01:21,905
+VOICE: "Then the engine replays the factory, from that moment forward, under each decision."
+SCREEN: Scenario Lab, both scenarios running.
+CAMERA: Pull back to 100%.
+CURSOR: Clicks a Run button: ripple.
+MOTION: Both timeline branches race forward. A progress bar fills, and an event counter ticks up to "3,043 events" as shown in the run details. Gears turn subtly.
+
+27
+00:01:21,905 --> 00:01:22,814
+[NO VOICE]
+Transition. The progress bar completes with a soft whoosh; Simulation Results slides up.
+
+28
+00:01:22,814 --> 00:01:23,691
+VOICE: "And the result?"
+SCREEN: Simulation Results (screenshot 04-comparison).
+CAMERA: Starts at 100%; dolly down towards Headline metrics.
+CURSOR: Opens the Run dropdown, picks "Park half as long"; opens Compare with, picks "Current factory operations".
+MOTION: Dropdowns open and close smoothly. The "Simulated : Park half as long" badge pops.
+
+29
+00:01:24,093 --> 00:01:31,890
+VOICE: "Halving parking finishes the work about thirty percent sooner... and on-time delivery jumps from fifty-seven to sixty-two percent."
+SCREEN: Simulation Results, Headline metrics table.
+CAMERA: Zoom 100% to 135% on the table, moving from the Completion time row to the On-time delivery row.
+CURSOR: Hovers each row as it is mentioned (row highlights).
+MOTION: Completion time: "109 d 8 h" rolls to "75 d 14 h", then the green "-33 d 18 h (-30.87%) improved" slides in with a down-arrow bounce, on "thirty percent sooner". On-time delivery: 57% rolls to 62% with a green glow, on "fifty-seven to sixty-two".
+
+30
+00:01:32,383 --> 00:01:35,432
+VOICE: "Each solid dot is when an order really finishes."
+SCREEN: Simulation Results, Ghost futures chart (screenshot 05-ghost-futures).
+CAMERA: Glide down to the chart; settle at 110%.
+CURSOR: Hovers one solid dot; a tooltip with its order ID appears.
+MOTION: Solid dots pop in top to bottom, staggered.
+
+31
+00:01:35,983 --> 00:01:38,473
+VOICE: "Its ghost... is when it would have finished."
+SCREEN: Ghost futures chart.
+CAMERA: Very slow push-in from 110% to 125%. Darker vignette.
+CURSOR: Rests, almost still.
+MOTION: The most atmospheric moment. Ghost dots fade in translucent, gliding from each solid dot along a dotted line that draws as they move. Soft glow, a slight blur trail.
+
+32
+00:01:39,001 --> 00:01:43,164
+VOICE: "And where history already knows, a diamond shows what truly happened."
+SCREEN: Ghost futures chart.
+CAMERA: Gentle pull-out to 100%.
+CURSOR: Hovers a green diamond; a tooltip reads "Recorded".
+MOTION: Green diamonds sparkle in with a small glint each.
+
+33
+00:01:43,164 --> 00:01:43,827
+[NO VOICE]
+Transition. Quick swipe; the cursor heads for the Run selector.
+
+34
+00:01:43,827 --> 00:01:45,716
+VOICE: "And three more inspectors?"
+SCREEN: Simulation Results.
+CAMERA: At 100%, moving up to the Run selector.
+CURSOR: Opens the Run dropdown and picks "Three more inspectors".
+MOTION: The figures cross-fade to the new run; the badge updates.
+
+35
+00:01:46,382 --> 00:01:47,877
+VOICE: "Completion doesn't move."
+SCREEN: Simulation Results, Completion time row.
+CAMERA: Snap zoom to 140% on the row.
+CURSOR: Hovers the Difference cell.
+MOTION: A needle gauge beside the row swings, wobbles and settles exactly at zero, "unchanged".
+
+36
+00:01:48,314 --> 00:01:49,308
+VOICE: "Not by a minute."
+SCREEN: Same row.
+CAMERA: Completely still (the stillness is the joke).
+CURSOR: Still.
+MOTION: A small stopwatch icon, frozen. Nothing else moves.
+
+37
+00:01:49,855 --> 00:01:51,584
+VOICE: "Cost goes up nine percent."
+SCREEN: Simulation Results, Total cost row.
+CAMERA: Slide down to the Total cost row.
+CURSOR: Hovers the row.
+MOTION: A red "+9%" with an up arrow slides in with a red pulse; the row is tagged "worse" in red.
+
+38
+00:01:52,058 --> 00:01:56,017
+VOICE: "More people only help where a stage is actually waiting for capacity."
+SCREEN: Simulation Results, full page.
+CAMERA: Pull out to 100%.
+CURSOR: Travels to the "Explain with AI Analyst" button and hovers it.
+MOTION: The button glows softly and its sparkle icon twinkles, setting up the next scene.
+
+39
+00:01:56,017 --> 00:01:56,681
+[NO VOICE]
+Transition. The cursor clicks "Explain with AI Analyst": ripple; AI Analyst slides in.
+
+40
+00:01:56,681 --> 00:02:03,571
+VOICE: "Claude explains the result, but only from stored evidence, and every number it writes is checked against the simulation."
+SCREEN: AI Analyst (screenshot 08-analyst).
+CAMERA: Starts at 100% on the answer card.
+CURSOR: Rests beside the answer.
+MOTION: The "AI interpretation" tag pops. The summary types in word by word. As each number appears, a small green check mark ticks beside it ("checked against the simulation").
+
+41
+00:02:04,153 --> 00:02:08,637
+VOICE: "Look closely: it says the evidence does not isolate a cause."
+SCREEN: AI Analyst, summary paragraph.
+CAMERA: Zoom 100% to 140% onto the sentence "The evidence does not isolate a cause...".
+CURSOR: Moves under the sentence, then to "Evidence behind this answer (10)".
+MOTION: A highlighter sweeps across the sentence on "Look closely".
+
+42
+00:02:09,214 --> 00:02:10,625
+VOICE: "It refuses to invent one."
+SCREEN: AI Analyst, evidence drawer.
+CAMERA: Ease back to 115% as the drawer opens.
+CURSOR: Clicks "Evidence behind this answer (10)": ripple.
+MOTION: The drawer expands smoothly; evidence rows cascade in, each with its source tag.
+
+43
+00:02:11,215 --> 00:02:16,451
+VOICE: "And if it ever states a number the results can't support, the built-in analyst steps in instead."
+SCREEN: AI Analyst, dimmed, with an overlay diagram.
+CAMERA: Pull back to 100%.
+CURSOR: Hidden behind the overlay.
+MOTION: Overlay: a number token flows into a "check" gate, the gate flashes a red X, and a "Built-in analyst" card slides in to take its place. Then the overlay fades.
+
+44
+00:02:16,451 --> 00:02:17,289
+[NO VOICE]
+Transition. The cursor clicks "Accuracy" in the sidebar.
+
+45
+00:02:17,289 --> 00:02:18,831
+VOICE: "But can you trust the engine?"
+SCREEN: Accuracy (screenshot 07-accuracy).
+CAMERA: Starts at 100% on the Backtest panel.
+CURSOR: Clicks "Accuracy" in the sidebar, then hovers "Run again" (glow) and clicks (ripple, spinner).
+MOTION: Page slides in.
+
+46
+00:02:19,297 --> 00:02:24,596
+VOICE: "A backtest simulates past dates, changing nothing, and compares the result with what was recorded."
+SCREEN: Accuracy, Typical error tiles and the per-date chart.
+CAMERA: Glide from the tiles down to the chart at 110%.
+CURSOR: Follows the bars as they grow.
+MOTION: Typical error tiles count up to 2.6%, 15.2% and 40.3%. In the chart, the blue simulated and green recorded bars grow in pairs, one date after another.
+
+47
+00:02:24,916 --> 00:02:32,334
+VOICE: "On one real factory, imported privately, it's within about a fifth on packets finished... and we publish exactly where it's wrong."
+SCREEN: Accuracy, table of dates.
+CAMERA: Scroll down to the table; push to 120% on the error columns.
+CURSOR: Hovers the error cells, including the large misses.
+MOTION: Bottom caption (small, not spoken): "Real-factory figures: 7-day windows, rounded; see docs/accuracy.md." On "exactly where it's wrong" the biggest error cells get an outline; misses are shown as plainly as hits.
+
+48
+00:02:32,334 --> 00:02:33,178
+[NO VOICE]
+Transition. The page dissolves to a dark card.
+
+49
+00:02:33,178 --> 00:02:37,959
+VOICE: "Built spec-first with Kiro: steering rules, eleven specs, and hooks."
+SCREEN: Dark card: "Built with Kiro".
+CAMERA: Slow push 100% to 105%.
+CURSOR: Hidden.
+MOTION: Items check off one by one as named: "Steering rules", "11 specs", "Hooks", "Agents".
+
+50
+00:02:38,242 --> 00:02:42,381
+VOICE: "And for Kiroween, a night theme, with exactly the same contrast."
+SCREEN: Ghost futures chart, professional theme, then Halloween theme (screenshot 09-halloween-ghost-futures).
+CAMERA: Card dissolves to the chart at 100%.
+CURSOR: Clicks the theme toggle on "a night theme".
+MOTION: A circular wipe spreads out from the click, turning the whole screen to the Halloween palette: same chart, same numbers. A few faint particles drift.
+
+51
+00:02:42,965 --> 00:02:43,933
+VOICE: "RealityCheck."
+SCREEN: Centred RealityCheck logo on the Halloween background.
+CAMERA: Pull back; the logo settles centre.
+CURSOR: Hidden.
+MOTION: The logo glints once.
+
+52
+00:02:44,559 --> 00:02:47,368
+VOICE: "See the future... before you change the present."
+SCREEN: End card.
+CAMERA: Locked off.
+CURSOR: Hidden.
+MOTION: The tagline "See the future... before you change the present." types on under the logo. Then fade in: "Kiroween 2026 · Frankenstein category" and the repository link.
+
+53
+00:02:47,368 --> 00:02:49,400
+[NO VOICE]
+Outro. Hold the end card, then a soft fade to black by 2:49.4.
