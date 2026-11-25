@@ -1,14 +1,15 @@
 # Devpost submission text
 
-Paste each section into the matching Devpost field. Fill the bracketed links before submitting.
+Paste each section into the matching Devpost field.
 
 - **Project name:** RealityCheck
 - **Tagline (one line):** A time machine for the factory floor: stop at any recorded moment, change one
   decision, and watch the other future play out beside the one that happened.
 - **Category:** Frankenstein
-- **Links:** public app [https://…], video [https://…], repository https://github.com/DRishu070501/RealityCheck
-- **Video note (optional, for transparency):** The narration is a text-to-speech voice (Microsoft Ava).
-- **Screenshots:** `docs/screenshots/01-overview.png` to `09-halloween-ghost-futures.png`, in order.
+- **Links:** public app https://3-106-245-39.sslip.io, video https://youtu.be/Rw4WrUri5G0, repository https://github.com/DRishu070501/RealityCheck
+- **Blog Prize post:** https://dev.to/drishu070501/i-built-a-time-machine-for-a-diamond-factory-spec-first-with-kiro-1ao9
+- **Video note (optional, for transparency):** The narration is an AI-generated voice (ElevenLabs).
+- **Screenshots:** `docs/screenshots/01-overview.png` to `09-halloween-ghost-futures.png`, then `10-import-data.png`, in order.
 
 ---
 
@@ -38,7 +39,10 @@ decision, and simulates the other future beside the one that happened.
   screen says so.
 - **Accuracy:** a backtest simulates past dates with no changes and compares with what was recorded, and the
   errors are shown as measured.
-- **Twelve screens**, every figure tagged Actual, Simulated or AI interpretation, with a table behind every
+- **Import Data:** a factory brings in its own orders and packet movements from two CSV files. A check runs
+  them through the same rules as live recording and names the file and row of any problem; the import is all
+  or nothing, and the data is recorded history straight away. The same rows can be posted to `POST /api/imports`.
+- **Thirteen screens**, every figure tagged Actual, Simulated or AI interpretation, with a table behind every
   chart. Plus a Halloween theme with the same contrast guarantees.
 
 In the demonstration, halving parking time finishes the work about 30% sooner and lifts on-time delivery from
@@ -80,8 +84,11 @@ The steering rules made real decisions. The engine gained calibrated delays with
 of the batch id instead), because determinism is a rule. The backtest reads history through the scenario
 module because simulation may not read production directly. Details are in `docs/kiro.md`.
 
-[Owner: add two or three sentences in your own words about working in the Kiro IDE: how you used spec
-generation, chat or hooks day to day, and what surprised you.]
+Day to day, I worked task by task: I'd open a spec's tasks.md, ask Kiro to implement the next task against its
+requirements, and the hooks would run the module's tests and lint the moment the file was saved. What surprised
+me was spec 11. When the first real-data backtest showed that capacity queues couldn't explain how long packets
+sit in a department, I updated the design in Kiro first, adding calibrated handling delays, and only then
+changed the engine. The spec stayed the source of truth even when the data proved my first idea wrong.
 
 ## Challenges we ran into
 
@@ -102,8 +109,8 @@ generation, chat or hooks day to day, and what surprised you.]
   doesn't support a cause.
 - A real factory backtest, run privately and published as rounded errors: within about a fifth on packets
   finished over a week, and wrong in ways we document.
-- 345 unit, 120 integration, 251 frontend and 74 browser tests, including accessibility checks in both
-  themes. A fresh clone starts with one command.
+- 345 unit, 120 integration, 251 frontend and 80 browser tests, including accessibility checks in both
+  themes. All 80 browser tests also pass against the live public site. A fresh clone starts with one command.
 
 ## What we learned
 

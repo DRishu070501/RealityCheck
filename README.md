@@ -6,7 +6,7 @@ RealityCheck is an operational time machine for a factory. It replays what reall
 any recorded moment, change a decision, and watch the other future play out beside the one that happened.
 The first implementation is diamond manufacturing.
 
-**Watch the 3-minute demo:** https://youtu.be/YBT9XyOghP4
+**Watch the 3-minute demo:** https://youtu.be/Rw4WrUri5G0
 
 ![Ghost futures: each order's completion beside its ghost under the alternative decision](docs/screenshots/05-ghost-futures.png)
 
