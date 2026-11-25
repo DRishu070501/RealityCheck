@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build ----
-FROM node:22-alpine AS build
+# Runs on the builder's own CPU; the output is static files, served by the per-platform nginx stage.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /app
 
 # Install dependencies first so this layer is cached until the lockfile changes.

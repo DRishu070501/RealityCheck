@@ -1,0 +1,15 @@
+# Run images built elsewhere instead of building on the server (spec 11, task 15). Add after the public overlay:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.public.yml -f deploy/docker-compose.prebuilt.yml \
+#     --env-file deploy/public.env up -d --wait
+# tools/deploy/ship.sh builds the images (for ARM by default), copies them with these files to the server and
+# loads them there. The server needs no source code and does no building.
+services:
+  backend:
+    build: !reset null
+    image: realitycheck-backend:${IMAGE_TAG:-arm64}
+    pull_policy: never
+
+  frontend:
+    build: !reset null
+    image: realitycheck-frontend:${IMAGE_TAG:-arm64}
+    pull_policy: never

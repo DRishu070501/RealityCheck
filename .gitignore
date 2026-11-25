@@ -38,3 +38,7 @@ deploy/public.env
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Private keys (never commit)
+*.pem
+pem/
